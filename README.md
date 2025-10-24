@@ -100,4 +100,11 @@ website/                       # Docusaurus Website mit eigenen Komponenten
 ---
 
 
+## ToDo Liste
+
+- Warnung wenn Lernelemente die bereits veröffentlicht sind bearbeitet werden (Willst du das nicht lieber in einem neuen Branch machen?)
+
+**Sprachlicher Hinweis**
+Auf dieser Seite wird bewusst auf Genderzeichen wie den Doppelpunkt oder Doppelnennungen verzichtet, da sie sprachlich eine Trennung der Geschlechter betonen. Stattdessen werden substantivierte Adjektive oder das generische Maskulinum verwendet, um eine flüssige, verständliche und zugleich inklusive Sprache zu fördern.
+
 © 2025 Christian Holst
