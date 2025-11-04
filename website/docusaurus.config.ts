@@ -16,13 +16,10 @@ const docsPlugins: PluginConfig[] = COURSES.flatMap(course =>
         sidebarPath: require.resolve(`./sidebars.ts`),
         remarkPlugins: [require('remark-math')],
         rehypePlugins: [require('rehype-katex')],
-        showLastUpdateAuthor: true,
-        showLastUpdateTime: true,
       },
     ] satisfies PluginConfig
   ))
 );
-
 
 const config: Config = {
   title: 'Learnspace',
