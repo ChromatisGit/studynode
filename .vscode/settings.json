@@ -1,5 +1,11 @@
 {
   "markdown.marp.themes": [
     "./shared/styles/marp/minimal.css"
-  ]
+  ],
+    "yaml.schemas": {
+    "./shared/schemas/progress.schema.json": [
+      "**/progress.yaml",
+      "**/progress.yml"
+    ]
+  }
 }

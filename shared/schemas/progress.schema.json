@@ -1,0 +1,46 @@
+{
+  "$id": "schema/progress",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Full Course Configuration",
+  "type": "object",
+  "required": ["course", "current_topic", "current_worksheets", "topics"],
+  "additionalProperties": false,
+
+  "properties": {
+    "course": {
+      "type": "object",
+      "required": ["label", "subject", "group"],
+      "optional": ["variant"],
+      "additionalProperties": false,
+      "properties": {
+        "label":   { "type": "string" },
+        "subject": { "type": "string", "enum": ["math", "info"] },
+        "group":   { "type": "string" },
+        "variant": { "type": "string" }
+      }
+    },
+
+    "current_topic": { "type": "string" },
+
+    "current_worksheets": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
+
+    "topics": {
+      "type": "object",
+      "description": "Themenblock -> null (Einzelthema) ODER Liste von Slugs.",
+      "patternProperties": {
+        "^[a-z0-9_]+$": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
