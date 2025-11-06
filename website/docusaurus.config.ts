@@ -60,9 +60,9 @@ const config: Config = {
     sidebar: {
       hideable: true,
     },
-    navbar: { 
+    navbar: {
       title: 'Learnspace',
-      items: [{ type: 'custom-dynamic-elements', position: 'left' }],
+      items: [{ type: 'plugin-based-elements', position: 'left' }],
       hideOnScroll: true},
     prism: {
       theme: prismThemes.github,

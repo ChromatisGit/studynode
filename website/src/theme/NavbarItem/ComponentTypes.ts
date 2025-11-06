@@ -1,7 +1,7 @@
 import ComponentTypes from '@theme-original/NavbarItem/ComponentTypes';
-import DynamicElements from '@site/src/components/NavbarItems/DynamicElements';
+import PluginBasedNavbar from '@site/src/components/PluginBasedNavbar';
 
 export default {
   ...ComponentTypes,
-  'custom-dynamic-elements': DynamicElements,
+  'plugin-based-elements': PluginBasedNavbar,
 };
