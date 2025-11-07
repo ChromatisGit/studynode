@@ -7,7 +7,7 @@
 /website/.generated/
 /website/.docusaurus/
 /website/.cache-loader
-/website/build
+/build/
 
 # Misc
 .DS_Store

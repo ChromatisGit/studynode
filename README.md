@@ -54,22 +54,20 @@ content/
 
 ```
 
-### Packages
+### Src
 ```
-packages/
+src/
 │
 ├─ builder/                          # Node-Buildtools
-│  ├─ src/
 │  │  ├─ build-site-config.ts        # erzeugt .generated/*
-│  │  ├─ io.ts                       # YAML lesen, atomic writes, glob
+│  │  ├─ io.ts                       # YAML lesen, Configs schreiben
 │  │  ├─ transforms.ts               # reine Daten-Transformationen
 │  │  └─ logger.ts                   # Logging
-│  └─ package.json
+│  
 │
 ├─ schemas/                          # Zod-Schemas (Quellcode)
-│  ├─ src/
-│  │  └─ course-plan.ts              # Schema + Types für course-plan.yml
-│  └─ package.json
+│  └─ course-plan.ts              # Schema + Types für course-plan.yml
+│  
 │
 └─ marp-styling/                     # CSS/Themes für Marp Foliensätze
 ```

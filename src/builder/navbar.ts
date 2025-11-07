@@ -1,6 +1,7 @@
+import type { CoursePlan } from "@schema/course-plan"
 
 
-function updateLabelIfUnique(data, subject, newLabel) {
+function updateLabelIfUnique(data: CoursePlan[], subject: string, newLabel: string) {
     const items = data.filter(item => item.subject === subject);
     if (items.length === 1) {
         items[0].label = newLabel;
@@ -8,9 +9,11 @@ function updateLabelIfUnique(data, subject, newLabel) {
 }
 
 
-export function buildNavbar(courses) {
+export function buildNavbar(courses: CoursePlan[]) {
+
+
     return Object.fromEntries(
-        Object.entries(Object.groupBy(courses, c => c.group)).map(([group, list]) => {
+        Object.entries(Object.groupBy(courses, c => c.group)).map(([group, list = []]) => {
 
             if (list.length === 1) {
                 list[0].label = 'Übersicht';
