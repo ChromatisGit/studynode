@@ -46,37 +46,3 @@ writeConfig('courses', courses.map(c => {
 }));
 
 
-function updateLabelIfUnique(data, subject, newLabel) {
-    const items = data.filter(item => item.subject === subject);
-
-    console.log(items)
-
-    if (items.length === 1) {
-        items[0].label = newLabel;
-        console.log(items[0].label)
-    }
-}
-
-const navbar = Object.fromEntries(
-  Object.entries(Object.groupBy(courses, c => c.group)).map(([group, list]) => {
-
-    if (list.length === 1) {
-      list[0].label = 'Übersicht';
-    } else {
-      updateLabelIfUnique(list, 'math', 'Mathematik');
-      updateLabelIfUnique(list, 'info', 'Informatik');
-    }
-
-    const navbar = list.map(({ label, group, course_variant }) => ({
-      label,
-      to: `${group}/${course_variant}`,
-      position: 'left'
-    }));
-
-    navbar.push({label: 'Leitsätze', to: `${group}/principles`, position: 'left'})
-
-    return [group, navbar];
-  })
-);
-
-writeConfig('navbar', navbar);

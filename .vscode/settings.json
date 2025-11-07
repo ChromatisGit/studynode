@@ -1,11 +1,11 @@
 {
   "markdown.marp.themes": [
-    "./shared/styles/marp/minimal.css"
+    "./packages/marp-styles/minimal.css"
   ],
     "yaml.schemas": {
-    "./shared/schemas/progress.schema.json": [
-      "**/progress.yaml",
-      "**/progress.yml"
+    "./.vscode/.schemas/course-plan.json": [
+      "**/course-plan.yaml",
+      "**/course-plan.yml"
     ]
   }
 }

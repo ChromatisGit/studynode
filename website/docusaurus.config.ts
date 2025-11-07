@@ -3,8 +3,6 @@ import type {Config, PluginConfig} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import COURSES from './.generated/courses.config.json';
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
 const docsPlugins: PluginConfig[] = COURSES.map(c => (
     [
       '@docusaurus/plugin-content-docs',
