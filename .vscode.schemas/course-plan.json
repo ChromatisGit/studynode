@@ -1,9 +1,0 @@
-{
-  "$ref": "#/definitions/course-plan",
-  "definitions": {
-    "course-plan": {
-      "type": "string"
-    }
-  },
-  "$schema": "http://json-schema.org/draft-07/schema#"
-}
