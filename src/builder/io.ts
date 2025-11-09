@@ -26,3 +26,26 @@ export function writeConfig(configName: string, content: any) {
   const filePath = path.resolve(process.cwd(), OUT_DIR, `${configName}.config.json`);
   fs.writeFile(filePath, JSON.stringify(content, null, 2), 'utf8');
 }
+
+export async function copyFile(source: string, target: string) {
+  const sourcePath = path.resolve(process.cwd(), BASE_DIR, source);
+  const targetPath = path.resolve(process.cwd(), OUT_DIR, target);
+
+  await fs.mkdir(path.dirname(targetPath), { recursive: true });
+
+  try {
+    await fs.copyFile(sourcePath, targetPath);
+  } catch (err: any) {
+    if (err.code === "ENOENT") {
+      // ToDo: Remove this and throw an error instead
+      await fs.writeFile(targetPath, "");
+    } else {
+      throw err;
+    }
+  }
+}
+
+export function buildPage({relativePath, pageName, content}: {relativePath: string, pageName: string, content: any}) {
+  const filePath = path.resolve(process.cwd(), OUT_DIR, relativePath, `${pageName}.md`);
+  fs.writeFile(filePath, content, 'utf8');
+}

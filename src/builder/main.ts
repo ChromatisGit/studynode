@@ -1,13 +1,18 @@
-import { buildCoursesList } from "./courses";
-import { readAllCourses, writeConfig } from "./io";
-import { buildNavbar } from "./navbar";
-
+import { buildCoursesList } from "./transformer/courses";
+import { getWebsiteFilePaths } from "./transformer/folders";
+import { copyFile, readAllCourses, writeConfig } from "./io";
+import { buildNavbar } from "./transformer/navbar";
+import { buildOverviewData } from "./transformer/overview";
 
 async function main() {
   const courses = await readAllCourses();
 
-  writeConfig('courses', buildCoursesList(courses));
+  const filesPaths = getWebsiteFilePaths(courses);
+  await Promise.all(
+    filesPaths.map(({ source, target }) => copyFile(source, target))
+  );
 
+  writeConfig('courses', buildCoursesList(courses));
   writeConfig('navbar', buildNavbar(courses));
 
   console.log(
