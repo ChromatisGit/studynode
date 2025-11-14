@@ -5,16 +5,15 @@ import fs from 'node:fs/promises';
 import path from "node:path";
 import yaml from 'yaml';
 
-const BASE_DIR = "./content/base";
-const COURSES_DIR = "./content/courses";
+const CONTENT_DIR = "./content";
 const OUT_DIR = "./website/.generated";
 
 
 export async function readAllCourses() {
-  const root = path.resolve(COURSES_DIR);
+  const root = path.resolve(CONTENT_DIR);
   const res: CoursePlan[] = [];
 
-  for await (const progress_path of fs.glob('*/*/course-plan.yml', { cwd: root })) {
+  for await (const progress_path of fs.glob('courses/*/*/course-plan.yml', { cwd: root })) {
     const raw: YamlCoursePlan = yaml.parse(await fs.readFile(path.join(root, progress_path), "utf8"));
     res.push(CoursePlanSchema.parse(raw));
   }
@@ -28,7 +27,7 @@ export function writeConfig(configName: string, content: any) {
 }
 
 export async function copyFile(source: string, target: string) {
-  const sourcePath = path.resolve(process.cwd(), BASE_DIR, source);
+  const sourcePath = path.resolve(process.cwd(), CONTENT_DIR, source);
   const targetPath = path.resolve(process.cwd(), OUT_DIR, target);
 
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
@@ -46,6 +45,6 @@ export async function copyFile(source: string, target: string) {
 }
 
 export function buildPage({relativePath, pageName, content}: {relativePath: string, pageName: string, content: any}) {
-  const filePath = path.resolve(process.cwd(), OUT_DIR, relativePath, `${pageName}.md`);
+  const filePath = path.resolve(process.cwd(), OUT_DIR, relativePath, pageName);
   fs.writeFile(filePath, content, 'utf8');
 }

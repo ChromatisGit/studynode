@@ -1,21 +1,21 @@
 import { buildCoursesList } from "./transformer/courses";
-import { getWebsiteFilePaths } from "./transformer/folders";
-import { copyFile, readAllCourses, writeConfig } from "./io";
+import { buildCourseFileMappings } from "./transformer/fileMapping";
+import { buildPage, copyFile, readAllCourses, writeConfig } from "./io";
 import { buildNavbar } from "./transformer/navbar";
 import { buildOverview } from "./transformer/overview";
 
 async function main() {
   const courses = await readAllCourses();
 
-  const filesPaths = getWebsiteFilePaths(courses);
+  const filesPaths = buildCourseFileMappings(courses);
   await Promise.all(
     filesPaths.map(({ source, target }) => copyFile(source, target))
   );
 
+  courses.map(course => buildPage(buildOverview(course)));
+
   writeConfig('courses', buildCoursesList(courses));
   writeConfig('navbar', buildNavbar(courses));
-
-  const overviewFiles = courses.map(course => buildOverview(course))
 
   console.log(
     `[builder] OK - ${courses.length} course(s)`

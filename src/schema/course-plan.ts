@@ -13,7 +13,7 @@ export const YamlCoursePlanSchema = z.object({
     label: z.string(),
     variant: z.string().optional(),
   }).strict(),
-  current_chapter: z.string(),
+  current_chapter: z.string().nullable(),
   current_worksheets: z.array(z.string()).nullable(),
   topics: TopicsSchema,
 }).strict();
@@ -46,8 +46,13 @@ export const CoursePlanSchema = YamlCoursePlanSchema.transform(v => ({
   topics: flattenTopics(v.topics)
 }))
   .refine(
-    data => data.topics.some(t => t.chapter === data.current_chapter),
-    { message: "current_chapter must exist in topics" }
-  );
+  ({ topics, current_chapter }) =>
+    current_chapter === null ||
+    topics.some(t => t.chapter === current_chapter),
+  {
+    message: "current_chapter must be null or exist inside of topics!",
+    path: ["current_chapter"]
+  }
+);
 
 export type CoursePlan = z.infer<typeof CoursePlanSchema>;
