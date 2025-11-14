@@ -1,7 +1,7 @@
 import type { CoursePlan } from "@schema/course-plan"
 import path from "node:path";
 import { renderOverview } from "../template/overview.mdx";
-import type { OverviewModel } from "../types/overview";
+import type { ChapterStatus, OverviewModel, RoadmapChapter, RoadmapTopic } from "@schema/overview";
 
 export function buildOverview(course: CoursePlan) {
   const relativePath = path.join("courses", course.group, course.course_variant);
@@ -19,25 +19,42 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
   const title = `${subjects[subject]} ${group.toUpperCase()}`;
 
   const hasCurrent = current_chapter !== null;
-  const index = hasCurrent ? topics.findIndex((t) => t.chapter === current_chapter) : 0;
-  if (index === -1) {
-    throw new Error(
-      `Invalid current_chapter "${current_chapter}" in course ${group}/${subject}.`
-    );
-  }
 
-  const finished = hasCurrent ? topics.slice(0, index) : [];
-  const inProgress = hasCurrent ? topics[index] : undefined;
-  const planned = hasCurrent ? topics.slice(index + 1) : topics;
+  // before current topic: finished
+  // at current topic: current (then switch to planned)
+  // after current topic: planned
+  // if no current topic all topics are planned
+  let chapterStatus: ChapterStatus = hasCurrent ? "finished" : "planned";
+
+  const roadmap: RoadmapTopic[] = Object.entries(Object.groupBy(topics, (t) => t.topic)).map(
+    ([topic, chapterArray]) => {
+      let topicStatus: ChapterStatus = chapterStatus;
+
+      const chapters: RoadmapChapter[] = chapterArray!.map(({ chapter }) => {
+        if (hasCurrent && chapter === current_chapter) {
+          topicStatus = "current";
+          chapterStatus = "planned";
+          return { label: chapter, status: "current" };
+        }
+
+        return { label: chapter, status: chapterStatus };
+      });
+
+      return {
+        topic,
+        status: topicStatus,
+        chapters,
+      };
+    }
+  );
 
   return {
     title,
     label,
     group,
     subject,
-    finished,
-    inProgress,
-    planned,
+    current: hasCurrent ? current_chapter : null,
+    roadmap,
     worksheets: current_worksheets,
   };
 }
