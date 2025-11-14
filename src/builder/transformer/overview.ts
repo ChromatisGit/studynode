@@ -1,16 +1,16 @@
 import type { CoursePlan } from "@schema/course-plan"
+import path from "node:path";
+import { createOverviewContent } from "./overviewContent";
 
-export function buildOverviewData(courses: CoursePlan[]) {
-    return courses.map((course) => {
-        const {topics, current_chapter, ...rest} = course;
 
-        const index = topics.findIndex(t => t.chapter === current_chapter);
+export function buildOverview(course: CoursePlan) {
 
-        return {
-            ...rest,
-            finished: topics.slice(0, index),
-            in_progress: topics[index],
-            planned: topics.slice(index + 1)
-        };
-    })
-};
+    const overviewPath = path.join(
+            "courses",
+            course.group,
+            course.course_variant,
+            "index.mdx",
+        );
+
+    const overviewContent = createOverviewContent(course);
+}
