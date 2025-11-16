@@ -4,12 +4,12 @@ import { renderOverview } from "../template/overview.mdx";
 import type { ChapterStatus, OverviewModel, RoadmapChapter, RoadmapTopic } from "@schema/overview";
 
 export function buildOverview(course: CoursePlan) {
-  const relativePath = path.join("courses", course.group, course.course_variant);
-
   const model = toOverviewModel(course);
-  const content = renderOverview(model);
 
-  return { relativePath, pageName: "index.mdx", content };
+  return {
+    relativePath: path.join("courses", course.group, course.course_variant, "index.mdx"),
+    content: renderOverview(model)
+  };
 }
 
 function toOverviewModel(course: CoursePlan): OverviewModel {

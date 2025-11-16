@@ -2,8 +2,7 @@ import type { CoursePlan } from "@schema/course-plan"
 
 export function buildNavbarConfig(courses: CoursePlan[]) {
     return {
-        relativePath: '',
-        pageName: `navbar.config.json`,
+        relativePath: `navbar.config.json`,
         content:  JSON.stringify(buildNavbarJSON(courses), null, 2)
     };
 }

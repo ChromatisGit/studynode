@@ -7,8 +7,7 @@ export function buildCoursesConfig(courses: CoursePlan[]) {
     })
 
     return {
-        relativePath: '',
-        pageName: `courses.config.json`,
+        relativePath: `courses.config.json`,
         content:  JSON.stringify(content, null, 2)
     };
 }

@@ -1,12 +1,15 @@
 import type { CoursePlan } from "@schema/course-plan"
+import type { PageFile } from "../processPage";
 import path from "node:path";
 
-interface FileMapping {
-  source: string;
-  target: string;
+export function getAllPagePaths(courses: CoursePlan[]): PageFile[] {
+  return [
+    ...baseWebsitePaths(courses),
+    ...groupPrinciplesPaths(courses),
+  ];
 }
 
-function buildTopicFileMappings(courses: CoursePlan[]): FileMapping[] {
+function baseWebsitePaths(courses: CoursePlan[]): PageFile[] {
   return courses.flatMap(({ group, subject, topics, course_variant }) =>
     topics.map(({ topic, chapter }) => {
       const baseDir = path.join("base", subject, topic, "chapters");
@@ -15,30 +18,24 @@ function buildTopicFileMappings(courses: CoursePlan[]): FileMapping[] {
       if (topic === chapter) {
         return {
           source: path.join(baseDir, "website.md"),
-          target: path.join(targetDir, "index.md"),
+          target: path.join(targetDir, "index.md")
         };
       }
 
       return {
         source: path.join(baseDir, chapter, "website.md"),
         target: path.join(targetDir, `${chapter}.md`),
+        sidebar: 'topic'
       };
     }),
   );
 }
 
-function buildPrinciplesFileMappings(courses: CoursePlan[]): FileMapping[] {
+function groupPrinciplesPaths(courses: CoursePlan[]): PageFile[] {
   const groups = [...new Set(courses.map(c => c.group))];
 
   return groups.map(group => ({
     source: path.join("courses", group, "principles.md"),
-    target: path.join("courses", "shared", group, "principles.md"),
+    target: path.join("courses", "shared", group, "principles.md")
   }));
-}
-
-export function buildCourseFileMappings(courses: CoursePlan[]): FileMapping[] {
-  return [
-    ...buildTopicFileMappings(courses),
-    ...buildPrinciplesFileMappings(courses),
-  ];
 }

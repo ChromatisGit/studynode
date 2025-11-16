@@ -21,25 +21,23 @@ export async function readAllCourses() {
   return res
 }
 
-export async function copyFile(source: string, target: string) {
-  const sourcePath = path.resolve(process.cwd(), CONTENT_DIR, source);
-  const targetPath = path.resolve(process.cwd(), OUT_DIR, target);
-
-  await fs.mkdir(path.dirname(targetPath), { recursive: true });
-
+export async function readFile(relativePath: string): Promise<string> {
+  const abs = path.resolve(process.cwd(), CONTENT_DIR, relativePath);
   try {
-    await fs.copyFile(sourcePath, targetPath);
+    const content = await fs.readFile(abs, "utf8");
+    return content;
   } catch (err: any) {
     if (err.code === "ENOENT") {
-      // ToDo: Remove this and throw an error instead
-      await fs.writeFile(targetPath, "");
+      // For testing only TODO: Remove this and throw an error instead
+      return ''
     } else {
       throw err;
     }
   }
 }
 
-export function writeFile({relativePath, pageName, content}: {relativePath: string, pageName: string, content: any}) {
-  const filePath = path.resolve(process.cwd(), OUT_DIR, relativePath, pageName);
-  fs.writeFile(filePath, content, 'utf8');
+export async function writeFile({ relativePath, content }: { relativePath: string, content: any }) {
+  const abs = path.resolve(process.cwd(), OUT_DIR, relativePath);
+  await fs.mkdir(path.dirname(abs), { recursive: true });
+  await fs.writeFile(abs, content, 'utf8');
 }
