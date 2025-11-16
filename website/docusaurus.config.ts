@@ -68,7 +68,8 @@ const config: Config = {
     navbar: {
       title: 'StudyNode',
       items: [{ type: 'custom-navbar', position: 'left' }],
-      hideOnScroll: true},
+      hideOnScroll: false
+    },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
