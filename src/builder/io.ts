@@ -21,11 +21,6 @@ export async function readAllCourses() {
   return res
 }
 
-export function writeConfig(configName: string, content: any) {
-  const filePath = path.resolve(process.cwd(), OUT_DIR, `${configName}.config.json`);
-  fs.writeFile(filePath, JSON.stringify(content, null, 2), 'utf8');
-}
-
 export async function copyFile(source: string, target: string) {
   const sourcePath = path.resolve(process.cwd(), CONTENT_DIR, source);
   const targetPath = path.resolve(process.cwd(), OUT_DIR, target);
@@ -44,7 +39,7 @@ export async function copyFile(source: string, target: string) {
   }
 }
 
-export function buildPage({relativePath, pageName, content}: {relativePath: string, pageName: string, content: any}) {
+export function writeFile({relativePath, pageName, content}: {relativePath: string, pageName: string, content: any}) {
   const filePath = path.resolve(process.cwd(), OUT_DIR, relativePath, pageName);
   fs.writeFile(filePath, content, 'utf8');
 }

@@ -10,7 +10,7 @@ const docsPlugins: PluginConfig[] = COURSES.map(c => (
         id: `${c.group}-${c.course_variant}`,
         path: `./.generated/courses/${c.group}/${c.course_variant}`,
         routeBasePath: `${c.group}/${c.course_variant}`,
-        sidebarPath: require.resolve('./sidebars.ts'),
+        sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.course_variant}.ts`),
         remarkPlugins: [require('remark-math')],
         rehypePlugins: [require('rehype-katex')],
       },
