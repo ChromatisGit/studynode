@@ -1,15 +1,15 @@
 import type { CoursePlan } from "./course-plan"
 
-export type ChapterStatus = "finished" | "current" | "planned";
+export type Status = "finished" | "current" | "planned" | "locked";
 
 export type RoadmapChapter = {
   label: string;
-  status: ChapterStatus;
+  status: Status;
 };
 
 export type RoadmapTopic = {
   topic: string;
-  status: ChapterStatus;
+  status: Status;
   chapters: RoadmapChapter[];
 };
 
