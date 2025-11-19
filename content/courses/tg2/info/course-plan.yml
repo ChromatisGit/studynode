@@ -3,18 +3,36 @@ course:
   group: tg2
   subject: info
 
-current_chapter: 13_ebenen_lagebeziehung
-current_worksheets:
+current_chapter: 01_variablen_und_datentypen
+current_worksheets: []
 
 topics:
-  trigonometrie:
-    - 00_einheitskreis
-    - 01_sinus_kosinus
-  statistik_grundlagen:
-  vektorgeometrie:
-    - 10_geraden
-    - 11_geraden_lagebeziehung
-    - 12_ebenen
-    - 13_ebenen_lagebeziehung
-    - 14_abstaende
-    - 15_volumen
+
+  programmieren_mit_typescript:
+    - 00_variablen_und_datentypen
+    - 01_ausdruecke_und_operatoren
+    - 02_bedingungen
+    - 03_schleifen
+    - 04_funktionen
+    - 05_arrays
+    - 06_objekte
+
+  clientseitige_anwendung:
+    - 00_einfuehrung_vs_code
+    - 01_modulare_webseiten
+    - 02_interaktive_module
+    - 03_eigene_webseite
+
+  profilabhängiges_thema_1:
+
+  profilabhängiges_thema_2:
+
+  datenbanken:
+
+  serverseitige_anwendung:
+
+  profilabhängiges_thema_3:
+
+  profilabhängiges_thema_4:
+
+  projekt:

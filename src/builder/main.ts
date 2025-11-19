@@ -1,13 +1,17 @@
 import { buildCoursesConfig } from "./transformer/courses";
 import { getAllPagePaths } from "./transformer/pagePaths";
-import { writeFile, readAllCourses } from "./io";
+import { writeFile, readAllCourses, deleteGeneratedWebsite, readAllTopics } from "./io";
 import { buildNavbarConfig } from "./transformer/navbar";
 import { buildOverview } from "./transformer/overview";
 import { buildSidebar } from "./transformer/sidebar";
 import { processPageFile } from "./processPage";
 
 async function main() {
+  await deleteGeneratedWebsite()
+
   const courses = await readAllCourses();
+
+  const topics = await readAllTopics();
 
   const filePaths = getAllPagePaths(courses);
 

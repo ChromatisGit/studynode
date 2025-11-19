@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan"
+import type { CoursePlan } from "@schema/coursePlan"
 import path from "node:path";
 import { renderOverview } from "../template/overview.mdx";
 import type { OverviewModel, RoadmapChapter, RoadmapTopic } from "@schema/overview";
@@ -35,9 +35,11 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
     if (topicIndex < currentTopicIndex) {
       return {
         topic: g.topic,
+        link: '',
         status: "finished",
         chapters: g.chapters.map((label): RoadmapChapter => ({
           label,
+          link: '',
           status: "finished",
         })),
       };
@@ -46,20 +48,21 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
     if (topicIndex === currentTopicIndex) {
         return {
           topic: g.topic,
+          link: '',
           status: "current",
           chapters: g.chapters.map((label): RoadmapChapter => {
             if (label === current_chapter) {
-              return { label, status: "current" };
+              return { label, link: '', status: "current" };
             }
             // Chapters before current: finished
             if (
               g.chapters.indexOf(label) <
               g.chapters.indexOf(current_chapter!)
             ) {
-              return { label, status: "finished" };
+              return { label, link: '', status: "finished" };
             }
             // Chapters after current: planned
-            return { label, status: "planned" };
+            return { label, link: '', status: "planned" };
           }),
         };
     }
@@ -69,9 +72,11 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
       const preview = g.chapters.slice(0, 2);
       return {
         topic: g.topic,
+        link: '',
         status: "planned",
         chapters: preview.map((label): RoadmapChapter => ({
           label,
+          link: '',
           status: "planned"
         })),
       };

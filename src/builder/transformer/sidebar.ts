@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan"
+import type { CoursePlan } from "@schema/coursePlan"
 import path from "node:path";
 
 export function buildSidebar(course: CoursePlan) {

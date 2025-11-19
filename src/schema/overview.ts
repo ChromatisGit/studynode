@@ -1,15 +1,17 @@
-import type { CoursePlan } from "./course-plan"
+import type { CoursePlan } from "./coursePlan"
 
 export type Status = "finished" | "current" | "planned" | "locked";
 
 export type RoadmapChapter = {
   label: string;
+  link: string;
   status: Status;
 };
 
 export type RoadmapTopic = {
   topic: string;
   status: Status;
+  link?: string;
   chapters: RoadmapChapter[];
 };
 

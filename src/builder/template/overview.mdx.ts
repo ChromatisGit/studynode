@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan";
+import type { CoursePlan } from "@schema/coursePlan";
 import type { OverviewModel, RoadmapTopic } from "@schema/overview";
 
 export function renderOverview(model: OverviewModel): string {

@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan"
+import type { CoursePlan } from "@schema/coursePlan"
 import type { PageFile } from "../processPage";
 import path from "node:path";
 

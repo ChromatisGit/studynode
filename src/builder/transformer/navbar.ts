@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan"
+import type { CoursePlan } from "@schema/coursePlan"
 
 export function buildNavbarConfig(courses: CoursePlan[]) {
     return {

@@ -1,4 +1,4 @@
-import type { CoursePlan } from "@schema/course-plan"
+import type { CoursePlan } from "@schema/coursePlan"
 
 export function buildCoursesConfig(courses: CoursePlan[]) {
     const content = courses.map(c => {
