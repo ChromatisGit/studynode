@@ -59,6 +59,11 @@ const config: Config = {
   ],
 
   themeConfig: {
+    tableOfContents: {
+      // Workaround to disable tableOfContents
+      minHeadingLevel: 6,
+      maxHeadingLevel: 6
+    },
     colorMode: {
       respectPrefersColorScheme: true,
     },
