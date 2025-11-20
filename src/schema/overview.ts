@@ -9,7 +9,7 @@ export type RoadmapChapter = {
 };
 
 export type RoadmapTopic = {
-  topic: string;
+  label: string;
   status: Status;
   link?: string;
   chapters: RoadmapChapter[];

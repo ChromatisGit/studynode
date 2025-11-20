@@ -8,11 +8,6 @@ interface RoadmapTrackerProps {
   roadmap: RoadmapTopic[];
 }
 
-/** Simple slug helper; keep consistent with your heading IDs */
-function toSlug(label: string): string {
-  return label.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
-}
-
 const PRIMARY_COLOR_VAR = "var(--ifm-color-primary)";
 const SECONDARY_COLOR_VAR = "var(--ifm-color-primary-lighter)"
 const EMPHASIS_500 = "var(--ifm-color-emphasis-500)";
@@ -213,7 +208,6 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
       {/* Continuous vertical lines */}
       {segments && (
         <>
-          {/* finished part */}
           {segments.finishedHeight > 0 && (
             <div
               style={{
@@ -228,8 +222,6 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
               }}
             />
           )}
-
-          {/* planned part */}
           {segments.plannedHeight > 0 && (
             <div
               style={{
@@ -250,17 +242,15 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
       {roadmap.map((topic, index) => {
         const isExpanded = expandedTopics.has(index);
         const status = topic.status;
-        const slug = toSlug(topic.topic);
         const panelId = `roadmap-topic-${index}-panel`;
+        const isLocked = status === "locked";
+        const isClickable = !isLocked && !!topic.link;
 
         return (
           <div
-            key={topic.topic + index}
+            key={index}
             style={{
-              marginBottom:
-                index === lastIndex
-                  ? 0
-                  : "var(--ifm-spacing-vertical)", // Infima spacing
+              marginBottom: index === lastIndex ? 0 : "var(--ifm-spacing-vertical)",
               position: "relative",
             }}
           >
@@ -310,45 +300,65 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
                   gap: "var(--ifm-spacing-horizontal)",
                 }}
               >
-                <Link
-                  to={`#${slug}`}
-                  className={styles.linkHoverBox}
-                  style={{
-                    flex: 1,
-                    textDecoration: "none",
-                    fontSize: "1.05rem",
-                    color: getTopicColor(status),
-                    fontWeight: getTopicFontWeight(status),
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {topic.topic}
-                </Link>
+                {isClickable ? (
+                  <Link
+                    to={topic.link!}
+                    className={styles.linkHoverBox}
+                    style={{
+                      flex: 1,
+                      textDecoration: "none",
+                      fontSize: "1.05rem",
+                      color: getTopicColor(status),
+                      fontWeight: getTopicFontWeight(status),
+                      lineHeight: 1.3,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {topic.label}
+                  </Link>
+                ) : (
+                  <span
+                    className={styles.linkHoverBox}
+                    style={{
+                      flex: 1,
+                      textDecoration: "none",
+                      fontSize: "1.05rem",
+                      color: getTopicColor(status),
+                      fontWeight: getTopicFontWeight(status),
+                      lineHeight: 1.3,
+                      cursor: "not-allowed", // or "default" if you prefer
+                    }}
+                  >
+                    {topic.label}
+                  </span>
+                )}
 
-                {topic.chapters.length > 0 && (<button
-                  type="button"
-                  onClick={() => toggleTopic(index)}
-                  aria-expanded={isExpanded}
-                  aria-controls={panelId}
-                  className={styles.chevronHoverBox}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--ifm-color-emphasis-600)",
-                  }}
-                >
-                  {isExpanded ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
-                </button>)}
+                {topic.chapters.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => toggleTopic(index)}
+                    aria-expanded={isExpanded}
+                    aria-controls={panelId}
+                    className={styles.chevronHoverBox}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--ifm-color-emphasis-600)",
+                    }}
+                  >
+                    {isExpanded ? <ChevronDown size={24} /> : <ChevronRight size={24} />}
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Chapters */}
+            {/* Chapters (unchanged) */}
             {isExpanded && (
               <div
                 id={panelId}
                 role="region"
-                aria-label={`Kapitel zu ${topic.topic}`}
+                aria-label={`Kapitel zu ${topic.label}`}
                 style={{
                   marginLeft: `calc(${BULLET_COL_WIDTH}px + var(--ifm-spacing-horizontal))`,
                   marginTop: "0.5rem",
@@ -357,7 +367,7 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
                 {topic.chapters.map((chapter, i) => (
                   <Link
                     key={i}
-                    to={''}//chapter.href}
+                    to={chapter.link}
                     className={styles.chapterHoverBox}
                     style={getChapterStyle(chapter.status)}
                   >

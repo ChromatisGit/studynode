@@ -20,9 +20,9 @@ export function renderOverview(model: OverviewModel): string {
 function frontMatter(title: string) {
   return `
     ---
+    title: "${title}"
     sidebar_position: 1
     sidebar_label: "Übersicht"
-    title: "${title}"
     ---
   `;
 }
@@ -45,7 +45,7 @@ function intro(title: string, label: string) {
 }
 
 function currentTopicSection(current: OverviewModel["current"]) {
-  if (current === null) return "";
+  if (!current) return "";
 
   return `
     ---

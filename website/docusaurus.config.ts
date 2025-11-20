@@ -1,21 +1,21 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config, PluginConfig} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config, PluginConfig } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import COURSES from './.generated/courses.config.json';
 
 const docsPlugins: PluginConfig[] = COURSES.map(c => (
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: `${c.group}-${c.course_variant}`,
-        path: `./.generated/courses/${c.group}/${c.course_variant}`,
-        routeBasePath: `${c.group}/${c.course_variant}`,
-        sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.course_variant}.ts`),
-        remarkPlugins: [require('remark-math')],
-        rehypePlugins: [require('rehype-katex')],
-      },
-    ] satisfies PluginConfig
-  )
+  [
+    '@docusaurus/plugin-content-docs',
+    {
+      id: `${c.group}-${c.course_variant}`,
+      path: `./.generated/courses/${c.group}/${c.course_variant}`,
+      routeBasePath: `${c.group}/${c.course_variant}`,
+      sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.course_variant}.ts`),
+      remarkPlugins: [require('remark-math')],
+      rehypePlugins: [require('rehype-katex')],
+    },
+  ] satisfies PluginConfig
+)
 );
 
 const config: Config = {
@@ -48,9 +48,9 @@ const config: Config = {
   plugins: [
     ...docsPlugins,
     [
-    '@docusaurus/plugin-content-pages',
+      '@docusaurus/plugin-content-pages',
       {
-        path: './.generated/shared',
+        path: './.generated/courses/shared',
         routeBasePath: '/',
         id: 'generated-pages',
       },
@@ -73,7 +73,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['python','typescript','sql'],
+      additionalLanguages: ['python', 'typescript', 'sql'],
     },
   } satisfies Preset.ThemeConfig,
 };

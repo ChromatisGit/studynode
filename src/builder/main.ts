@@ -5,13 +5,15 @@ import { buildNavbarConfig } from "./transformer/navbar";
 import { buildOverview } from "./transformer/overview";
 import { buildSidebar } from "./transformer/sidebar";
 import { processPageFile } from "./processPage";
+import { setCourseLabels } from "./transformer/courseLabels";
 
 async function main() {
   await deleteGeneratedWebsite()
 
-  const courses = await readAllCourses();
+  const coursesData = await readAllCourses();
+  const topicsData = await readAllTopics();
 
-  const topics = await readAllTopics();
+  const courses = setCourseLabels(coursesData, topicsData)
 
   const filePaths = getAllPagePaths(courses);
 

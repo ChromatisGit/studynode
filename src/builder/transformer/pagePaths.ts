@@ -10,22 +10,24 @@ export function getAllPagePaths(courses: CoursePlan[]): PageFile[] {
 }
 
 function baseWebsitePaths(courses: CoursePlan[]): PageFile[] {
-  return courses.flatMap(({ group, subject, topics, course_variant }) =>
-    topics.map(({ topic, chapter }) => {
+  return courses.flatMap(({ group, subject, chapters, course_variant }) =>
+    chapters.map(({ topic, chapter, label }) => {
       const baseDir = path.join("base", subject, topic, "chapters");
       const targetDir = path.join("courses", group, course_variant, topic);
 
       if (topic === chapter) {
         return {
           source: path.join(baseDir, "website.md"),
-          target: path.join(targetDir, "index.md")
+          target: path.join(targetDir, "index.md"),
+          label
         };
       }
 
       return {
         source: path.join(baseDir, chapter, "website.md"),
         target: path.join(targetDir, `${chapter}.md`),
-        sidebar: 'topic'
+        label,
+        sidebar: topic
       };
     }),
   );
@@ -36,6 +38,7 @@ function groupPrinciplesPaths(courses: CoursePlan[]): PageFile[] {
 
   return groups.map(group => ({
     source: path.join("courses", group, "principles.md"),
-    target: path.join("courses", "shared", group, "principles.md")
+    target: path.join("courses", "shared", group, "principles.md"),
+    label: 'Leitsätze'
   }));
 }

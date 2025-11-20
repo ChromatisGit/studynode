@@ -3,25 +3,27 @@ import { writeFile, readFile } from "./io";
 export type PageFile = {
   source: string;
   target: string;
+  label: string;
   sidebar?: string;
 };
 
 export async function processPageFile(file: PageFile) {
-  const { source, target, sidebar } = file;
+  const { source, target, label, sidebar } = file;
 
-  let content = await readFile(source);
+  const body = await readFile(source);
 
-  if (sidebar !== undefined) {
-    content = injectSidebar(sidebar);
-  }
+  const frontmatterLines = [
+    `title: ${label}`,
+    ...(sidebar ? [`sidebar: ${sidebar}`] : []),
+  ];
+
+  const content = [
+    "---",
+    ...frontmatterLines,
+    "---",
+    body.trim(),
+    "",
+  ].join("\n");
 
   await writeFile({ relativePath: target, content });
-}
-
-function injectSidebar(
-  title: string,
-  body: string,
-  sidebar: string
-): string {
-  return `---\n${title}\nsidebar: ${sidebar}\n---\n${body}`;
 }

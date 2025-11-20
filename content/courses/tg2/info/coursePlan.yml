@@ -3,12 +3,12 @@ course:
   group: tg2
   subject: info
 
-current_chapter: 01_variablen_und_datentypen
+current_chapter: 00_variablen_und_datentypen
 current_worksheets: []
 
 topics:
 
-  programmieren_mit_typescript:
+  grundlagen_programmieren_ts:
     - 00_variablen_und_datentypen
     - 01_ausdruecke_und_operatoren
     - 02_bedingungen
