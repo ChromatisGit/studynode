@@ -6,20 +6,17 @@ export const VisualTypeSchema = z.enum([
   "challenge",
 ]);
 
-export const CodeLanguageSchema = z.enum(["ts", "python"]); 
-
-export const InfoItemSchema = z.object({
-  type: z.literal("info"),
-  text: z.string(),
-  language: CodeLanguageSchema.optional(), // Syntax Highlighting
-  visual: VisualTypeSchema,
-});
-
+export const CodeLanguageSchema = z.enum(["ts", "python"]);
 
 export const BaseTaskSchema = z.object({
-  prompt: z.string().optional(),   // allgemeine Aufgabenstellung
+  title: z.string().optional(),
+  text: z.string().optional(),   // allgemeine Aufgabenstellung
   visual: VisualTypeSchema,        // Styling: task / checkpoint / challenge
   language: CodeLanguageSchema.optional(), // Syntax Highlighting / Runner
+});
+
+export const InfoItemSchema = BaseTaskSchema.extend({
+  type: z.literal("info")
 });
 
 // MCQ mit mehreren Fragen
@@ -36,8 +33,7 @@ const MCQQuestionSchema = z.object({
 export const McqItemSchema = BaseTaskSchema.extend({
   type: z.literal("mcq"),
   questions: z.array(MCQQuestionSchema),
-  multiple: z.boolean().optional(), 
-  // ob mehrere Antworten pro Frage korrekt sein dürfen
+  single: z.boolean().optional(),
 });
 
 // MCQ-Lückentext (jede Lücke mit Auswahl)
