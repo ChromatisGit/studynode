@@ -1,8 +1,6 @@
 # Beispielsblatt
 
-## @info
-
-### Eine Infoannotation
+# @info
 
 `@info` wird genutzt, um **theoretischen Input**, Erklärungen oder Beispiele zu geben.
 
@@ -13,67 +11,67 @@ Ein Beispiel mit Code:
 const example: string = "hello World";
 ```
 
-## @checkpoint
+# @checkpoint
 
-Ein Checkpoint überprüft direkt das Wissen aus dem Infotext
-
-### @wrapper
+## @set
 
 Zum Beispiel mit Multiple Choice Fragen:
 
-#### @mcq
+### @mcq
 
 Welche Antworten sind richtig?
 - [x] ich
 - [x] ich auch
 - [ ] ich nicht
 
-#### @mcq
+### @mcq
 
 Müssen mehrere Antworten richtig sein?
 - [x] Nein
 - [ ] Doch
 - [ ] Ohh!
 
-### @wrapper
+## @set
 
 `@mcq[single=true]` bedeutet: *Immer nur eine Antwort ist korrekt.*
 
-#### @mcq[single=true]
+### @mcq[single=true]
 
 Eine Quizfrage
 - [x] richtig
 - [ ] falsch
 - [ ] auch falsch
 
-#### @mcq[single=true]
+### @mcq[single=true]
 
 Zweite Quizfrage
 - [x] richtig
 - [ ] falsch
 - [ ] ganz falsch
 
-## @task
+# @core
 
-Aufgaben, die die Schüler bearbeiten sollen.
-
-### @gap
+## @gap
 
 Der `@gap`-Decorator erzeugt **Lückentexte**, bei denen Schüler Wörter einsetzen.
 
 Ich kann eine __ {{Lücke}} platzieren. Hier ist eine Lücke mit mehreren richtigen __ {{Lösungen|Antworten}}!
 
-Wenn ich ein Dropdown mit Antwortmöglichkeiten haben möchte, schreibe ich `{[]}`. Nur die erste __ {[Antwort|Frage|Bild]} ist richtig.
-
 Funktioniert auch in Code
 
 ``` ts
-let counter: __ {[number|string|var]};
+let counter: __ {{number}};
 
 counter __ {{=}} 1;
 ```
 
-## @challenge
+## @gap[mcq=true]
+
+Ich kann auch einen Lückentext mit Dropdown für die Antworten haben. Nur die erste __ {{Antwort|Frage|Bild}} ist richtig.
+
+# @challenge
+
+## @set
 
 Eine `@challenge` enthält anspruchsvollere Aufgaben für schnelle Schüler
 
@@ -97,7 +95,9 @@ Rechne!
 @solution
 Ergebnis
 
-### @coding
+### @code
+
+Eine Codingaufgabe:
 
 Setze `counter` auf 2.
 

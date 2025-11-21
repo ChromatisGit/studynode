@@ -1,104 +1,86 @@
 import { z } from "zod";
 
-export const VisualTypeSchema = z.enum([
-  "task",
-  "checkpoint",
-  "challenge",
-]);
-
-export const CodeLanguageSchema = z.enum(["ts", "python"]);
-
-export const BaseTaskSchema = z.object({
-  title: z.string().optional(),
-  text: z.string().optional(),   // allgemeine Aufgabenstellung
-  visual: VisualTypeSchema,        // Styling: task / checkpoint / challenge
-  language: CodeLanguageSchema.optional(), // Syntax Highlighting / Runner
-});
-
-export const InfoItemSchema = BaseTaskSchema.extend({
-  type: z.literal("info")
-});
-
-// MCQ mit mehreren Fragen
-const MCQQuestionSchema = z.object({
-  question: z.string(),
-  correct: z.union([
-    z.string(),
-    z.array(z.string()),
-  ]),                      // richtige Antwort(en)
-  options: z.array(z.string()), // Antwortoptionen
-  explanation: z.string().optional(),
-});
-
-export const McqItemSchema = BaseTaskSchema.extend({
+export const McqTaskSchema = z.object({
   type: z.literal("mcq"),
-  questions: z.array(MCQQuestionSchema),
+  question: z.string(),
+  correct: z.array(z.string()),
+  options: z.array(z.string()),
   single: z.boolean().optional(),
-});
-
-// MCQ-Lückentext (jede Lücke mit Auswahl)
-const MCQGapSchema = z.object({
-  gap_text: z.string(),         // Text der Lücke / Beschreibung
-  correct: z.string(),          // richtige Option
-  options: z.array(z.string()), // Antwortoptionen
-  explanation: z.string().optional(),
-});
-
-export const GapMcqItemSchema = BaseTaskSchema.extend({
-  type: z.literal("mcq_gap"),
-  gaps: z.array(MCQGapSchema),
 });
 
 // Freieingabe-Lückentext
 const GapSchema = z.object({
   gap_text: z.string(),
-  correct: z.union([
-    z.string(),
-    z.array(z.string()),
-  ]),
+  correct: z.array(z.string()),
   hint: z.string().optional(),
-  explanation: z.string().optional(),
 });
 
-export const GapItemSchema = BaseTaskSchema.extend({
+export const GapTaskSchema = z.object({
   type: z.literal("gap"),
   gaps: z.array(GapSchema),
 });
 
+const GapMcqSchema = z.object({
+  gap_text: z.string(),
+  correct: z.string(),
+  options: z.array(z.string())
+});
+
+export const GapMcqTaskSchema = z.object({
+  type: z.literal("gap_mcq"),
+  gaps: z.array(GapMcqSchema),
+});
+
 // Freies Textfeld
-export const TextItemSchema = BaseTaskSchema.extend({
+export const TextTaskSchema = z.object({
   type: z.literal("text"),
   hint: z.string().optional(),
-  solution: z.string().optional(),      // Musterlösung (optional)
-  explanation: z.string().optional(),   // Erklärung zur Musterlösung
+  solution: z.string().optional(),
+  explanation: z.string().optional(),
 });
 
 // Rechenfeld (kariert)
-export const GridItemSchema = BaseTaskSchema.extend({
-  type: z.literal("grid"),
+export const MathTaskSchema = z.object({
+  type: z.literal("math"),
   hint: z.string().optional(),
-  solution: z.string().optional(),      // Musterlösung (optional)
+  solution: z.string().optional(),
   explanation: z.string().optional(),
 });
 
 // Coding-Aufgabe mit optionalem Starter-Code
-export const CodeItemSchema = BaseTaskSchema.extend({
+export const CodeTaskSchema = z.object({
   type: z.literal("code"),
   hint: z.string().optional(),
-  solution: z.string().optional(),      // Musterlösung (optional)
+  solution: z.string().optional(),
   explanation: z.string().optional(),
-  starter_code: z.string().optional(),  // Code, der schon vorgegeben ist
-  expected_output: z.string().optional(), // erwartete Ausgabe
+  starter_code: z.string().optional(),
+  validation: z.string().optional(),
 });
 
-export const LearningItemSchema = z.discriminatedUnion("type", [
-  InfoItemSchema,
-  McqItemSchema,
-  GapItemSchema,
-  GapMcqItemSchema,
-  TextItemSchema,
-  GridItemSchema,
-  CodeItemSchema,
+const TaskTypeSchema = z.discriminatedUnion("type", [
+  McqTaskSchema,
+  GapTaskSchema,
+  GapMcqTaskSchema,
+  TextTaskSchema,
+  MathTaskSchema,
+  CodeTaskSchema,
+])
+
+const CodeLanguageSchema = z.enum(["ts", "python"]);
+
+export const TaskSchema = z.object({
+  text: z.string().optional(),
+  language: CodeLanguageSchema.optional(),
+  subtask: z.array(TaskTypeSchema)
+});
+
+const CategoryTypeSchema = z.enum([
+  "checkpoint",
+  "core",
+  "challenge",
 ]);
 
-export type LearningItem = z.infer<typeof LearningItemSchema>;
+export const CategorySchema = z.object({
+  category: CategoryTypeSchema,
+  task: z.array(TaskSchema)
+});
