@@ -21,8 +21,8 @@ content/
 │  │     │  └─ <chapter>/            # z. B. 00_geraden, 01_geraden_lagebeziehung
 │  │     │     ├─ slides/            # Foliensätze-Vorlagen
 │  │     │     ├─ worksheets/        # Arbeitsbögen-Vorlagen
-│  │     │     ├─ current.md         # Website während Bearbeitung
-│  │     │     └─ summary.md         # Website nach Abschluss
+│  │     │     ├─ preview.md         # (optional) Website vor/während Bearbeitung
+│  │     │     └─ website.md         # Website
 │  │     │
 │  │     ├─ resources/               # Wiederverwendbare Aufgaben, Texte, Checkpoints
 │  │     ├─ images/                  # Abbildungen für Webseite und Arbeitsbögen
