@@ -1,6 +1,6 @@
 # Markdown-Syntax und Strukturregeln
 
-Dieses Dokument beschreibt die Syntax- und Strukturregeln für Arbeitsblätter im Learnspace-Format.
+Dieses Dokument beschreibt die Syntax- und Strukturregeln für Arbeitsblätter im Studynode-Format.
 Die Struktur orientiert sich an den Datenmodellen:
 
 - `CategorySchema`
@@ -31,9 +31,9 @@ Jede Kategorie beginnt mit einer `#`-Überschrift und einem Decorator.
 | `# @checkpoint` | Verständnis- bzw. Selbsttest-Aufgaben | `"checkpoint"` |
 | `# @challenge` | Anspruchsvollere Zusatzaufgaben | `"challenge"` |
 | `# @core` | Grundaufgabe die alle Schüler während der Übungsphase erarbeiten sollen | `"core"` |
-| `# @info` | Theoretischer Input, kein Category-Block | – |
+| `# @info` | Theoretischer Input | – |
 
-**Alles unterhalb** einer Kategorie bis zur nächsten `# @...` gehört zu dieser Kategorie.
+**Alles unterhalb** einer Kategorie bis zur nächsten `#` gehört zu dieser Kategorie.
 
 ---
 
@@ -86,7 +86,7 @@ Innerhalb einer Teilaufgabe können zusätzliche Marker vorkommen:
 
 ---
 
-## 🧠 Beispiel: Checkpoint-Kategorie
+## Beispiel: Checkpoint-Kategorie
 
 ```md
 # @checkpoint
@@ -114,29 +114,6 @@ Eine Quizfrage
 - [x] richtig
 - [ ] falsch
 - [ ] auch falsch
-```
-
-Ergebnis:
-
-```ts
-{
-  category: "checkpoint",
-  task: [
-    {
-      text: "Zum Beispiel mit Multiple Choice Fragen:",
-      subtask: [
-        { type: "mcq", question: "...", options: [...], correct: [...] },
-        { type: "mcq", question: "...", options: [...], correct: [...] }
-      ]
-    },
-    {
-      text: "",
-      subtask: [
-        { type: "mcq", question: "Eine Quizfrage", options: [...], correct: [...], single: true }
-      ]
-    }
-  ]
-}
 ```
 
 ---
@@ -198,24 +175,6 @@ let counter: number = 2;
 @validation
 ```ts
 counter === 2
-```
-```
-
-Ergebnis:
-```ts
-{
-  category: "challenge",
-  task: [
-    {
-      text: "Eine `@challenge` enthält anspruchsvollere Aufgaben...",
-      subtask: [
-        { type: "text", hint: "...", solution: "..." },
-        { type: "math", hint: "...", solution: "..." },
-        { type: "code", starter_code: "let counter...", hint: "...", solution: "...", validation: "counter === 2" }
-      ]
-    }
-  ]
-}
 ```
 
 ---
