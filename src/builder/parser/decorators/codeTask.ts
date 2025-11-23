@@ -1,5 +1,7 @@
 import { Code, RootContent } from "mdast";
-import { TaskDecorator } from "./base";
+
+import { collectContentBlock } from "../utils/markdown";
+import { DecoratedTask, TaskDecorator } from "./base";
 
 export type CodeTask = {
   type: "code";
@@ -7,15 +9,20 @@ export type CodeTask = {
   hint?: string;
   solution?: string;
   explanation?: string;
-  starter_code?: string;
+  starterCode?: string;
   validation?: string;
 }
 
 export const codeTaskDecorator: TaskDecorator<CodeTask> = {
   type: "code",
 
-  handle({ nodes, index }): CodeTask {
-    const block = collectBlockUntilBoundary(nodes, index);
+  handle({ nodes, index, heading, markdown: source }): DecoratedTask<CodeTask> {
+    const block = collectContentBlock({
+      nodes,
+      startIndex: index,
+      markdown: source,
+      stopAtHeadingDepth: heading.depth,
+    });
     const relevantNodes: RootContent[] = nodes.slice(index + 1, block.endIndex + 1);
 
     let starterCode: string | undefined;
@@ -27,9 +34,22 @@ export const codeTaskDecorator: TaskDecorator<CodeTask> = {
     }
 
     return {
-      type: "code",
-      instruction: block.markdown.trim(),
-      ...(starterCode ? { starter_code: starterCode } : {}),
+      task: {
+        type: "code",
+        instruction: block.markdown.trim(),
+        ...(starterCode ? { starterCode } : {}),
+      },
+      inlineDecorators: {
+        hint: (task, content) => {
+          task.hint = content.trim();
+        },
+        solution: (task, content) => {
+          task.solution = content.trim();
+        },
+        validation: (task, content) => {
+          task.validation = content.trim();
+        },
+      },
     };
   },
 };

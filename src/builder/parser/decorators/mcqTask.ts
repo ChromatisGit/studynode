@@ -1,3 +1,9 @@
+import type { List, ListItem, Paragraph, RootContent } from "mdast";
+
+import { parserError } from "../utils/errors";
+import { nodeToPlainText } from "../utils/nodeToPlainText";
+import type { DecoratedTask, TaskDecorator } from "./base";
+
 export type McqTask = {
   type: "mcq";
   question: string;
@@ -6,23 +12,24 @@ export type McqTask = {
   single?: boolean;
 }
 
-import type { TaskDecorator } from "./base";
-import type { List, ListItem, Paragraph } from "mdast";
-
 export const mcqTaskDecorator: TaskDecorator<McqTask> = {
   type: "mcq",
 
-  handle({ nodes, index, decorator }): McqTask {
+  handle({ nodes, index, decorator, heading, filePath }): DecoratedTask<McqTask> {
     const questionNode = nodes[index + 1];
     const listNode = nodes[index + 2];
 
     const question =
       questionNode && questionNode.type === "paragraph"
-        ? toString(questionNode as Paragraph)
+        ? nodeToPlainText(questionNode as Paragraph).trim()
         : "";
 
     if (!listNode || listNode.type !== "list") {
-      throw new Error("@mcq erwartet direkt danach eine Liste mit - [x] / - [ ] Einträgen");
+      throw parserError(
+        filePath,
+        (listNode as RootContent) ?? heading,
+        "@mcq must be followed by a checklist using - [x] / - [ ]",
+      );
     }
 
     const list = listNode as List;
@@ -31,24 +38,24 @@ export const mcqTaskDecorator: TaskDecorator<McqTask> = {
     const correct: string[] = [];
 
     for (const item of list.children as ListItem[]) {
-      const label = toString(item).trim();
+      const label = nodeToPlainText(item).trim();
       options.push(label);
-      const anyItem = item as any;
-      if (anyItem.checked === true) {
+      if ((item as ListItem).checked === true) {
         correct.push(label);
       }
     }
 
-    const singleArg = decorator.args.single;
-    const single =
-      typeof singleArg === "boolean" ? singleArg : undefined;
+    const singleArg = decorator.args?.single;
+    const single = typeof singleArg === "boolean" ? singleArg : undefined;
 
     return {
-      type: "mcq",
-      question,
-      options,
-      correct,
-      ...(single !== undefined ? { single } : {}),
+      task: {
+        type: "mcq",
+        question,
+        options,
+        correct,
+        ...(single !== undefined ? { single } : {}),
+      },
     };
   },
 };

@@ -1,11 +1,12 @@
+import type { RootContent } from "mdast";
+
+import { nodeToPlainText } from "./nodeToPlainText";
+
 export interface DecoratorLabel {
   name: string;
   args?: Record<string, string | number | boolean>;
 }
 
-/**
- * Parse things like "@mcq[single=true]" or "@gap[mcq=true]"
- */
 export function parseDecoratorLabel(raw: string): DecoratorLabel | null {
   const trimmed = raw.trim();
   if (!trimmed.startsWith("@")) return null;
@@ -19,7 +20,7 @@ export function parseDecoratorLabel(raw: string): DecoratorLabel | null {
 
   if (argsPart) {
     for (const pair of argsPart.split(",")) {
-      const [rawKey, rawValue] = pair.split("=").map((s) => s.trim());
+      const [rawKey, rawValue] = pair.split("=").map((segment) => segment.trim());
       if (!rawKey) continue;
       let value: string | number | boolean = rawValue ?? "";
       if (value === "true") value = true;
@@ -30,4 +31,9 @@ export function parseDecoratorLabel(raw: string): DecoratorLabel | null {
   }
 
   return { name, args };
+}
+
+export function readInlineDecorator(node: RootContent): DecoratorLabel | null {
+  if (node.type !== "paragraph") return null;
+  return parseDecoratorLabel(nodeToPlainText(node));
 }

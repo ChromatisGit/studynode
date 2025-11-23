@@ -1,4 +1,5 @@
-import { TaskDecorator } from "./base";
+import { collectContentBlock } from "../utils/markdown";
+import { DecoratedTask, TaskDecorator } from "./base";
 
 export type MathTask = {
   type: "math";
@@ -11,11 +12,26 @@ export type MathTask = {
 export const mathTaskDecorator: TaskDecorator<MathTask> = {
   type: "math",
 
-  handle({ nodes, index }): MathTask {
-    const { markdown } = collectBlockUntilBoundary(nodes, index);
+  handle({ nodes, index, heading, markdown: source }): DecoratedTask<MathTask> {
+    const { markdown } = collectContentBlock({
+      nodes,
+      startIndex: index,
+      markdown: source,
+      stopAtHeadingDepth: heading.depth,
+    });
     return {
-      type: "math",
-      instruction: markdown.trim(),
+      task: {
+        type: "math",
+        instruction: markdown.trim(),
+      },
+      inlineDecorators: {
+        hint: (task, content) => {
+          task.hint = content.trim();
+        },
+        solution: (task, content) => {
+          task.solution = content.trim();
+        },
+      },
     };
   },
 };
