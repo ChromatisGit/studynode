@@ -50,32 +50,6 @@ export function appendTask(
   ctx.inlineDecorators = inlineDecorators;
 }
 
-export function applyInlineDecorator(
-  ctx: ParserContext,
-  decoratorName: string,
-  markdown: string,
-  node: RootContent,
-) {
-  if (!ctx.currentTask) {
-    throw parserError(
-      ctx.filePath,
-      node,
-      `Decorator @${decoratorName} requires a preceding task`,
-    );
-  }
-
-  const handler = ctx.inlineDecorators?.[decoratorName];
-  if (!handler) {
-    throw parserError(
-      ctx.filePath,
-      node,
-      `Decorator @${decoratorName} is not supported for task type "${ctx.currentTask.type}"`,
-    );
-  }
-
-  handler(ctx.currentTask, markdown);
-}
-
 export function ensureTaskSet(ctx: ParserContext, node: RootContent): TaskSet {
   if (!ctx.currentTaskSet) {
     const category = requireCategory(ctx, node);

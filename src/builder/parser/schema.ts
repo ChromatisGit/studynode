@@ -6,7 +6,6 @@ export type CodeLanguage = "ts" | "python";
 
 export type TaskSet = {
   text?: string;
-  language?: CodeLanguage;
   task: Task[];
 };
 

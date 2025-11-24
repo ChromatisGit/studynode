@@ -9,21 +9,25 @@ export type McqTask = {
   question: string;
   correct: string[];
   options: string[];
-  single?: boolean;
+  single: boolean;
 }
 
 export const mcqTaskDecorator: TaskDecorator<McqTask> = {
   type: "mcq",
 
   handle({ nodes, index, decorator, heading, filePath }): DecoratedTask<McqTask> {
-    const questionNode = nodes[index + 1];
-    const listNode = nodes[index + 2];
+    let cursor = index + 1;
+    const questionNode = nodes[cursor];
+    const hasQuestion = questionNode && questionNode.type === "paragraph";
+    const question = hasQuestion
+      ? nodeToPlainText(questionNode as Paragraph).trim()
+      : "";
 
-    const question =
-      questionNode && questionNode.type === "paragraph"
-        ? nodeToPlainText(questionNode as Paragraph).trim()
-        : "";
+    if (hasQuestion) {
+      cursor += 1;
+    }
 
+    const listNode = nodes[cursor];
     if (!listNode || listNode.type !== "list") {
       throw parserError(
         filePath,
@@ -45,8 +49,7 @@ export const mcqTaskDecorator: TaskDecorator<McqTask> = {
       }
     }
 
-    const singleArg = decorator.args?.single;
-    const single = typeof singleArg === "boolean" ? singleArg : undefined;
+    const single = decorator.args?.single === true ? true : false;
 
     return {
       task: {
@@ -54,8 +57,9 @@ export const mcqTaskDecorator: TaskDecorator<McqTask> = {
         question,
         options,
         correct,
-        ...(single !== undefined ? { single } : {}),
+        single
       },
+      nextIndex: cursor + 1,
     };
   },
 };

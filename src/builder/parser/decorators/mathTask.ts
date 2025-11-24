@@ -1,37 +1,30 @@
-import { collectContentBlock } from "../utils/markdown";
+import { parseInlineDecorators } from "../utils/decorators";
 import { DecoratedTask, TaskDecorator } from "./base";
 
 export type MathTask = {
   type: "math";
   instruction: string;
-  hint?: string;
-  solution?: string;
-  explanation?: string;
+  hint: string;
+  solution: string;
 }
 
 export const mathTaskDecorator: TaskDecorator<MathTask> = {
   type: "math",
 
-  handle({ nodes, index, heading, markdown: source }): DecoratedTask<MathTask> {
-    const { markdown } = collectContentBlock({
-      nodes,
+  handle({ index, heading, consumeBlock, markdown: source }): DecoratedTask<MathTask> {
+    const { markdown, nextIndex } = consumeBlock({
       startIndex: index,
-      markdown: source,
       stopAtHeadingDepth: heading.depth,
     });
+
+    const inlineDecorators = parseInlineDecorators('math', markdown, 
+      ['hint', 'solution'] as const)
     return {
       task: {
         type: "math",
-        instruction: markdown.trim(),
+        ...inlineDecorators
       },
-      inlineDecorators: {
-        hint: (task, content) => {
-          task.hint = content.trim();
-        },
-        solution: (task, content) => {
-          task.solution = content.trim();
-        },
-      },
+      nextIndex,
     };
   },
 };

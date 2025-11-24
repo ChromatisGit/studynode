@@ -1,6 +1,7 @@
 import type { Root, Heading, RootContent } from "mdast";
 import type { Task, TaskType } from "../decoratorRegistry";
 import type { DecoratorLabel } from "../utils/decorators";
+import type { BlockBoundary, ContentBlock } from "../utils/markdown";
 
 export interface TaskDecoratorContext {
   filePath: string;
@@ -10,6 +11,11 @@ export interface TaskDecoratorContext {
   heading: Heading;
   decorator: DecoratorLabel;
   markdown: string;
+  consumeBlock: (options: {
+    startIndex: number;
+    stopAtHeadingDepth?: number;
+    boundary?: BlockBoundary;
+  }) => ContentBlock;
 }
 
 export type InlineDecoratorHandler<TTask extends Task = Task> = (
@@ -22,12 +28,13 @@ export type InlineDecoratorMap<TTask extends Task = Task> = Record<
   InlineDecoratorHandler<TTask>
 >;
 
-export interface DecoratedTask<TTask extends Task = Task> {
+export type DecoratedTask<TTask extends Task = Task> = {
   task: TTask;
   inlineDecorators?: InlineDecoratorMap<TTask>;
-}
+  nextIndex?: number;
+};
 
-export interface TaskDecorator<TTask extends Task = Task> {
+export type TaskDecorator<TTask extends Task = Task> = {
   type: TaskType;
   handle(ctx: TaskDecoratorContext): DecoratedTask<TTask>;
-}
+};

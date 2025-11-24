@@ -1,16 +1,3 @@
-# Beispielsblatt
-
-# @info
-
-`@info` wird genutzt, um **theoretischen Input**, Erklärungen oder Beispiele zu geben.
-
-**Beispiel:**
-Ein Beispiel mit Code:
-
-``` ts
-const example: string = "hello World";
-```
-
 # @checkpoint
 
 ## @set
@@ -101,6 +88,7 @@ Eine Codingaufgabe:
 
 Setze `counter` auf 2.
 
+@starter
 ``` ts
 let counter: number
 ```
@@ -117,3 +105,13 @@ let counter: number = 2;
 ```ts
 counter === 2
 ```
+
+## @text
+
+Eine weitere Textaufgabe, die nicht mit den anderen Aufgaben zu tun hat und deshalb level 2 statt in dem set ist
+
+@hint
+Ein Hinweis
+
+@solution
+Eine beispielhafte Antwort.

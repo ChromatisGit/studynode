@@ -1,19 +1,10 @@
 import type { Heading, Root, RootContent } from "mdast";
-
-import {
-  appendTask,
-  enterCategory,
-  ParserContext,
-  startTaskSet,
-} from "./context";
-import {
-  taskDecoratorRegistry,
-  TaskType,
-  TaskTypeSchema,
-} from "./decoratorRegistry";
+import { appendTask, enterCategory, ParserContext, startTaskSet } from "./context";
+import { taskDecoratorRegistry, TaskType, TaskTypeSchema } from "./decoratorRegistry";
 import type { TaskDecoratorContext } from "./decorators/base";
 import { CategoryTypeSchema } from "./schema";
 import type { CategoryType } from "./schema";
+import type { ContentBlock, BlockBoundary } from "./utils/markdown";
 import { parserError } from "./utils/errors";
 import { parseDecoratorLabel } from "./utils/decorators";
 import { nodeToPlainText } from "./utils/nodeToPlainText";
@@ -26,6 +17,7 @@ export function processHeading({
   markdown,
   context,
   filePath,
+  consumeBlock,
 }: {
   heading: Heading;
   index: number;
@@ -34,10 +26,15 @@ export function processHeading({
   markdown: string;
   context: ParserContext;
   filePath: string;
-}) {
+  consumeBlock: (options: {
+    startIndex: number;
+    stopAtHeadingDepth?: number;
+    boundary?: BlockBoundary;
+  }) => ContentBlock;
+}): number {
   const text = nodeToPlainText(heading);
   const decorator = parseDecoratorLabel(text);
-  if (!decorator) return;
+  if (!decorator) return index + 1;
 
   const taskParse = TaskTypeSchema.safeParse(decorator.name);
   if (taskParse.success) {
@@ -67,11 +64,12 @@ export function processHeading({
       heading,
       decorator,
       markdown,
+      consumeBlock,
     };
 
-    const { task, inlineDecorators } = decoratorImpl.handle(ctx);
+    const { task, inlineDecorators, nextIndex } = decoratorImpl.handle(ctx);
     appendTask(context, task, heading, inlineDecorators);
-    return;
+    return nextIndex ?? index + 1;
   }
 
   const categoryParse = CategoryTypeSchema.safeParse(decorator.name);
@@ -85,7 +83,7 @@ export function processHeading({
     }
 
     enterCategory(context, categoryParse.data as CategoryType);
-    return;
+    return index + 1;
   }
 
   if (decorator.name === "set") {
@@ -98,7 +96,7 @@ export function processHeading({
     }
 
     startTaskSet(context, heading);
-    return;
+    return index + 1;
   }
 
   throw parserError(filePath, heading, `Unknown header decorator @${decorator.name}`);

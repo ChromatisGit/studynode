@@ -2,19 +2,24 @@ import type { Heading, RootContent } from "mdast";
 
 export type BlockBoundary = (node: RootContent, index: number) => boolean;
 
-export interface ContentBlock {
+export type ContentBlock = {
   markdown: string;
   endIndex: number;
-}
+  nextIndex: number;
+};
 
-export interface CollectContentBlockOptions {
+export type CollectContentBlockOptions = {
   nodes: RootContent[];
   startIndex: number;
   markdown: string;
   stopAtHeadingDepth?: number;
   boundary?: BlockBoundary;
-}
+};
 
+/**
+ * Consumes all nodes after `startIndex` until a boundary is hit and returns the raw markdown slice.
+ * The `nextIndex` points to the first node after the consumed block, making it easy to advance a cursor.
+ */
 export function collectContentBlock({
   nodes,
   startIndex,
@@ -36,7 +41,7 @@ export function collectContentBlock({
   const shouldStop = boundary ?? fallbackBoundary;
   const firstContentIndex = startIndex + 1;
   if (firstContentIndex >= nodes.length) {
-    return { markdown: "", endIndex: startIndex };
+    return { markdown: "", endIndex: startIndex, nextIndex: startIndex + 1 };
   }
 
   const firstContentNode = nodes[firstContentIndex];
@@ -60,7 +65,7 @@ export function collectContentBlock({
   }
 
   if (endIndex === startIndex) {
-    return { markdown: "", endIndex };
+    return { markdown: "", endIndex, nextIndex: startIndex + 1 };
   }
 
   const sliceStart = Math.max(0, blockStart ?? 0);
@@ -69,5 +74,6 @@ export function collectContentBlock({
   return {
     markdown: markdown.slice(sliceStart, sliceEnd),
     endIndex,
+    nextIndex: endIndex + 1,
   };
 }

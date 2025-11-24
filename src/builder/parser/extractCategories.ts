@@ -1,41 +1,52 @@
 import { readFile } from "node:fs/promises";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
+import remarkGfm from 'remark-gfm';
 import type { Heading, Root, RootContent } from "mdast";
 
 import type { Category } from "./schema";
 import { createParserContext } from "./context";
-import { processHeading } from "./headingProcessor";
-import { processInlineDecorator } from "./inlineDecorators";
+import { processHeading } from "./headingProcessor";  
+import { processContent } from "./contentProcessor";
+import { collectContentBlock, BlockBoundary } from "./utils/markdown";
 
-const DEFAULT_MARKDOWN_PATH =
-  "base/math/vektorgeometrie/content-pool/example.md";
-
-export async function extractCategories(
-  markdownPath: string = DEFAULT_MARKDOWN_PATH,
-): Promise<Category[]> {
+export async function extractCategories(markdownPath: string): Promise<Category[]> {
   const markdown = await readFile(markdownPath, "utf8");
-  const tree = unified().use(remarkParse).parse(markdown) as Root;
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
   const nodes = tree.children as RootContent[];
 
   const context = createParserContext(markdownPath);
 
-  nodes.forEach((node, index) => {
-    if (node.type === "heading") {
-      processHeading({
-        heading: node as Heading,
-        index,
-        nodes,
-        tree,
-        markdown,
-        context,
-        filePath: markdownPath,
-      });
-      return;
-    }
+  const consumeBlock = (options: {
+    startIndex: number;
+    stopAtHeadingDepth?: number;
+    boundary?: BlockBoundary;
+  }) => collectContentBlock({ nodes, markdown, ...options });
 
-    processInlineDecorator({ node, index, nodes, markdown, context });
-  });
+  let index = 0;
+  while (index < nodes.length) {
+    const node = nodes[index];
+    const nextIndex =
+      node.type === "heading"
+        ? processHeading({
+            heading: node as Heading,
+            index,
+            nodes,
+            tree,
+            markdown,
+            context,
+            filePath: markdownPath,
+            consumeBlock,
+          })
+        : processContent({
+            node,
+            index,
+            markdown,
+            context,
+          });
+
+    index = nextIndex ?? index + 1;
+  }
 
   return context.categories;
 }
