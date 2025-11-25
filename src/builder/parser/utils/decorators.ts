@@ -18,13 +18,29 @@ export function parseDecorator(heading: Heading): Decorator | undefined {
     for (const pair of argsPart.split(",")) {
       const [rawKey, rawValue] = pair.split("=").map((segment) => segment.trim());
       if (!rawKey) continue;
-      let value: string | number | boolean = rawValue ?? "";
-      if (value === "true") value = true;
-      else if (value === "false") value = false;
-      else if (!Number.isNaN(Number(value))) value = Number(value);
+
+      let value: string | number | boolean = rawValue;
+
+      switch (value) {
+        case undefined:
+          value = true;
+          break;
+        case "true":
+          value = true;
+          break;
+        case "false":
+          value = false;
+          break;
+        default:
+          if (!Number.isNaN(Number(value))) value = Number(value);
+          else value = false;
+      }
+
       args[rawKey] = value;
     }
   }
+
+  console.log(args)
 
   return { name, depth: heading.depth, args };
 }

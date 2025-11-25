@@ -29,7 +29,7 @@ Eine Quizfrage
 - [ ] falsch
 - [ ] auch falsch
 
-### @mcq[single=true]
+### @mcq[single]
 
 Zweite Quizfrage
 - [x] richtig
@@ -52,7 +52,7 @@ let counter: __ {{number}};
 counter __ {{=}} 1;
 ```
 
-## @gap[mcq=true]
+## @gap[mcq]
 
 Ich kann auch einen Lückentext mit Dropdown für die Antworten haben. Nur die erste __ {{Antwort|Frage|Bild}} ist richtig.
 
