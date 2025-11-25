@@ -1,5 +1,6 @@
+import { RootContent } from "mdast";
 import { parseInlineDecorators } from "../utils/decorators";
-import { DecoratedTask, TaskDecorator } from "./base";
+import { nodesToMarkdown } from "../utils/nodeTransformer";
 
 export type TextTask = {
   type: "text";
@@ -8,23 +9,13 @@ export type TextTask = {
   solution: string;
 }
 
-export const textTaskDecorator: TaskDecorator<TextTask> = {
-  type: "text",
+export function textTaskHandler({contentNodes}: {contentNodes: RootContent[]}): TextTask {
+  const markdown = nodesToMarkdown(contentNodes)
 
-  handle({ index, heading, consumeBlock, markdown: source }): DecoratedTask<TextTask> {
-    const { markdown, nextIndex } = consumeBlock({
-      startIndex: index,
-      stopAtHeadingDepth: heading.depth,
-    });
-
-    const inlineDecorators = parseInlineDecorators('text', markdown, 
-      ['hint', 'solution'] as const)
-    return {
-      task: {
-        type: "text",
-        ...inlineDecorators
-      },
-      nextIndex,
-    };
-  },
-};
+  const inlineDecorators = parseInlineDecorators('text', markdown,
+    ['hint', 'solution'] as const)
+  return {
+    type: "text",
+    ...inlineDecorators
+  };
+}

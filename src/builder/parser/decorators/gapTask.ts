@@ -1,4 +1,7 @@
-import { DecoratedTask, TaskDecorator } from "./base";
+import { RootContent } from "mdast";
+
+import { nodesToMarkdown } from "../utils/nodeTransformer";
+import { DecoratorArgs } from "../taskRegistry";
 
 export type GapField = {
   mode: "text" | "mcq";
@@ -15,70 +18,58 @@ export type GapTask = {
   parts: GapPart[];
 };
 
-export const gapTaskDecorator: TaskDecorator<GapTask> = {
-  type: "gap",
+export function gapTaskHandler({
+  contentNodes,
+  args,
+}: {
+  contentNodes: RootContent[];
+  args?: DecoratorArgs;
+}): GapTask {
+  const markdown = nodesToMarkdown(contentNodes);
 
-  handle({
-    nodes,
-    index,
-    decorator,
-    heading,
-    markdown: source,
-    consumeBlock,
-  }): DecoratedTask<GapTask> {
-    const { markdown, nextIndex } = consumeBlock({
-      startIndex: index,
-      stopAtHeadingDepth: heading.depth,
+  const mcqMode = args?.mcq === true;
+  const gapRegex = /__ ?\{\{(.+?)\}\}/g;
+
+  const matches = [...markdown.matchAll(gapRegex)];
+  if (matches.length === 0) {
+    throw new Error("No gaps found in markdown.");
+  }
+
+  const parts: GapPart[] = [];
+  let lastIndex = 0;
+
+  for (const match of matches) {
+    const matchIndex = match.index ?? 0;
+
+    if (matchIndex > lastIndex) {
+      parts.push({ type: "text", content: markdown.slice(lastIndex, matchIndex) });
+    }
+
+    const rawEntries = match[1]
+      .split("|")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const options = rawEntries.length ? rawEntries : [""];
+
+    parts.push({
+      type: "gap",
+      gap: {
+        mode: mcqMode ? "mcq" : "text",
+        correct: mcqMode ? [options[0]] : options,
+        ...(mcqMode ? { options } : {}),
+      },
     });
 
-    const mcqMode = decorator.args?.mcq ?? false;
-    const gapRegex = /__ ?\{\{(.+?)\}\}/g;
+    lastIndex = matchIndex + match[0].length;
+  }
 
-    const matches = [...markdown.matchAll(gapRegex)];
-    if (matches.length === 0) {
-      // TODO use error class
-      throw new Error("No gaps found in markdown.");
-    }
+  if (lastIndex < markdown.length) {
+    parts.push({ type: "text", content: markdown.slice(lastIndex) });
+  }
 
-    const parts: GapPart[] = [];
-    let lastIndex = 0;
-
-    for (const match of matches) {
-      const matchIndex = match.index ?? 0;
-
-      if (matchIndex > lastIndex) {
-        parts.push({ type: "text", content: markdown.slice(lastIndex, matchIndex) });
-      }
-
-      const rawEntries = match[1]
-        .split("|")
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-      const options = rawEntries.length ? rawEntries : [""];
-
-      parts.push({
-        type: "gap",
-        gap: {
-          mode: mcqMode ? "mcq" : "text",
-          correct: mcqMode ? [options[0]] : options,
-          ...(mcqMode ? { options } : {}),
-        },
-      });
-
-      lastIndex = matchIndex + match[0].length;
-    }
-
-    if (lastIndex < markdown.length) {
-      parts.push({ type: "text", content: markdown.slice(lastIndex) });
-    }
-
-    return {
-      task: {
-        type: "gap",
-        parts,
-      },
-      nextIndex,
-    };
-  },
-};
+  return {
+    type: "gap",
+    parts,
+  };
+}

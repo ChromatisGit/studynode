@@ -1,18 +1,18 @@
-export interface DecoratorLabel {
-  name: string;
-  args?: Record<string, string | number | boolean>;
-}
+import { Heading } from "mdast";
+import { nodeToPlainText } from "./nodeTransformer";
+import { Decorator, DecoratorArgs } from "../taskRegistry";
 
-export function parseDecoratorLabel(raw: string): DecoratorLabel | null {
-  const trimmed = raw.trim();
-  if (!trimmed.startsWith("@")) return null;
+export function parseDecorator(heading: Heading): Decorator | undefined {
 
-  const match = /^@([a-zA-Z0-9_]+)(\[(.*)\])?$/.exec(trimmed);
-  if (!match) return null;
+  const text = nodeToPlainText(heading).trim();
+  if (!text.startsWith("@")) return undefined;
+
+  const match = /^@([a-zA-Z0-9_]+)(\[(.*)\])?$/.exec(text);
+  if (!match) return undefined;
 
   const name = match[1];
   const argsPart = match[3];
-  const args: Record<string, string | number | boolean> = {};
+  const args: DecoratorArgs = {};
 
   if (argsPart) {
     for (const pair of argsPart.split(",")) {
@@ -26,7 +26,7 @@ export function parseDecoratorLabel(raw: string): DecoratorLabel | null {
     }
   }
 
-  return { name, args };
+  return { name, depth: heading.depth, args };
 }
 
 export function parseInlineDecorators<D extends readonly string[]>(
