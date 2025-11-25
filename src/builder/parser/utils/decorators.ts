@@ -40,8 +40,6 @@ export function parseDecorator(heading: Heading): Decorator | undefined {
     }
   }
 
-  console.log(args)
-
   return { name, depth: heading.depth, args };
 }
 
@@ -50,6 +48,8 @@ export function parseInlineDecorators<D extends readonly string[]>(
   raw: string,
   validDecorators: D
 ): Record<"instruction" | D[number], string> {
+
+  // Todo optional parameters
   const res: Partial<Record<string, string>> = {};
 
   const chunks = raw.split(/\r?\n@(?=[a-z]+)/);

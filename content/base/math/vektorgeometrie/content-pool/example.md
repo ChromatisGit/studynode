@@ -6,10 +6,15 @@ Zum Beispiel mit Multiple Choice Fragen:
 
 ### @mcq
 
-Welche Antworten sind richtig?
-- [x] ich
-- [x] ich auch
-- [ ] ich nicht
+Macht dieser Code etwas?
+
+```ts
+console.log("test")
+```
+
+- [x] Ja
+- [x] Definitiv
+- [ ] Nein
 
 ### @mcq
 
@@ -20,9 +25,9 @@ Müssen mehrere Antworten richtig sein?
 
 ## @set
 
-`@mcq[single=true]` bedeutet: *Immer nur eine Antwort ist korrekt.*
+`@mcq[single]` bedeutet: *Immer nur eine Antwort ist korrekt.*
 
-### @mcq[single=true]
+### @mcq[single]
 
 Eine Quizfrage
 - [x] richtig

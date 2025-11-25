@@ -63,6 +63,7 @@ export class Parser {
       return;
     }
 
+        // Todo Error locations points to previous node instead of the offending decorator
     throw this.parserError(`Unknown decorator @${decorator.name}`);
   }
 

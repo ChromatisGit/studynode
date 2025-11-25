@@ -1,6 +1,6 @@
 import type { List, ListItem, Paragraph, RootContent } from "mdast";
 
-import { nodeToPlainText } from "../utils/nodeTransformer";
+import { nodesToMarkdown, nodeToPlainText } from "../utils/nodeTransformer";
 import { DecoratorArgs } from "../taskRegistry";
 
 export type McqTask = {
@@ -19,24 +19,19 @@ export function mcqTaskHandler({
   args?: DecoratorArgs;
 }): McqTask {
 
-  let cursor = 0;
-  let question = "";
+  const index = contentNodes.findIndex((node) => node.type === "list")
 
-  const questionNode = contentNodes[cursor];
-  if (questionNode?.type === "paragraph") {
-    question = nodeToPlainText(questionNode as Paragraph).trim();
-    cursor += 1;
+  if (index === -1) {
+    // Todo error component
+    throw new Error("@mcq must include a checklist using - [x] / - [ ]");
   }
 
-  const listNode = contentNodes[cursor];
-  if (!listNode || listNode.type !== "list") {
-    throw new Error("@mcq must be followed by a checklist using - [x] / - [ ]");
-  }
+  const question = nodesToMarkdown(contentNodes.slice(0,index)) ?? "";
 
   const options: string[] = [];
   const correct: string[] = [];
 
-  for (const item of (listNode as List).children as ListItem[]) {
+  for (const item of (contentNodes[index] as List).children as ListItem[]) {
     const label = nodeToPlainText(item).trim();
     options.push(label);
     if ((item as ListItem).checked === true) {
