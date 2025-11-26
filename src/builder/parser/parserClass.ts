@@ -3,9 +3,7 @@ import { z } from "zod";
 import { callTaskHandler, Decorator, TaskTypeSchema, type Task } from "./taskRegistry";
 import { Heading, RootContent } from "mdast";
 import { parseDecorator } from "./utils/decorators";
-import { nodesToMarkdown, nodeToPlainText } from "./utils/nodeTransformer";
-
-type CodeLanguage = "ts" | "python";
+import { nodesToMarkdown } from "./utils/nodeTransformer";
 
 type TaskSet = {
   intro?: string;
@@ -62,8 +60,7 @@ export class Parser {
       this.handleSetDecorator(decorator);
       return;
     }
-
-        // Todo Error locations points to previous node instead of the offending decorator
+    // Todo Error locations points to previous node instead of the offending decorator
     throw this.parserError(`Unknown decorator @${decorator.name}`);
   }
 

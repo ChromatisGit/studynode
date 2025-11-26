@@ -6,30 +6,35 @@ import { GapTask, gapTaskHandler } from "./decorators/gapTask";
 import { z } from "zod";
 import { RootContent } from "mdast";
 
-export type DecoratorArgs = Record<string, string | number | boolean>;
-
-export type Decorator = {
-  name: string;
-  depth: number
-  args?: DecoratorArgs;
-}
-
 export type Task = McqTask | GapTask | TextTask | MathTask | CodeTask;
 
-const taskTypes = ["text", "math", "code", "mcq", "gap"] as const;
-
-export const TaskTypeSchema = z.enum(taskTypes);
-export type TaskType = (typeof taskTypes)[number];
-
-type TaskHandler = (params: { contentNodes: RootContent[]; args?: DecoratorArgs }) => Task;
-
-const taskRegistry: Record<TaskType, TaskHandler> = {
+const taskRegistry = {
     text: textTaskHandler,
     math: mathTaskHandler,
     code: codeTaskHandler,
     mcq: mcqTaskHandler,
-    gap: gapTaskHandler
+    gap: gapTaskHandler,
+} satisfies Record<string, TaskHandler>;
+
+
+export type DecoratorArgs = Record<string, string | number | boolean>;
+
+export type Decorator = {
+    name: string;
+    depth: number;
+    args?: DecoratorArgs;
 };
+
+type TaskHandler = (params: {
+    contentNodes: RootContent[];
+    args: DecoratorArgs;
+}) => Task;
+
+
+export type TaskType = keyof typeof taskRegistry;
+
+const taskTypes = Object.keys(taskRegistry) as TaskType[];
+export const TaskTypeSchema = z.enum(taskTypes);
 
 export function callTaskHandler(taskDecorator: Decorator, contentNodes: RootContent[]): Task {
     const parsedName = TaskTypeSchema.safeParse(taskDecorator.name);
