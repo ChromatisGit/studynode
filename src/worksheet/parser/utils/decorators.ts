@@ -33,7 +33,7 @@ export function parseDecorator(heading: Heading): Decorator | undefined {
           break;
         default:
           if (!Number.isNaN(Number(value))) value = Number(value);
-          else value = false;
+          else value = rawValue as string;
       }
 
       args[rawKey] = value;

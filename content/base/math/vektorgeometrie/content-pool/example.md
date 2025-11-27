@@ -1,3 +1,13 @@
+# Der Titel des Worksheets
+
+# @info
+
+Ein Info chapter was sogar ein Codebeispiel enthält:
+
+```ts
+let a = 1
+```
+
 # @checkpoint
 
 ## @set
@@ -110,6 +120,10 @@ let counter: number = 2;
 ```ts
 counter === 2
 ```
+
+## @info
+
+Eine Info bölock in der Category, weil diese Erklärung für die nächste Aufgabe interessant sein könnte
 
 ## @text
 
