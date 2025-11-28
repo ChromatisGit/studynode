@@ -1,7 +1,11 @@
-import { RootContent } from "mdast";
+import { TaskHandlerArgs } from "../taskRegistry";
+import {
+  collapseNewlinePadding,
+  dedentFencedCodeBlocks,
+  stripSharedIndentation,
+} from "../utils/text";
 
-import { nodesToMarkdown } from "../utils/nodeTransformer";
-import { DecoratorArgs } from "../taskRegistry";
+const GAP_PLACEHOLDER_REGEX = /\{\{\s*([^}]+?)\s*\}\}/g;
 
 export type GapField = {
   mode: "text" | "mcq";
@@ -19,20 +23,18 @@ export type GapTask = {
 };
 
 export function gapTaskHandler({
-  contentNodes,
-  args,
-}: {
-  contentNodes: RootContent[];
-  args?: DecoratorArgs;
-}): GapTask {
-  const markdown = nodesToMarkdown(contentNodes);
+  body,
+  params,
+}: TaskHandlerArgs): GapTask {
+  const content = collapseNewlinePadding(
+    dedentFencedCodeBlocks(stripSharedIndentation(body))
+  );
 
-  const mcqMode = args?.mcq === true;
-  const gapRegex = /__ ?\{\{(.+?)\}\}/g;
+  const mcqMode = params?.mcq === true;
 
-  const matches = [...markdown.matchAll(gapRegex)];
+  const matches = [...content.matchAll(GAP_PLACEHOLDER_REGEX)];
   if (matches.length === 0) {
-    throw new Error("No gaps found in markdown.");
+    throw new Error("No gaps found in gap task.");
   }
 
   const parts: GapPart[] = [];
@@ -42,7 +44,10 @@ export function gapTaskHandler({
     const matchIndex = match.index ?? 0;
 
     if (matchIndex > lastIndex) {
-      parts.push({ type: "text", content: markdown.slice(lastIndex, matchIndex) });
+      const textPart = collapseNewlinePadding(
+        content.slice(lastIndex, matchIndex)
+      );
+      parts.push({ type: "text", content: textPart });
     }
 
     const rawEntries = match[1]
@@ -64,8 +69,9 @@ export function gapTaskHandler({
     lastIndex = matchIndex + match[0].length;
   }
 
-  if (lastIndex < markdown.length) {
-    parts.push({ type: "text", content: markdown.slice(lastIndex) });
+  if (lastIndex < content.length) {
+    const trailing = collapseNewlinePadding(content.slice(lastIndex));
+    parts.push({ type: "text", content: trailing });
   }
 
   return {

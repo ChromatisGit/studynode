@@ -3,8 +3,8 @@ import { buildWorksheetData } from "./buildWorksheet";
 
 async function main() {
   const worksheet = await buildWorksheetData(
-    "content/base/math/vektorgeometrie/content-pool/example.md",
-    { title: "Worksheet Demo", format: "web" }
+    "content/base/math/vektorgeometrie/content-pool/worksheet.typ",
+    "web"
   );
 
   await writeFile({

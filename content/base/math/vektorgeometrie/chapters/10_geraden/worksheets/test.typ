@@ -1,5 +1,5 @@
-#import "worksheet-2.typ": *
-#show: worksheet-style
+#import "worksheet-style.typ": *
+#show: worksheetStyle
 
 #title[Arbeitsblatt 1]
 
@@ -59,7 +59,6 @@ let a = 1
     Ich kann eine {{Lücke}} platzieren. Hier ist eine Lücke mit mehreren richtigen {{Lösungen|Antworten}}!
 
     Funktioniert auch in Code:
-
     ```ts
     let counter: {{number}};
 
@@ -123,4 +122,11 @@ let a = 1
     counter === 2
     ```
   ]
+]
+
+#mcq(single: true)[
+  Eine Frage kann auch eine eigene Aufgabe sein und nicht nur ein Subtask
+  - [x] richtig
+  - [ ] falsch
+  - [ ] auch falsch
 ]

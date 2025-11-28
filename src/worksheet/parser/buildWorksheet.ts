@@ -1,39 +1,13 @@
 import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import type { Root, RootContent } from "mdast";
-import { Parser } from "./parserClass";
-import type { RenderMode, Worksheet } from "../types";
 
-type BuildOptions = {
-  title?: string;
-  format?: RenderMode;
-};
+import type { RenderMode, Worksheet } from "../types";
+import { WorksheetParser } from "./parserClass";
 
 export async function buildWorksheetData(
-  markdownPath: string,
-  options: BuildOptions = {}
+  typstPath: string,
+  format: RenderMode
 ): Promise<Worksheet> {
-  const markdown = await readFile(markdownPath, "utf8");
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
-  const nodes = tree.children as RootContent[];
-
-  const parser = new Parser(markdownPath);
-
-  nodes.forEach((node) => {
-    parser.processNode(node);
-  });
-
-  const categories = parser.finalize();
-
-  const resolvedTitle =
-    options.title ?? path.basename(markdownPath, path.extname(markdownPath));
-
-  return {
-    title: resolvedTitle,
-    format: options.format ?? "web",
-    content: categories,
-  };
+  const rawContent = await readFile(typstPath, "utf8");
+  const parser = new WorksheetParser(typstPath, rawContent);
+  return parser.parse(format);
 }

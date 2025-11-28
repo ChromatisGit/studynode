@@ -1,51 +1,49 @@
-import { TextTask, textTaskHandler } from "./decorators/textTask";
-import { McqTask, mcqTaskHandler } from "./decorators/mcqTask";
-import { MathTask, mathTaskHandler } from "./decorators/mathTask";
-import { CodeTask, codeTaskHandler } from "./decorators/codeTask";
-import { GapTask, gapTaskHandler } from "./decorators/gapTask";
 import { z } from "zod";
-import { RootContent } from "mdast";
+
+import { CodeTask, codeTaskHandler } from "./tasks/codeTask";
+import { GapTask, gapTaskHandler } from "./tasks/gapTask";
+import { MathTask, mathTaskHandler } from "./tasks/mathTask";
+import { McqTask, mcqTaskHandler } from "./tasks/mcqTask";
+import { TextTask, textTaskHandler } from "./tasks/textTask";
 
 export type Task = McqTask | GapTask | TextTask | MathTask | CodeTask;
 
-const taskRegistry = {
-    text: textTaskHandler,
-    math: mathTaskHandler,
-    code: codeTaskHandler,
-    mcq: mcqTaskHandler,
-    gap: gapTaskHandler,
-} satisfies Record<string, TaskHandler>;
-
-
 export type DecoratorArgs = Record<string, string | number | boolean>;
 
-export type Decorator = {
-    name: string;
-    depth: number;
-    args?: DecoratorArgs;
+export type TaskHandlerArgs = {
+  body: string;
+  inlineMacros: Record<string, string>;
+  params: DecoratorArgs;
 };
 
-type TaskHandler = (params: {
-    contentNodes: RootContent[];
-    args: DecoratorArgs;
-}) => Task;
+type TaskHandler = (params: TaskHandlerArgs) => Task;
 
+const taskRegistry = {
+  text: textTaskHandler,
+  math: mathTaskHandler,
+  code: codeTaskHandler,
+  mcq: mcqTaskHandler,
+  gap: gapTaskHandler,
+} satisfies Record<string, TaskHandler>;
 
 export type TaskType = keyof typeof taskRegistry;
 
 const taskTypes = Object.keys(taskRegistry) as TaskType[];
 export const TaskTypeSchema = z.enum(taskTypes);
 
-export function callTaskHandler(taskDecorator: Decorator, contentNodes: RootContent[]): Task {
-    const parsedName = TaskTypeSchema.safeParse(taskDecorator.name);
+export function callTaskHandler(
+  taskType: string,
+  handlerArgs: TaskHandlerArgs
+): Task {
+  const parsedName = TaskTypeSchema.safeParse(taskType);
 
-    if (!parsedName.success) {
-        throw new Error(
-            `Task decorator "${taskDecorator.name}" is not registered. ` +
-            `Registered types: ${taskTypes.join(", ")}`
-        );
-    }
+  if (!parsedName.success) {
+    throw new Error(
+      `Task macro "${taskType}" is not registered. ` +
+        `Registered types: ${taskTypes.join(", ")}`
+    );
+  }
 
-    const handler = taskRegistry[parsedName.data];
-    return handler({ contentNodes, args: taskDecorator.args ?? {} });
+  const handler = taskRegistry[parsedName.data];
+  return handler(handlerArgs);
 }

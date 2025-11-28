@@ -1,8 +1,8 @@
-import type { CodeTask } from "./parser/decorators/codeTask";
-import type { GapTask } from "./parser/decorators/gapTask";
-import type { MathTask } from "./parser/decorators/mathTask";
-import type { McqTask } from "./parser/decorators/mcqTask";
-import type { TextTask } from "./parser/decorators/textTask";
+import type { CodeTask } from "./parser/tasks/codeTask";
+import type { GapTask } from "./parser/tasks/gapTask";
+import type { MathTask } from "./parser/tasks/mathTask";
+import type { McqTask } from "./parser/tasks/mcqTask";
+import type { TextTask } from "./parser/tasks/textTask";
 
 export type RenderMode = "web" | "pdf" | "pdfSolutions";
 
