@@ -1,0 +1,30 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 80%, var(--ifm-background-surface-color));
+  border: 1px solid color-mix(in srgb, var(--ifm-color-primary) 26%, var(--ifm-color-emphasis-200));
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.card:hover {
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 88%, var(--ifm-background-surface-color));
+  border-color: color-mix(in srgb, var(--ifm-color-primary) 26%, var(--ifm-color-emphasis-200));
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.title {
+  font-size: 1.1rem;
+  margin: 0.35rem 0 0;
+}
+
+.text {
+  color: color-mix(in srgb, var(--ifm-font-color-base) 88%, var(--ifm-color-emphasis-800));
+  margin: 0.4rem 0 0;
+}

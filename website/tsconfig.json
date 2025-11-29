@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@schema/*": ["../src/schema/*"]
+      "@schema/*": ["../src/schema/*"],
+      "@site/*": ["./*"]
     }
   },
   "exclude": [".docusaurus", "build"]

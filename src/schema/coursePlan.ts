@@ -12,6 +12,7 @@ export const YamlCoursePlanSchema = z.object({
     subject: Subject,
     label: z.string(),
     variant: z.string().optional(),
+    icon: z.string().optional(),
   }).strict(),
   current_chapter: z.string().nullable(),
   current_worksheets: z.array(z.string()).nullable(),

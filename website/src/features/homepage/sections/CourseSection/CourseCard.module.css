@@ -1,0 +1,78 @@
+.courseCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 80%, var(--ifm-background-surface-color));
+  padding: 1rem 1rem 1.25rem;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  --accent-color: var(--ifm-color-primary);
+  --accent-strong: var(--ifm-color-primary);
+  --accent-surface: color-mix(in srgb, var(--ifm-color-primary) 14%, var(--ifm-background-surface-color));
+  --accent-border: color-mix(in srgb, var(--ifm-color-primary) 38%, var(--ifm-color-emphasis-200));
+  --accent-muted: color-mix(in srgb, var(--ifm-color-primary) 78%, var(--ifm-font-color-base));
+}
+
+.courseCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.accentBar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.iconRow {
+  display: inline-flex;
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.cardDescription {
+  margin: 0;
+  color: color-mix(in srgb, var(--ifm-font-color-base) 88%, var(--ifm-color-emphasis-800));
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  background: var(--accent-surface);
+  color: var(--accent-strong);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cardFooter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  color: var(--accent-strong);
+  font-weight: 700;
+}

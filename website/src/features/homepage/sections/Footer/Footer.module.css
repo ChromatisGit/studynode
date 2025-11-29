@@ -1,0 +1,54 @@
+.footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.5rem;
+  padding: 2rem var(--ifm-spacing-horizontal) 1.5rem;
+  background: var(--ifm-footer-background-color, var(--ifm-background-surface-color));
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.footerInner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.footerTitle {
+  margin-bottom: 0.5rem;
+}
+
+.footerText {
+  color: color-mix(in srgb, var(--ifm-font-color-base) 85%, var(--ifm-color-emphasis-800));
+}
+
+.footerLinks {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.footerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: color-mix(in srgb, var(--ifm-font-color-base) 85%, var(--ifm-color-emphasis-800));
+}
+
+.footerLink:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.footerBar {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  text-align: center;
+  color: color-mix(in srgb, var(--ifm-font-color-base) 83%, var(--ifm-color-emphasis-800));
+  display: grid;
+  gap: 0.35rem;
+}

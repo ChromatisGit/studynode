@@ -29,8 +29,8 @@ function frontMatter(title: string) {
 
 function imports() {
   return `
-    import DocCard from '@site/src/components/DocCard';
-    import Roadmap from '@site/src/components/Roadmap';
+    import DocCard from '@site/src/features/overview/DocCard';
+    import Roadmap from '@site/src/features/overview/Roadmap';
   `;
 }
 

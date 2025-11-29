@@ -2,6 +2,7 @@ course:
   label: "Mathe"
   group: tg1
   subject: math
+  icon: server
 
 current_chapter: 12_ebenen
 current_worksheets:

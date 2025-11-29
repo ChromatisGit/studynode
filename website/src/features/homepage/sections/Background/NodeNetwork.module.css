@@ -1,0 +1,29 @@
+.nodeNetwork {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: color-mix(in srgb, var(--ifm-color-primary) 68%, #9b7fff);
+  opacity: 0.45;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.08));
+}
+
+:global([data-theme='dark']) .nodeNetwork {
+  color: color-mix(in srgb, var(--ifm-color-primary) 82%, #dfe7ff);
+  opacity: 0.55;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.55));
+}
+
+.nodeNetwork svg {
+  width: 100%;
+  height: 100%;
+}
+
+.connection {
+  stroke: currentColor;
+  stroke-width: 0.2;
+  transition: opacity 240ms ease;
+}
+
+.node {
+  fill: currentColor;
+}

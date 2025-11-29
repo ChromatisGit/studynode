@@ -1,0 +1,17 @@
+.infoNote {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: 12px;
+  border: 1px dashed var(--ifm-color-emphasis-300);
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 80%, var(--ifm-background-surface-color));
+  color: color-mix(in srgb, var(--ifm-font-color-base) 86%, var(--ifm-color-emphasis-700));
+  text-align: left;
+}
+
+.infoNote p {
+  margin: 0;
+}
+
+.infoNote p + p {
+  margin-top: 0.75rem;
+}

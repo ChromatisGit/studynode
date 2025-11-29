@@ -1,7 +1,7 @@
 import React from 'react';
 import NavbarItem, { type Props as NavbarItemProps } from '@theme/NavbarItem';
 import {useLocation} from '@docusaurus/router';
-import NAVBAR_JSON from '../../.generated/navbar.config.json';
+import NAVBAR_JSON from '../../../.generated/navbar.config.json';
 
 const NAVBAR = NAVBAR_JSON as Record<string, NavbarItemProps[]>;
 
