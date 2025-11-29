@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import styles from './Hero.module.css';
+import styles from '@features/homepage/sections/Hero/Hero.module.css';
 
 export function Hero() {
   return (

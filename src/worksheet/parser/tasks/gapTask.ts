@@ -1,9 +1,9 @@
-import { TaskHandlerArgs } from "../taskRegistry";
+import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
 import {
   collapseNewlinePadding,
   dedentFencedCodeBlocks,
   stripSharedIndentation,
-} from "../utils/text";
+} from "@worksheet/parser/utils/text";
 
 const GAP_PLACEHOLDER_REGEX = /\{\{\s*([^}]+?)\s*\}\}/g;
 

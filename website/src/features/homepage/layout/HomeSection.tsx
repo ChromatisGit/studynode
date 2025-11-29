@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import layout from './HomepageLayout.module.css';
+import layout from '@features/homepage/layout/HomepageLayout.module.css';
 
 interface HomeSectionProps {
   id?: string;

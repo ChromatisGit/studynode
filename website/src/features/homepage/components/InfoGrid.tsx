@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
-import { IconContainer } from './IconContainer';
-import styles from './InfoGrid.module.css';
+import { IconContainer } from '@features/homepage/components/IconContainer';
+import styles from '@features/homepage/components/InfoGrid.module.css';
 
 export interface InfoCardItem {
   id: string;

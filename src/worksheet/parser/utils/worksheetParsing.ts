@@ -1,4 +1,4 @@
-import type { TaskType } from "../taskRegistry";
+import type { TaskType } from "@worksheet/parser/taskRegistry";
 import type { RestoreCodeBlocks } from "./codeBlocks";
 import { CategoryBlock, collectCategoryBlocks, parseCategoryBlock } from "./categoryParsing";
 

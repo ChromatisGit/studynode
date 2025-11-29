@@ -1,6 +1,7 @@
 import { CoursePlanSchema } from "@schema/coursePlan";
 import type { CoursePlan } from "@schema/coursePlan";
-import { TopicPlan, TopicPlanSchema } from "@schema/topicPlan";
+import { GroupsAndSubjects, groupsAndSubjectsSchema } from "@schema/groupsAndSubjects";
+import { TopicPlan, topicPlanSchema } from "@schema/topicPlan";
 
 import fs from 'node:fs/promises';
 import path from "node:path";
@@ -33,7 +34,7 @@ export async function readAllTopics(): Promise<Record<string, TopicPlan>> {
     const raw = yaml.parse(rawText);
 
     try {
-      const parsed = TopicPlanSchema.parse(raw);
+      const parsed = topicPlanSchema.parse(raw);
 
       const folderPath = path.dirname(relPath);
       const id = path.basename(folderPath);
@@ -69,6 +70,21 @@ export async function readAllCourses(): Promise<CoursePlan[]> {
   }
 
   return res;
+}
+
+export async function readGroupsAndSubjects(): Promise<GroupsAndSubjects> {
+  const root = path.resolve(CONTENT_DIR);
+  const abs = path.join(root, "groupsAndSubjects.yml");
+  const raw = yaml.parse(await fs.readFile(abs, "utf8"));
+
+  try {
+    return groupsAndSubjectsSchema.parse(raw)
+  } catch (err) {
+    if (err instanceof ZodError) {
+      err.message = `Error in file: groupsAndSubjects.yml\n${err.message}`;
+    }
+    throw err;
+  }
 }
 
 export async function readFile(relativePath: string): Promise<string> {

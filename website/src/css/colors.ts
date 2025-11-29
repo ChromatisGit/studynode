@@ -1,5 +1,10 @@
 export type ColorMode = 'light' | 'dark';
-export type AccentColor = 'purple' | 'blue' | 'green' | 'orange' | 'teal' | 'indigo';
+import { z } from 'zod';
+
+export const accentColorSchema = z.enum(['purple', 'blue', 'green', 'orange', 'teal', 'red']);
+export type AccentColor = z.infer<typeof accentColorSchema>;
+//https://coolors.co/eb8023-af1b3f-2e8555-32989a-5784ec
+
 
 export interface AccentTokens {
   accent: string;
@@ -44,22 +49,6 @@ const palette: Palette = {
       mutedText: '#d7e6ff',
     },
   },
-  green: {
-    light: {
-      accent: '#2e8555',
-      accentStrong: '#276c46',
-      surface: '#e7f4ec',
-      border: '#cce7d8',
-      mutedText: '#1f5133',
-    },
-    dark: {
-      accent: '#63c58a',
-      accentStrong: '#88d7a5',
-      surface: '#0f1a14',
-      border: '#234233',
-      mutedText: '#d3f1de',
-    },
-  },
   orange: {
     light: {
       accent: '#e36209',
@@ -92,20 +81,36 @@ const palette: Palette = {
       mutedText: '#d4f4f5',
     },
   },
-  indigo: {
+  green: {
     light: {
-      accent: '#5b6ee1',
-      accentStrong: '#3f51c6',
-      surface: '#eceffe',
-      border: '#ccd3fa',
-      mutedText: '#343f9d',
+      accent: '#2e8555',
+      accentStrong: '#276c46',
+      surface: '#e7f4ec',
+      border: '#cce7d8',
+      mutedText: '#1f5133',
     },
     dark: {
-      accent: '#9fb2ff',
-      accentStrong: '#c1ccff',
-      surface: '#151933',
-      border: '#343f76',
-      mutedText: '#e7ebff',
+      accent: '#63c58a',
+      accentStrong: '#88d7a5',
+      surface: '#0f1a14',
+      border: '#234233',
+      mutedText: '#d3f1de',
+    },
+  },
+  red: {
+    light: {
+      accent: '#AF1B3F',
+      accentStrong: '#8c1533',
+      surface: '#f9e8ed',
+      border: '#e9c7d1',
+      mutedText: '#5a0f24',
+    },
+    dark: {
+      accent: '#e06583',
+      accentStrong: '#ff8fa8',
+      surface: '#2c101a',
+      border: '#552534',
+      mutedText: '#f6d6de',
     },
   },
 };

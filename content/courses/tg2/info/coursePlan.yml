@@ -1,6 +1,6 @@
 course:
-  label: "Informatik"
   group: tg2
+  variant: tgtm
   subject: info
 
 current_chapter: 00_variablen_und_datentypen

@@ -1,7 +1,7 @@
-import { InfoGrid } from '../../components/InfoGrid';
-import { HomeSection } from '../../layout/HomeSection';
-import { aboutGoals } from './aboutData';
-import styles from './About.module.css';
+import { InfoGrid } from '@features/homepage/components/InfoGrid';
+import { HomeSection } from '@features/homepage/layout/HomeSection';
+import { aboutGoals } from '@features/homepage/sections/About/aboutData';
+import styles from '@features/homepage/sections/About/About.module.css';
 
 export function About() {
   return (

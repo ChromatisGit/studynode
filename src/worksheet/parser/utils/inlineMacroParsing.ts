@@ -1,4 +1,4 @@
-import { DecoratorArgs } from "../taskRegistry";
+import { DecoratorArgs } from "@worksheet/parser/taskRegistry";
 
 export type ParsedMacro = {
   name: string;

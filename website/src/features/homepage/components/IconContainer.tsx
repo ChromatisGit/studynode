@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { LucideIcon } from 'lucide-react';
-import styles from './IconContainer.module.css';
+import styles from '@features/homepage/components/IconContainer.module.css';
 
 interface IconContainerProps {
   Icon: LucideIcon;

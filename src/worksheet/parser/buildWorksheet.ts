@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import type { RenderMode, Worksheet } from "../types";
-import { WorksheetParser } from "./parserClass";
+import type { RenderMode, Worksheet } from "@worksheet/types";
+import { WorksheetParser } from "@worksheet/parser/parserClass";
 
 export async function buildWorksheetData(
   typstPath: string,

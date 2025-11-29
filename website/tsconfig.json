@@ -1,11 +1,9 @@
 {
-  "extends": "@docusaurus/tsconfig",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@schema/*": ["../src/schema/*"],
-      "@site/*": ["./*"]
-    }
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "types": ["@docusaurus/module-type-aliases"]
   },
   "exclude": [".docusaurus", "build"]
 }

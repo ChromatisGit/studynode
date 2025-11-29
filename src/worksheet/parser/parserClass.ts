@@ -1,11 +1,11 @@
-import { RenderMode, Worksheet } from "../types";
-import { protectCodeBlocks } from "./utils/codeBlocks";
+import { RenderMode, Worksheet } from "@worksheet/types";
+import { protectCodeBlocks } from "@worksheet/parser/utils/codeBlocks";
 import {
   collectCategoryBlocks,
   extractTitle,
   parseCategoryBlock,
   TaskMacroMap,
-} from "./utils/worksheetParsing";
+} from "@worksheet/parser/utils/worksheetParsing";
 
 const TASK_MACRO_TO_KIND: TaskMacroMap = {
   textTask: "text",

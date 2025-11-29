@@ -1,6 +1,7 @@
 import type { CoursePlan } from "@schema/coursePlan";
+import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
 import path from "node:path";
-import { renderOverview } from "../template/overview.mdx";
+import { renderOverview } from "@builder/template/overview.mdx";
 import type {
   OverviewModel,
   RoadmapChapter,
@@ -8,34 +9,29 @@ import type {
   Status,
 } from "@schema/overview";
 
-export function buildOverview(course: CoursePlan) {
-  const model = toOverviewModel(course);
+export function buildOverview(course: CoursePlan, groupCourses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
+  const model = toOverviewModel(course, groupCourses, groupsAndSubjects);
 
   return {
     relativePath: path.join(
       "courses",
       course.group,
-      course.course_variant,
+      course.slug,
       "index.mdx",
     ),
     content: renderOverview(model),
   };
 }
 
-const subjects = {
-  math: "Mathe",
-  info: "Informatik",
-} as const;
-
 type Chapter = CoursePlan["chapters"][number];
 
 function makeChapterStatusFactory(
-  courseVariant: CoursePlan["course_variant"],
+  slug: CoursePlan["slug"],
   topic: string,
 ) {
   return (chapter: Chapter, status: Status): RoadmapChapter => ({
     label: chapter.label,
-    link: [courseVariant,
+    link: [slug,
       topic,
       chapter.chapter.slice(3) // Removes first two digits e.g '01_geraden' -> 'geraden'
     ].join("/"),
@@ -43,12 +39,15 @@ function makeChapterStatusFactory(
   });
 }
 
-function toOverviewModel(course: CoursePlan): OverviewModel {
+function toOverviewModel(
+  course: CoursePlan,
+  groupCourses: CoursePlan[],
+  groupsAndSubjects: GroupsAndSubjects,
+): OverviewModel {
   const {
     group,
     subject,
-    course_variant,
-    label,
+    slug,
     chapters,
     topics,
     current_worksheets,
@@ -56,8 +55,31 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
   } = course;
 
   let currentChapterLabel: string = '';
-  const subjectLabel = subjects[subject];
-  const title = `${subjectLabel} ${group.toUpperCase()}`;
+
+  const subjectEntry = groupsAndSubjects.subjects[subject];
+  if (!subjectEntry) {
+    throw new Error(
+      `Subject '${subject}' used in course '${group}/${slug}' is not defined in groupsAndSubjects.yml`,
+    );
+  }
+
+  const coursesWithSameSubject = (groupCourses.length ? groupCourses : [course]).filter(
+    (c) => c.subject === subject,
+  );
+  const variantEntry = course.course_variant ? groupsAndSubjects.variants[course.course_variant] : undefined;
+
+  if (coursesWithSameSubject.length > 1 && !variantEntry) {
+    throw new Error(
+      `Variant '${course.course_variant}' used in course '${group}/${slug}' is not defined in groupsAndSubjects.yml`,
+    );
+  }
+
+  const label =
+    coursesWithSameSubject.length === 1
+      ? subjectEntry.name
+      : `${subjectEntry.name} (${variantEntry!.short})`;
+
+  const title = `${subjectEntry.name} ${group.toUpperCase()}`;
 
   let currentTopicIndex = 0;
 
@@ -80,13 +102,13 @@ function toOverviewModel(course: CoursePlan): OverviewModel {
 
   const roadmap: RoadmapTopic[] = topics.map((topic, topicIndex) => {
     const setChapterStatus = makeChapterStatusFactory(
-      course_variant,
+      slug,
       topic.topic,
     );
 
     const topicBase = {
       label: topic.label,
-      link: [course_variant, topic.topic].join("/"),
+      link: [slug, topic.topic].join("/"),
     };
 
     const currentChapters = chapters.filter(

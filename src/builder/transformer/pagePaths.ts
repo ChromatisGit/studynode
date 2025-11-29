@@ -1,5 +1,5 @@
 import type { CoursePlan } from "@schema/coursePlan"
-import type { PageFile } from "../processPage";
+import type { PageFile } from "@builder/processPage";
 import path from "node:path";
 
 export function getAllPagePaths(courses: CoursePlan[]): PageFile[] {
@@ -10,10 +10,10 @@ export function getAllPagePaths(courses: CoursePlan[]): PageFile[] {
 }
 
 function baseWebsitePaths(courses: CoursePlan[]): PageFile[] {
-  return courses.flatMap(({ group, subject, chapters, course_variant }) =>
+  return courses.flatMap(({ group, subject, chapters, slug }) =>
     chapters.map(({ topic, chapter, label }) => {
       const baseDir = path.join("base", subject, topic, "chapters");
-      const targetDir = path.join("courses", group, course_variant, topic);
+      const targetDir = path.join("courses", group, slug, topic);
 
       if (topic === chapter) {
         return {

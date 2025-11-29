@@ -1,4 +1,4 @@
-import { Category, CategoryItem, CategoryType, TaskCategory } from "../../types";
+import { Category, CategoryItem, CategoryType, TaskCategory } from "@worksheet/types";
 import { RestoreCodeBlocks } from "./codeBlocks";
 import { findNextMacro } from "./inlineMacroParsing";
 import { parseGroupMacro, parseInfoMacro, parseTaskMacro } from "./macroParsing";

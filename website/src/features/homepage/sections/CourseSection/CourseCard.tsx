@@ -1,15 +1,10 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { IconContainer } from '../../components/IconContainer';
-import { Course, getCourseIcon, getCourseColor } from './courseData';
-import { getAccentTokens, type ColorMode } from '@site/src/css/colors';
-import styles from './CourseCard.module.css';
-
-interface CourseCardProps {
-  course: Course;
-  index: number;
-}
+import { IconContainer } from '@features/homepage/components/IconContainer';
+import { getAccentTokens, type ColorMode } from '@css/colors';
+import styles from '@features/homepage/sections/CourseSection/CourseCard.module.css';
+import { Course } from '@builder/transformer/courses';
 
 function getDocumentTheme(): ColorMode {
   if (typeof document === 'undefined') {
@@ -18,10 +13,8 @@ function getDocumentTheme(): ColorMode {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
-export function CourseCard({ course, index }: CourseCardProps) {
-  const { title, description, topics } = course;
-  const Icon = getCourseIcon(course, index);
-  const color = getCourseColor(index);
+export function CourseCard({course}: {course: Course}) {
+  const { title, description, tags, icon, color } = course;
 
   const [mode, setMode] = useState<ColorMode>(() => getDocumentTheme());
 
@@ -51,16 +44,16 @@ export function CourseCard({ course, index }: CourseCardProps) {
       <div className={styles.accentBar} />
       <div className={styles.cardBody}>
         <div className={styles.iconRow}>
-          <IconContainer Icon={Icon} size="md" bgColor={accent.surface} iconColor={accent.accentStrong} />
+          <IconContainer Icon={icon} size="md" bgColor={accent.surface} iconColor={accent.accentStrong} />
         </div>
 
         <h3 className={styles.cardTitle}>{title}</h3>
         <p className={styles.cardDescription}>{description}</p>
 
         <div className={styles.tagRow}>
-          {topics.map((topic) => (
-            <span key={topic} className={styles.tag}>
-              {topic}
+          {tags.map((tag) => (
+            <span key={tag} className={styles.tag}>
+              {tag}
             </span>
           ))}
         </div>

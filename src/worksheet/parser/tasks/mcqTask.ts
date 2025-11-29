@@ -1,8 +1,8 @@
-import { TaskHandlerArgs } from "../taskRegistry";
+import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
 import {
   dedentFencedCodeBlocks,
   stripSharedIndentation,
-} from "../utils/text";
+} from "@worksheet/parser/utils/text";
 
 const CHECKBOX_LINE_REGEX = /^-\s*\[[xX ]\]/;
 const CHECKBOX_OPTION_REGEX = /^-\s*\[([xX ])\]\s*(.+)$/;

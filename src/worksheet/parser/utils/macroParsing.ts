@@ -1,5 +1,5 @@
-import { CategoryItem, TaskSet } from "../../types";
-import { TaskType, callTaskHandler } from "../taskRegistry";
+import { CategoryItem, TaskSet } from "@worksheet/types";
+import { TaskType, callTaskHandler } from "@worksheet/parser/taskRegistry";
 import { RestoreCodeBlocks } from "./codeBlocks";
 import {
   ParsedMacro,

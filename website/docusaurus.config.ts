@@ -1,16 +1,19 @@
+import path from 'path';
 import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config, PluginConfig } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import COURSES from './.generated/courses.config.json';
+import COURSES_JSON from './.generated/configs/courses.config.json';
+import { Course } from '../src/builder/transformer/courses';
 
+const COURSES = COURSES_JSON as Course[];
 const docsPlugins: PluginConfig[] = COURSES.map(c => (
   [
     '@docusaurus/plugin-content-docs',
     {
-      id: `${c.group}-${c.course_variant}`,
-      path: `./.generated/courses/${c.group}/${c.course_variant}`,
-      routeBasePath: `${c.group}/${c.course_variant}`,
-      sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.course_variant}.ts`),
+      id: `${c.group}-${c.slug}`,
+      path: `./.generated/courses/${c.group}/${c.slug}`,
+      routeBasePath: `${c.group}/${c.slug}`,
+      sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.slug}.ts`),
       remarkPlugins: [require('remark-math')],
       rehypePlugins: [require('rehype-katex')],
     },
@@ -56,6 +59,27 @@ const config: Config = {
       },
     ],
     [require.resolve('@cmfcmf/docusaurus-search-local'), { language: ['de'] }],
+    function aliasPlugin() {
+      return {
+        name: 'studynode-aliases',
+        configureWebpack: () => ({
+          resolve: {
+            alias: {
+              '@builder': path.resolve(__dirname, '../src/builder'),
+              '@css': path.resolve(__dirname, 'src/css'),
+              '@dev': path.resolve(__dirname, '../src/dev'),
+              '@features': path.resolve(__dirname, 'src/features'),
+              '@generated-configs': path.resolve(__dirname, '.generated/configs'),
+              '@marp-styles': path.resolve(__dirname, '../src/marp-styles'),
+              '@pages': path.resolve(__dirname, 'src/pages'),
+              '@schema': path.resolve(__dirname, '../src/schema'),
+              '@theme': path.resolve(__dirname, 'src/theme'),
+              '@worksheet': path.resolve(__dirname, '../src/worksheet'),
+            },
+          },
+        }),
+      };
+    },
   ],
 
   themeConfig: {

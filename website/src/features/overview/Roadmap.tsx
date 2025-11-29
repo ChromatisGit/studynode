@@ -2,7 +2,7 @@ import Link from "@docusaurus/Link";
 import type { RoadmapTopic, Status } from "@schema/overview";
 import { Check, Circle, ChevronDown, ChevronRight, LockKeyholeIcon, LockKeyholeOpenIcon } from "lucide-react";
 import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import styles from "./Roadmap.module.css";
+import styles from "@features/overview/Roadmap.module.css";
 
 interface RoadmapTrackerProps {
   roadmap: RoadmapTopic[];

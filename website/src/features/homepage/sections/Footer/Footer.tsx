@@ -1,5 +1,5 @@
 import { Mail } from 'lucide-react';
-import styles from './Footer.module.css';
+import styles from '@features/homepage/sections/Footer/Footer.module.css';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

@@ -1,16 +1,14 @@
 import { z } from "zod";
 
-const Subject = z.enum(["math", "info"]);
 const Group = z.string().regex(/^[a-z0-9]+$/i, "use letters/numbers only");
 
 const TopicValue = z.array(z.string()).nullable();
 const TopicsSchema = z.record(z.string(), TopicValue);
 
-export const YamlCoursePlanSchema = z.object({
+export const yamlCoursePlanSchema = z.object({
   course: z.object({
     group: Group,
-    subject: Subject,
-    label: z.string(),
+    subject: z.string(),
     variant: z.string().optional(),
     icon: z.string().optional(),
   }).strict(),
@@ -19,7 +17,7 @@ export const YamlCoursePlanSchema = z.object({
   topics: TopicsSchema,
 }).strict();
 
-export type YamlCoursePlan = z.infer<typeof YamlCoursePlanSchema>;
+export type YamlCoursePlan = z.infer<typeof yamlCoursePlanSchema>;
 
 
 type Topics = z.infer<typeof TopicsSchema>
@@ -44,11 +42,11 @@ function addTitlesToTopics(topics: Topics) {
   })
 }
 
-export const CoursePlanSchema = YamlCoursePlanSchema.transform(v => ({
+export const CoursePlanSchema = yamlCoursePlanSchema.transform(v => ({
   group: v.course.group,
   subject: v.course.subject,
-  label: v.course.label,
-  course_variant: v.course.variant
+  course_variant: v.course.variant,
+  slug: v.course.variant
     ? `${v.course.subject}-${v.course.variant}`
     : v.course.subject,
   current_chapter: v.current_chapter,

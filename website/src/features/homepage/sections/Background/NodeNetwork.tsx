@@ -9,8 +9,8 @@ import {
   calculateNodePosition,
   updateConnectionRandomness,
   isConnectionActive,
-} from './nodeNetworkHelpers';
-import styles from './NodeNetwork.module.css';
+} from '@features/homepage/sections/Background/nodeNetworkHelpers';
+import styles from '@features/homepage/sections/Background/NodeNetwork.module.css';
 
 const INITIAL_DELAY_MAX = 600; // ms
 const OPACITY_TRANSITION_DURATION = 500; // ms

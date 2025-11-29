@@ -1,10 +1,10 @@
 import Layout from '@theme/Layout';
-import layout from '../features/homepage/layout/HomepageLayout.module.css';
-import { About } from '../features/homepage/sections/About/About';
-import { CourseSection } from '../features/homepage/sections/CourseSection/CourseSection';
-import { Footer } from '../features/homepage/sections/Footer/Footer';
-import { Hero } from '../features/homepage/sections/Hero/Hero';
-import { NodeNetwork } from '../features/homepage/sections/Background/NodeNetwork';
+import layout from '@features/homepage/layout/HomepageLayout.module.css';
+import { About } from '@features/homepage/sections/About/About';
+import { CourseSection } from '@features/homepage/sections/CourseSection/CourseSection';
+import { Footer } from '@features/homepage/sections/Footer/Footer';
+import { Hero } from '@features/homepage/sections/Hero/Hero';
+import { NodeNetwork } from '@features/homepage/sections/Background/NodeNetwork';
 
 
 export default function Home() {

@@ -1,8 +1,7 @@
 course:
-  label: "Mathe"
   group: tg1
   subject: math
-  icon: server
+  variant: gk
 
 current_chapter: 12_ebenen
 current_worksheets:

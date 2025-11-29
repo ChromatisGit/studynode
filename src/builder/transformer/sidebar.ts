@@ -3,7 +3,7 @@ import path from "node:path";
 
 export function buildSidebar(course: CoursePlan) {
     return {
-        relativePath: path.join("sidebars", course.group, `${course.course_variant}.ts`),
+        relativePath: path.join("sidebars", course.group, `${course.slug}.ts`),
         content: buildSidebarContent(course)
     };
 }
