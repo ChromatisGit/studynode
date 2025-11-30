@@ -16,15 +16,15 @@ const SIZE_CLASSES = {
   lg: { container: styles.iconLg, icon: 22 },
 } as const;
 
-const DEFAULT_BG = 'var(--accent-surface, color-mix(in srgb, var(--ifm-color-primary) 14%, var(--ifm-background-surface-color)))';
-const DEFAULT_ICON = 'var(--accent-strong, var(--ifm-color-primary))';
+const DEFAULT_BG = 'var(--accent-surface, var(--sn-purple-accent-soft-bg))';
+const DEFAULT_ICON = 'var(--accent-strong, var(--sn-purple-accent-strong))';
 
 /**
  * Reusable icon container with consistent styling
  */
 export function IconContainer({
   Icon,
-  size = 'md',
+  size = 'lg',
   variant = 'square',
   bgColor = DEFAULT_BG,
   iconColor = DEFAULT_ICON,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { accentColorSchema } from "@css/colors";
+import { accentColorSchema } from "@schema/colors";
 
 export const groupsAndSubjectsSchema = z.object({
     groups: z.record(

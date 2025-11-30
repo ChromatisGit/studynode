@@ -1,5 +1,4 @@
 import type { ComponentProps } from "react";
-import React from "react";
 import ThemeDocCard from "@theme/DocCard";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 

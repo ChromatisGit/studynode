@@ -2,38 +2,32 @@ import type { CoursePlan } from "@schema/coursePlan";
 import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
 import path from "node:path";
 import { renderOverview } from "@builder/template/overview.mdx";
-import type {
-  OverviewModel,
-  RoadmapChapter,
-  RoadmapTopic,
-  Status,
-} from "@schema/overview";
+import type { OverviewModel, RoadmapChapter, RoadmapTopic, Status } from "@schema/overview";
 
-export function buildOverview(course: CoursePlan, groupCourses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
+export function buildOverview(
+  course: CoursePlan,
+  groupCourses: CoursePlan[],
+  groupsAndSubjects: GroupsAndSubjects,
+) {
   const model = toOverviewModel(course, groupCourses, groupsAndSubjects);
 
   return {
-    relativePath: path.join(
-      "courses",
-      course.group,
-      course.slug,
-      "index.mdx",
-    ),
+    relativePath: path.join("courses", course.group, course.slug, "index.mdx"),
     content: renderOverview(model),
   };
 }
 
 type Chapter = CoursePlan["chapters"][number];
 
-function makeChapterStatusFactory(
-  slug: CoursePlan["slug"],
-  topic: string,
-) {
+function makeChapterStatusFactory(group: string, slug: string, topic: string) {
   return (chapter: Chapter, status: Status): RoadmapChapter => ({
     label: chapter.label,
-    link: [slug,
+    link: [
+      "",
+      group,
+      slug,
       topic,
-      chapter.chapter.slice(3) // Removes first two digits e.g '01_geraden' -> 'geraden'
+      chapter.chapter.slice(3), // Removes first two digits e.g '01_geraden' -> 'geraden'
     ].join("/"),
     status,
   });
@@ -54,7 +48,7 @@ function toOverviewModel(
     current_chapter,
   } = course;
 
-  let currentChapterLabel: string = '';
+  let currentChapterLabel = "";
 
   const subjectEntry = groupsAndSubjects.subjects[subject];
   if (!subjectEntry) {
@@ -63,10 +57,14 @@ function toOverviewModel(
     );
   }
 
-  const coursesWithSameSubject = (groupCourses.length ? groupCourses : [course]).filter(
+  const effectiveCourses = groupCourses.length ? groupCourses : [course];
+  const coursesWithSameSubject = effectiveCourses.filter(
     (c) => c.subject === subject,
   );
-  const variantEntry = course.course_variant ? groupsAndSubjects.variants[course.course_variant] : undefined;
+
+  const variantEntry = course.course_variant
+    ? groupsAndSubjects.variants[course.course_variant]
+    : undefined;
 
   if (coursesWithSameSubject.length > 1 && !variantEntry) {
     throw new Error(
@@ -101,14 +99,11 @@ function toOverviewModel(
   }
 
   const roadmap: RoadmapTopic[] = topics.map((topic, topicIndex) => {
-    const setChapterStatus = makeChapterStatusFactory(
-      slug,
-      topic.topic,
-    );
+    const setChapterStatus = makeChapterStatusFactory(group, slug, topic.topic);
 
     const topicBase = {
       label: topic.label,
-      link: [slug, topic.topic].join("/"),
+      link: ["", group, slug, topic.topic].join("/"),
     };
 
     const currentChapters = chapters.filter(
@@ -136,7 +131,6 @@ function toOverviewModel(
 
       const chaptersForRoadmap: RoadmapChapter[] = currentChapters.map(
         (chapter, chapterIndex): RoadmapChapter => {
-
           if (currentChapterIndex >= 0) {
             if (chapterIndex < currentChapterIndex) {
               return setChapterStatus(chapter, "finished");

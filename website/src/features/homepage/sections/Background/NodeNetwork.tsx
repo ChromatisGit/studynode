@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Node,
   Connection,
@@ -17,9 +17,9 @@ const OPACITY_TRANSITION_DURATION = 500; // ms
 const INITIALIZATION_DELAY = 50; // ms
 
 export function NodeNetwork() {
-  const [nodes] = useState<Node[]>(() => generateNodes(getNodeCount()));
+  const nodes = useMemo(() => generateNodes(getNodeCount()), []);
   const [nodePositions, setNodePositions] = useState<Vec2[]>(() =>
-    nodes.map(n => ({ x: n.baseX, y: n.baseY }))
+    nodes.map((node) => ({ x: node.baseX, y: node.baseY }))
   );
   const [activeConnections, setActiveConnections] = useState<Set<string>>(new Set());
   const [hasInitialized, setHasInitialized] = useState(false);
@@ -28,8 +28,11 @@ export function NodeNetwork() {
   const startTimeRef = useRef<number>(Date.now());
   const connectionsRef = useRef<Connection[]>(generateConnections(nodes));
   const initialDelaysRef = useRef<Map<number, number>>(new Map());
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
+    startTimeRef.current = Date.now();
+
     connectionsRef.current.forEach((_, idx) => {
       initialDelaysRef.current.set(idx, Math.random() * (INITIAL_DELAY_MAX / 1000));
     });
@@ -67,7 +70,8 @@ export function NodeNetwork() {
       });
       setActiveConnections(active);
 
-      if (!hasInitialized && elapsed > INITIALIZATION_DELAY / 1000) {
+      if (!hasInitializedRef.current && elapsed > INITIALIZATION_DELAY / 1000) {
+        hasInitializedRef.current = true;
         setHasInitialized(true);
       }
 
@@ -83,7 +87,7 @@ export function NodeNetwork() {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [nodes, hasInitialized]);
+  }, [nodes]);
 
   return (
     <div className={styles.nodeNetwork}>

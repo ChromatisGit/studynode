@@ -5,7 +5,7 @@
     {
       "kind": "info",
       "title": "Info",
-      "text": "Ein Info-Chapter, das sogar ein Codebeispiel enthält:\n\n```ts\nlet a = 1\n```"
+      "text": "Ein Info-Chapter, das sogar ein Codebeispiel enthält:\n```ts\nlet a = 1\n```"
     },
     {
       "kind": "checkpoint",
@@ -16,7 +16,7 @@
           "tasks": [
             {
               "type": "mcq",
-              "question": "Macht dieser Code etwas?\n    ```ts\n    console.log(\"test\")\n    ```",
+              "question": "Macht dieser Code etwas?\n```ts\nconsole.log(\"test\")\n```",
               "options": [
                 "Ja",
                 "Definitiv",
@@ -88,7 +88,7 @@
               "parts": [
                 {
                   "type": "text",
-                  "content": "Der `#gap`-Command erzeugt *Lückentexte*, bei denen Schüler Wörter einsetzen.\n\nIch kann eine "
+                  "content": "Der `#gap`-Command erzeugt *Lückentexte*, bei denen Schüler Wörter einsetzen.\nIch kann eine "
                 },
                 {
                   "type": "gap",
@@ -115,7 +115,7 @@
                 },
                 {
                   "type": "text",
-                  "content": "!\n\nFunktioniert auch in Code:\n```ts\nlet counter: "
+                  "content": "!\nFunktioniert auch in Code:\n```ts\nlet counter: "
                 },
                 {
                   "type": "gap",
@@ -128,7 +128,7 @@
                 },
                 {
                   "type": "text",
-                  "content": ";\n\ncounter "
+                  "content": ";\ncounter "
                 },
                 {
                   "type": "gap",
@@ -155,11 +155,14 @@
                 {
                   "type": "gap",
                   "gap": {
-                    "mode": "text",
-                    "correct": [
+                    "mode": "mcq",
+                    "options": [
                       "Antwort",
                       "Frage",
                       "Bild"
+                    ],
+                    "correct": [
+                      "Antwort"
                     ]
                   }
                 },
@@ -193,7 +196,7 @@
             {
               "type": "math",
               "instruction": "Eine Matheaufgabe.",
-              "hint": "Rechne!",
+              "hint": "Rechne!\naus\ndiesmal",
               "solution": "Ergebnis"
             }
           ]
@@ -209,9 +212,9 @@
             {
               "type": "code",
               "language": "ts",
-              "instruction": "Eine Codingaufgabe:\n\n  Setze `counter` auf 2.",
+              "instruction": "Eine Codingaufgabe:\nSetze `counter` auf 2.",
               "hint": "Welches Symbol setzt einen Wert?",
-              "solution": "```ts\n    let counter: number = 2;\n    ```",
+              "solution": "```ts\nlet counter: number = 2;\n```",
               "starter": "let counter: number",
               "validation": "counter === 2"
             }

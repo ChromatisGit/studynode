@@ -1,7 +1,6 @@
 course:
-  group: tg1
+  group: ts
   subject: math
-  variant: gk
 
 current_chapter: 12_ebenen
 current_worksheets:

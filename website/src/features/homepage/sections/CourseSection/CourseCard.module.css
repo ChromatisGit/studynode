@@ -4,22 +4,21 @@
   flex-direction: column;
   gap: 0.5rem;
   height: 100%;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--sn-border);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 80%, var(--ifm-background-surface-color));
+  background: var(--sn-surface-raised);
   padding: 1rem 1rem 1.25rem;
   transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
-  --accent-color: var(--ifm-color-primary);
-  --accent-strong: var(--ifm-color-primary);
-  --accent-surface: color-mix(in srgb, var(--ifm-color-primary) 14%, var(--ifm-background-surface-color));
-  --accent-border: color-mix(in srgb, var(--ifm-color-primary) 38%, var(--ifm-color-emphasis-200));
-  --accent-muted: color-mix(in srgb, var(--ifm-color-primary) 78%, var(--ifm-font-color-base));
+  --accent-strong: var(--sn-purple-accent-strong);
+  --accent-surface: var(--sn-purple-accent-soft-bg);
+  --accent-border: var(--sn-purple-accent-soft-border);
+  text-decoration: none;
 }
 
 .courseCard:hover {
   transform: translateY(-2px);
   border-color: var(--accent-border);
-  box-shadow: var(--ifm-global-shadow-md);
+  box-shadow: var(--sn-shadow-md);
 }
 
 .accentBar {
@@ -42,11 +41,12 @@
 .cardTitle {
   font-size: 1.1rem;
   margin: 0;
+  color: var(--sn-text);
 }
 
 .cardDescription {
   margin: 0;
-  color: color-mix(in srgb, var(--ifm-font-color-base) 88%, var(--ifm-color-emphasis-800));
+  color: var(--sn-text-muted);
 }
 
 .tagRow {
@@ -75,4 +75,40 @@
   margin-top: auto;
   color: var(--accent-strong);
   font-weight: 700;
+}
+
+.colorPurple {
+  --accent-strong: var(--sn-purple-accent-strong);
+  --accent-surface: var(--sn-purple-accent-soft-bg);
+  --accent-border: var(--sn-purple-accent-soft-border);
+}
+
+.colorBlue {
+  --accent-strong: var(--sn-blue-accent-strong);
+  --accent-surface: var(--sn-blue-accent-soft-bg);
+  --accent-border: var(--sn-blue-accent-soft-border);
+}
+
+.colorGreen {
+  --accent-strong: var(--sn-green-accent-strong);
+  --accent-surface: var(--sn-green-accent-soft-bg);
+  --accent-border: var(--sn-green-accent-soft-border);
+}
+
+.colorOrange {
+  --accent-strong: var(--sn-orange-accent-strong);
+  --accent-surface: var(--sn-orange-accent-soft-bg);
+  --accent-border: var(--sn-orange-accent-soft-border);
+}
+
+.colorTeal {
+  --accent-strong: var(--sn-teal-accent-strong);
+  --accent-surface: var(--sn-surface-raised);
+  --accent-border: var(--sn-teal-accent-strong);
+}
+
+.colorRed {
+  --accent-strong: var(--sn-red-accent-strong);
+  --accent-surface: var(--sn-red-accent-soft-bg);
+  --accent-border: var(--sn-red-accent-soft-border);
 }

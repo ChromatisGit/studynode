@@ -1,7 +1,6 @@
 import type { CoursePlan } from "@schema/coursePlan";
 import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
-import { AccentColor } from "@css/colors";
-import type { LucideIcon } from "lucide-react";
+import { AccentColor } from "@schema/colors";
 
 export type Course = {
   group: string;
@@ -10,7 +9,7 @@ export type Course = {
   description: string;
   tags: string[];
   color: AccentColor;
-  icon: LucideIcon;
+  icon: string;
 };
 
 
@@ -45,7 +44,7 @@ export function buildCoursesConfig(courses: CoursePlan[], groupsAndSubjects: Gro
         return {
             group,
             slug,
-            title: `${group.toUpperCase()} ${subjectEntry.name}`,
+            title: `${subjectEntry.name} ${group.toUpperCase()}`,
             description,
             tags,
             color: groupEntry.color,

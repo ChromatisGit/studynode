@@ -13,44 +13,42 @@ Digitale Unterrichtsplattform für Mathematik und Informatik auf Basis von **Doc
 ```
 
 content/
+├─ groupsAndSubjects.yml             # Definiert die Fächer und Kursarten
 │
 ├─ base/                             # Allgemeine Unterrichtsinhalte (kursunabhängig)
-│  ├─ math/                          # Mathematik
+│  ├─ <subject>/                     # math, info ...
 │  │  └─ <topic>/                    # z. B. vektorgeometrie, trigonometrie
 │  │     ├─ chapters/
 │  │     │  └─ <chapter>/            # z. B. 00_geraden, 01_geraden_lagebeziehung
-│  │     │     ├─ slides/            # Foliensätze-Vorlagen
-│  │     │     ├─ worksheets/        # Arbeitsbögen-Vorlagen
-│  │     │     ├─ preview.md         # (optional) Website vor/während Bearbeitung
-│  │     │     └─ website.md         # Website
+│  │     │     ├─ slides/            # Foliensätze
+│  │     │     ├─ worksheets/        # Arbeitsbögen
+│  │     │     ├─ preview.md         # Website vor/während Bearbeitung
+│  │     │     └─ overview.md        # Website nach Abschluss des Kapitels
 │  │     │
-│  │     ├─ resources/               # Wiederverwendbare Aufgaben, Texte, Checkpoints
 │  │     ├─ images/                  # Abbildungen für Webseite und Arbeitsbögen
 │  │     ├─ notes.md                 # Interne Notizen
-│  │     └─ plan.yml                 # Stoffverteilungsplan eines Themenblocks (Lernziele + Kapitel)
-│  │
-│  ├─ info/                          # Informatik (gleicher Aufbau wie Mathematik)
+│  │     ├─ preview.md               # Website vor/während Bearbeitung
+│  │     ├─ overview.md              # Website nach Vollendung des Themenblocks
+│  │     └─ topicPlan.yml            # Stoffverteilungsplan eines Themenblocks (Lernziele + Kapitel)
 │  │
 │  └─ slides/                        # Überfachliche Foliensätze
 │
 ├─ courses/                          # Konkrete Kurse (sichtbar für Schüler)
 │  └─ <group>/                       # z. B. tg2, bk1
-│     ├─ group-info.md               # Leitsätze & Informationen für gesamte Gruppe
+│     ├─ principles.md               # Leitsätze & Informationen für gesamte Gruppe
 │     │
 │     └─ <subject_variant>/          # z. B. math-lk, info-tm
-│        ├─ course-plan.yml          # Themenliste + aktueller Fortschritt
+│        ├─ coursePlan.yml          # Themenliste + aktueller Fortschritt
 │        │
-│        └─ <topic>/                 # Kurs-spezifische Themen
+│        └─ <topic>/                 # Kurs-spezifische Themen (Alles optional)
 │           └─ chapters/
 │              └─ <chapter>/         # z.B. 10_geraden, 11_geraden_lagebeziehung
-│                 ├─ slides/         # Generierte Kursfolien
-│                 ├─ worksheets/     # Generierte Arbeitsbögen + Lösungen
-│                 ├─ current.md      # (optional) überschreibt base/current.md
-│                 └─ summary.md      # (optional) überschreibt base/summary.md
+│                 ├─ preview.md      # (optional) überschreibt base/preview.md
+│                 └─ overview.md     # (optional) überschreibt base/summary.md
 │
 └─ templates/                        # Vorlagen zum Kopieren
-   ├─ base_topic/                    # Topic + Chapter Skelett
-   └─ course-plans/                  # course-plan.yml Vorlagen für Kursvarianten
+   ├─ baseTopic/                    # Topic + Chapter Skelett
+   └─ coursePlans/                  # coursePlan.yml Vorlagen für Kursvarianten
 
 ```
 
@@ -77,8 +75,7 @@ website/                             # Docusaurus-Website
 ├─ src/                              # Darstellung & Interaktion mit der Webseite
 ├─ static/                           # Vom Builder abgelegte PDFs/Bilder
 └─ .generated/                       # Vom Builder generiertes Layout
-   ├─ navbar.config.json
-   └─ courses.config.json
+
 ```
 
 .vscode/
@@ -109,7 +106,7 @@ website/                             # Docusaurus-Website
 
 1. Vorbereitung
 2. Einstiegsphase (Marp-Folien)
-3. Erarbeitungsphase (`/aktuell/`)
+3. Erarbeitungsphase
 4. Ergebnissicherung
 5. Nachbereitung
 

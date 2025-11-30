@@ -4,8 +4,13 @@
   justify-content: center;
   background: var(--accent-surface);
   color: var(--accent-strong);
-  border-radius: 12px;
-  box-shadow: var(--ifm-global-shadow-lw);
+  border-radius: 14px;
+  border: 1px solid var(--accent);
+}
+
+.icon svg {
+  width: 55%;
+  height: 55%;
 }
 
 .iconSm {

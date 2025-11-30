@@ -1,4 +1,5 @@
-import { LayoutGrid, GraduationCap, Network, LucideIcon } from 'lucide-react';
+import { LayoutGrid, GraduationCap, Network, LucideIcon } from "lucide-react";
+import HOMEPAGE_COPY from "@features/homepage/homepage.de.json";
 
 export interface AboutGoal {
   id: string;
@@ -7,23 +8,25 @@ export interface AboutGoal {
   description: string;
 }
 
+const goalsCopy = HOMEPAGE_COPY.about.goals;
+
 export const aboutGoals: AboutGoal[] = [
   {
     id: 'clear-structure',
     icon: LayoutGrid,
-    title: 'Klare Strukturen',
-    description: 'Alle Materialien und Aufgaben sind übersichtlich organisiert.',
+    title: goalsCopy.clearStructure.title,
+    description: goalsCopy.clearStructure.description,
   },
   {
     id: 'for-students',
     icon: GraduationCap,
-    title: 'Für meine Schüler',
-    description: 'Ergänzt den Unterricht und unterstützt beim eigenständigen Lernen.',
+    title: goalsCopy.forStudents.title,
+    description: goalsCopy.forStudents.description,
   },
   {
     id: 'connected-knowledge',
     icon: Network,
-    title: 'Vernetztes Wissen',
-    description: 'Ermöglicht Zusammenhänge zu erkennen und Verbindungen zu verstehen.',
+    title: goalsCopy.connectedKnowledge.title,
+    description: goalsCopy.connectedKnowledge.description,
   },
 ];

@@ -1,0 +1,11 @@
+.page {
+  min-height: 100vh;
+  padding: 2.75rem var(--ifm-spacing-horizontal);
+  background: var(--sn-bg);
+  color: var(--sn-text);
+}
+
+.pageInner {
+  max-width: 1120px;
+  margin: 0 auto;
+}

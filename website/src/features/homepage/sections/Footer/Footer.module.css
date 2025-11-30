@@ -3,8 +3,8 @@
   z-index: 1;
   margin-top: 2.5rem;
   padding: 2rem var(--ifm-spacing-horizontal) 1.5rem;
-  background: var(--ifm-footer-background-color, var(--ifm-background-surface-color));
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--sn-surface);
+  border-top: 1px solid var(--sn-border);
 }
 
 .footerInner {
@@ -13,9 +13,20 @@
 }
 
 .footerGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 1.25rem;
+}
+
+.footerGrid > div:last-child {
+  justify-self: end;
+  text-align: right;
+}
+
+.footerGrid > div {
+  flex: 1 1 340px;
+  min-width: 100px;
+  max-width: 340px;
 }
 
 .footerTitle {
@@ -23,32 +34,27 @@
 }
 
 .footerText {
-  color: color-mix(in srgb, var(--ifm-font-color-base) 85%, var(--ifm-color-emphasis-800));
-}
-
-.footerLinks {
-  display: grid;
-  gap: 0.4rem;
+  color: var(--sn-text-muted);
 }
 
 .footerLink {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: color-mix(in srgb, var(--ifm-font-color-base) 85%, var(--ifm-color-emphasis-800));
+  color: var(--sn-text-muted);
 }
 
 .footerLink:hover {
-  color: var(--ifm-color-primary);
+  color: var(--sn-purple-accent);
   text-decoration: none;
 }
 
 .footerBar {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-top: 1px solid var(--sn-border);
   text-align: center;
-  color: color-mix(in srgb, var(--ifm-font-color-base) 83%, var(--ifm-color-emphasis-800));
+  color: var(--sn-text-muted);
   display: grid;
   gap: 0.35rem;
 }

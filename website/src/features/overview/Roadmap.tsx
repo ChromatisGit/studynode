@@ -8,10 +8,10 @@ interface RoadmapTrackerProps {
   roadmap: RoadmapTopic[];
 }
 
-const PRIMARY_COLOR_VAR = "var(--ifm-color-primary)";
-const SECONDARY_COLOR_VAR = "var(--ifm-color-primary-lighter)"
-const EMPHASIS_500 = "var(--ifm-color-emphasis-500)";
-const BACKGROUND = "var(--ifm-background-surface-color, var(--ifm-color-emphasis-0))";
+const PRIMARY_COLOR_VAR = "var(--sn-purple-accent)";
+const SECONDARY_COLOR_VAR = "var(--sn-purple-accent-soft-border)";
+const EMPHASIS_500 = "var(--sn-text-muted)";
+const BACKGROUND = "var(--sn-surface)";
 const BULLET_COL_WIDTH = 36;
 
 export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
@@ -277,7 +277,7 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
               >
                 <div style={getCircleStyle(status)}>
                   {status === "finished" && (
-                    <Check size={24} color="white" strokeWidth={4} />
+                    <Check size={24} color="var(--sn-text-on-accent)" strokeWidth={4} />
                   )}
                   {status === "current" && (
                     <Circle size={22} color={PRIMARY_COLOR_VAR} fill={PRIMARY_COLOR_VAR} />
@@ -344,7 +344,7 @@ export default function Roadmap({ roadmap }: RoadmapTrackerProps) {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      color: "var(--ifm-color-emphasis-600)",
+                      color: "var(--sn-text-muted)",
                     }}
                   >
                     {isExpanded ? <ChevronDown size={24} /> : <ChevronRight size={24} />}

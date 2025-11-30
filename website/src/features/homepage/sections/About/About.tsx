@@ -1,25 +1,19 @@
-import { InfoGrid } from '@features/homepage/components/InfoGrid';
-import { HomeSection } from '@features/homepage/layout/HomeSection';
-import { aboutGoals } from '@features/homepage/sections/About/aboutData';
-import styles from '@features/homepage/sections/About/About.module.css';
+import { InfoGrid } from "@features/homepage/components/InfoGrid";
+import { HomeSection } from "@features/homepage/layout/HomeSection";
+import { aboutGoals } from "@features/homepage/sections/About/aboutData";
+import HOMEPAGE_COPY from "@features/homepage/homepage.de.json";
+import styles from "@features/homepage/sections/About/About.module.css";
 
 export function About() {
+  const { about } = HOMEPAGE_COPY;
+
   return (
-    <HomeSection
-      id="about"
-      title="Was ist StudyNode?"
-      subtitle="StudyNode ist eine zentrale Lernplattform für den Informatik- und Mathematikunterricht von Herrn Holst."
-    >
+    <HomeSection id="about" title={about.title} subtitle={about.subtitle}>
       <InfoGrid items={aboutGoals} iconVariant="circle" />
 
       <div className={styles.infoNote}>
-        <p>
-          StudyNode soll mehr als nur ein Ablageort für Unterrichtsmaterialien sein. Die Plattform macht Wissen sichtbar und
-          zeigt, wie die Themen zusammenhängen und sich gegenseitig ergänzen - wie Knoten in einem Netzwerk! Sie basiert auf
-          Docusaurus und modernen Web-Standards, die für Übersicht und Lesbarkeit sorgen. Alles ist fokussiert aufs Lernen
-          ohne Werbung, ohne Schnickschnack.
-        </p>
-        <p>Die Plattform befindet sich noch in der Aufbauphase. Ich freue mich über sämtliches Feedback!</p>
+        <p>{about.intro}</p>
+        <p>{about.note}</p>
       </div>
     </HomeSection>
   );

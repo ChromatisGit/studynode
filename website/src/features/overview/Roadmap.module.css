@@ -5,7 +5,7 @@
 }
 
 .linkHoverBox:hover {
-  background-color: var(--ifm-menu-color-background-active);
+  background-color: var(--sn-purple-accent-selection);
 }
 
 /* Chevron hover area */
@@ -16,7 +16,7 @@
 }
 
 .chevronHoverBox:hover {
-  background-color: var(--ifm-menu-color-background-active);
+  background-color: var(--sn-purple-accent-selection);
 }
 
 /* Chapters */
@@ -27,5 +27,5 @@
 }
 
 .chapterHoverBox:hover {
-  background-color: var(--ifm-menu-color-background-active);
+  background-color: var(--sn-purple-accent-selection);
 }

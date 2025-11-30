@@ -1,5 +1,5 @@
 import type { CodeTask } from "./parser/tasks/codeTask";
-import type { GapTask } from "./parser/tasks/gapTask";
+import type { GapField, GapPart, GapTask } from "./parser/tasks/gapTask";
 import type { MathTask } from "./parser/tasks/mathTask";
 import type { McqTask } from "./parser/tasks/mcqTask";
 import type { TextTask } from "./parser/tasks/textTask";
@@ -9,7 +9,7 @@ export type RenderMode = "web" | "pdf" | "pdfSolutions";
 export type Task = McqTask | GapTask | TextTask | MathTask | CodeTask;
 
 
-type InfoBlock = {
+export type InfoBlock = {
   kind: "info";
   title: string;
   text: string;
@@ -32,9 +32,20 @@ export type TaskCategory = {
 };
 
 export type Category = InfoBlock | TaskCategory;
+export type WorksheetBlock = Category;
 
 export type Worksheet = {
   title: string;
   format: RenderMode;
   content: Category[];
+};
+
+export type {
+  CodeTask,
+  GapField,
+  GapPart,
+  GapTask,
+  MathTask,
+  McqTask,
+  TextTask,
 };

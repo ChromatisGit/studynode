@@ -1,50 +1,101 @@
-import type { CSSProperties } from 'react';
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
-import { IconContainer } from '@features/homepage/components/IconContainer';
-import { getAccentTokens, type ColorMode } from '@css/colors';
-import styles from '@features/homepage/sections/CourseSection/CourseCard.module.css';
-import { Course } from '@builder/transformer/courses';
+import { useEffect, useState } from "react";
+import { ArrowRight, BookOpen, type LucideIcon } from "lucide-react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
+import { IconContainer } from "@features/homepage/components/IconContainer";
+import HOMEPAGE_COPY from "@features/homepage/homepage.de.json";
+import styles from "@features/homepage/sections/CourseSection/CourseCard.module.css";
+import { Course } from "@builder/transformer/courses";
+import Link from "@docusaurus/Link";
 
-function getDocumentTheme(): ColorMode {
-  if (typeof document === 'undefined') {
-    return 'light';
-  }
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+const COLOR_CLASS_MAP: Record<Course['color'], string> = {
+  purple: styles.colorPurple,
+  blue: styles.colorBlue,
+  green: styles.colorGreen,
+  orange: styles.colorOrange,
+  teal: styles.colorTeal,
+  red: styles.colorRed,
+};
+
+const ICON_CACHE = new Map<string, LucideIcon>();
+const FALLBACK_ICON = BookOpen;
+const COURSE_COPY = HOMEPAGE_COPY.courses;
+
+function normalizeIconName(iconName?: string) {
+  if (!iconName) return undefined;
+
+  return iconName
+    .trim()
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/[_\s]+/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase();
 }
 
-export function CourseCard({course}: {course: Course}) {
-  const { title, description, tags, icon, color } = course;
-
-  const [mode, setMode] = useState<ColorMode>(() => getDocumentTheme());
+function useCourseIcon(iconName?: string) {
+  const [IconComponent, setIconComponent] = useState<LucideIcon>(() => FALLBACK_ICON);
 
   useEffect(() => {
-    // Sync with Docusaurus theme toggle by watching the html[data-theme] attribute.
-    const updateMode = () => setMode(getDocumentTheme());
+    const normalizedName = normalizeIconName(iconName);
+    if (!normalizedName) {
+      setIconComponent(() => FALLBACK_ICON);
+      return;
+    }
 
-    updateMode();
-    const observer = new MutationObserver(updateMode);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const cachedIcon = ICON_CACHE.get(normalizedName);
+    if (cachedIcon) {
+      setIconComponent(() => cachedIcon);
+      return;
+    }
 
-    return () => observer.disconnect();
-  }, []);
+    const importer = (dynamicIconImports as Record<string, () => Promise<{ default: LucideIcon }>>)[normalizedName];
+    if (!importer) {
+      setIconComponent(() => FALLBACK_ICON);
+      return;
+    }
 
-  const accent = useMemo(() => getAccentTokens(color, mode), [color, mode]);
+    let active = true;
 
-  const accentVars: CSSProperties = {
-    ['--accent-color' as string]: accent.accent,
-    ['--accent-strong' as string]: accent.accentStrong,
-    ['--accent-surface' as string]: accent.surface,
-    ['--accent-border' as string]: accent.border,
-    ['--accent-muted' as string]: accent.mutedText,
-  };
+    importer()
+      .then((mod) => {
+        if (!active) return;
+        const LoadedIcon = mod.default as LucideIcon;
+        ICON_CACHE.set(normalizedName, LoadedIcon);
+        setIconComponent(() => LoadedIcon);
+      })
+      .catch(() => {
+        if (!active) return;
+        setIconComponent(() => FALLBACK_ICON);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [iconName]);
+
+  return IconComponent;
+}
+
+export function CourseCard({ course }: { course: Course }) {
+  const { title, description, tags, icon, color, group, slug } = course;
+  const colorClass = COLOR_CLASS_MAP[color] ?? styles.colorPurple;
+  const IconComponent = useCourseIcon(icon);
 
   return (
-    <article className={styles.courseCard} style={accentVars} aria-label={`Enter ${title} course`}>
+    <Link
+      to={[group, slug].join('/')}
+      className={`${styles.courseCard} ${colorClass}`}
+      aria-label={`Enter ${title} course`}
+    >
       <div className={styles.accentBar} />
+
       <div className={styles.cardBody}>
         <div className={styles.iconRow}>
-          <IconContainer Icon={icon} size="md" bgColor={accent.surface} iconColor={accent.accentStrong} />
+          <IconContainer
+            Icon={IconComponent}
+            size="md"
+            bgColor="var(--accent-surface)"
+            iconColor="var(--accent-strong)"
+          />
         </div>
 
         <h3 className={styles.cardTitle}>{title}</h3>
@@ -60,9 +111,9 @@ export function CourseCard({course}: {course: Course}) {
       </div>
 
       <div className={styles.cardFooter}>
-        <span>Kurs öffnen</span>
-        <ArrowRight size={16} aria-hidden style={{ marginLeft: '0.2rem' }} />
+        <span>{COURSE_COPY.openActionLabel}</span>
+        <ArrowRight size={16} aria-hidden style={{ marginLeft: "0.2rem" }} />
       </div>
-    </article>
+    </Link>
   );
 }
