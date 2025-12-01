@@ -18,20 +18,9 @@ export function buildCoursesConfig(courses: CoursePlan[], groupsAndSubjects: Gro
         const { group, slug, subject, course_variant, current_chapter, chapters } = c
         const groupId = group.replace(/[0-9]/g, "")
 
-        const groupEntry = groupsAndSubjects.groups[groupId]
-        if (!groupEntry) {
-            throw new Error(`Group '${groupId}' used in course '${group}' is not defined in groupsAndSubjects.yml`);
-        }
-
-        const subjectEntry = groupsAndSubjects.subjects[subject]
-        if (!subjectEntry) {
-            throw new Error(`Subject '${subject}' used in course '${group}/${slug}' is not defined in groupsAndSubjects.yml`);
-        }
-
-        const variantEntry = course_variant ? groupsAndSubjects.variants[course_variant] : undefined
-        if (course_variant && !variantEntry) {
-            throw new Error(`Variant '${course_variant}' used in course '${group}/${slug}' is not defined in groupsAndSubjects.yml`);
-        }
+        const groupEntry = groupsAndSubjects.groups[groupId]!;
+        const subjectEntry = groupsAndSubjects.subjects[subject]!;
+        const variantEntry = course_variant ? groupsAndSubjects.variants[course_variant]! : undefined;
 
         const description = `Aktuelles Thema: ${chapters.find((c) => c.chapter === current_chapter)?.label ?? current_chapter ?? chapters[0].label}`
 

@@ -27,12 +27,7 @@ function buildNavbarJSON(courses: CoursePlan[], groupsAndSubjects: GroupsAndSubj
 }
 
 function buildLabel(course: CoursePlan, groupCourses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
-  const subjectEntry = groupsAndSubjects.subjects[course.subject];
-  if (!subjectEntry) {
-    throw new Error(
-      `Subject '${course.subject}' used in course '${course.group}/${course.slug}' is not defined in groupsAndSubjects.yml`,
-    );
-  }
+  const subjectEntry = groupsAndSubjects.subjects[course.subject]!;
 
   if (groupCourses.length === 1) {
     return "Übersicht";
@@ -43,12 +38,7 @@ function buildLabel(course: CoursePlan, groupCourses: CoursePlan[], groupsAndSub
     return subjectEntry.name;
   }
 
-  const variantEntry = course.course_variant ? groupsAndSubjects.variants[course.course_variant] : undefined;
-  if (!variantEntry) {
-    throw new Error(
-      `Variant '${course.course_variant}' used in course '${course.group}/${course.slug}' is not defined in groupsAndSubjects.yml`,
-    );
-  }
+  const variantEntry = course.course_variant ? ` (${groupsAndSubjects.variants[course.course_variant]!})` : "";
 
-  return `${subjectEntry.name} (${variantEntry.short})`;
+  return `${subjectEntry.name}` + variantEntry;
 }

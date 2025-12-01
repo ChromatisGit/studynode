@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { GroupsAndSubjects } from "./groupsAndSubjects";
 
 const Group = z.string().regex(/^[a-z0-9]+$/i, "use letters/numbers only");
 
@@ -64,3 +65,33 @@ export const CoursePlanSchema = yamlCoursePlanSchema.transform(v => ({
   );
 
 export type CoursePlan = z.infer<typeof CoursePlanSchema>;
+
+export function createCoursePlanSchema(groupsAndSubjects: GroupsAndSubjects) {
+  return CoursePlanSchema.superRefine((course, ctx) => {
+    const groupId = course.group.replace(/[0-9]/g, "");
+
+    if (!groupsAndSubjects.groups[groupId]) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["group"],
+        message: `Group '${course.group}' is not defined in groupsAndSubjects.yml`,
+      });
+    }
+
+    if (!groupsAndSubjects.subjects[course.subject]) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["subject"],
+        message: `Subject '${course.subject}' is not defined in groupsAndSubjects.yml`,
+      });
+    }
+
+    if (course.course_variant && !groupsAndSubjects.variants[course.course_variant]) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["course_variant"],
+        message: `Variant '${course.course_variant}' is not defined in groupsAndSubjects.yml`,
+      });
+    }
+  });
+}

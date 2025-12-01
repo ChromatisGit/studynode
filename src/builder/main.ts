@@ -1,40 +1,40 @@
+import { deleteGeneratedWebsite, writeGeneratedFile } from "./fs";
+import { loadContent } from "./loader/content";
 import { buildCoursesConfig } from "./transformer/courses";
 import { getAllPagePaths } from "./transformer/pagePaths";
-import { writeFile, readAllCourses, deleteGeneratedWebsite, readAllTopics, readGroupsAndSubjects } from "./io";
+import { buildPageFile } from "./transformer/pages";
 import { buildNavbarConfig } from "./transformer/navbar";
 import { buildOverview } from "./transformer/overview";
 import { buildSidebar } from "./transformer/sidebar";
-import { processPageFile } from "./processPage";
 import { setCourseLabels } from "./transformer/courseLabels";
 import { buildGroupsAndSubjects } from "./transformer/groupsAndSubjects";
+import { validateCourses } from "./validator/courses";
 
 async function main() {
   await deleteGeneratedWebsite()
 
-  const groupsAndSubjects = await readGroupsAndSubjects();
-  writeFile(buildGroupsAndSubjects(groupsAndSubjects));
+  const { groupsAndSubjects, topics, courses } = await loadContent();
 
+  validateCourses(courses, groupsAndSubjects);
 
-  const coursesData = await readAllCourses();
-  const topicsData = await readAllTopics();
+  const labeledCourses = setCourseLabels(courses, topics)
+  const coursesByGroup = Object.groupBy(labeledCourses, c => c.group);
 
-  const courses = setCourseLabels(coursesData, topicsData)
-  const coursesByGroup = Object.groupBy(courses, c => c.group);
-
-  const filePaths = getAllPagePaths(courses);
+  const filePaths = getAllPagePaths(labeledCourses);
 
   await Promise.all([
+    writeGeneratedFile(buildGroupsAndSubjects(groupsAndSubjects)),
 
-    ...filePaths.map(file => processPageFile(file)),
+    ...filePaths.map(async file => writeGeneratedFile(await buildPageFile(file))),
 
-    ...courses.map(course => writeFile(buildSidebar(course))),
-    ...courses.map(course => writeFile(buildOverview(course, coursesByGroup[course.group] ?? [], groupsAndSubjects))),
+    ...labeledCourses.map(course => writeGeneratedFile(buildSidebar(course))),
+    ...labeledCourses.map(course => writeGeneratedFile(buildOverview(course, coursesByGroup[course.group] ?? [], groupsAndSubjects))),
 
-    writeFile(buildCoursesConfig(courses, groupsAndSubjects)),
-    writeFile(buildNavbarConfig(courses, groupsAndSubjects)),
+    writeGeneratedFile(buildCoursesConfig(labeledCourses, groupsAndSubjects)),
+    writeGeneratedFile(buildNavbarConfig(labeledCourses, groupsAndSubjects)),
   ])
 
-  console.log(`[builder] OK - ${courses.length} course(s)`);
+  console.log(`[builder] OK - ${labeledCourses.length} course(s)`);
 }
 
 main().catch((err) => {
