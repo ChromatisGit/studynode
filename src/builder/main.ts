@@ -1,5 +1,5 @@
-import { deleteGeneratedWebsite, writeGeneratedFile } from "./fs";
-import { loadContent } from "./loader/content";
+import { deleteGeneratedWebsite, writeGeneratedFile } from "./io";
+import { loadContent } from "./loadContent";
 import { buildCoursesConfig } from "./transformer/courses";
 import { getAllPagePaths } from "./transformer/pagePaths";
 import { buildPageFile } from "./transformer/pages";
@@ -8,7 +8,7 @@ import { buildOverview } from "./transformer/overview";
 import { buildSidebar } from "./transformer/sidebar";
 import { setCourseLabels } from "./transformer/courseLabels";
 import { buildGroupsAndSubjects } from "./transformer/groupsAndSubjects";
-import { validateCourses } from "./validator/courses";
+import { validateCourses } from "./validateCourses";
 
 async function main() {
   await deleteGeneratedWebsite()
@@ -18,17 +18,14 @@ async function main() {
   validateCourses(courses, groupsAndSubjects);
 
   const labeledCourses = setCourseLabels(courses, topics)
-  const coursesByGroup = Object.groupBy(labeledCourses, c => c.group);
-
-  const filePaths = getAllPagePaths(labeledCourses);
 
   await Promise.all([
     writeGeneratedFile(buildGroupsAndSubjects(groupsAndSubjects)),
 
-    ...filePaths.map(async file => writeGeneratedFile(await buildPageFile(file))),
+    ...getAllPagePaths(labeledCourses).map(async file => writeGeneratedFile(await buildPageFile(file))),
 
     ...labeledCourses.map(course => writeGeneratedFile(buildSidebar(course))),
-    ...labeledCourses.map(course => writeGeneratedFile(buildOverview(course, coursesByGroup[course.group] ?? [], groupsAndSubjects))),
+    ...labeledCourses.map(course => writeGeneratedFile(buildOverview(course, labeledCourses, groupsAndSubjects))),
 
     writeGeneratedFile(buildCoursesConfig(labeledCourses, groupsAndSubjects)),
     writeGeneratedFile(buildNavbarConfig(labeledCourses, groupsAndSubjects)),

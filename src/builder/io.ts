@@ -40,3 +40,11 @@ export async function writeGeneratedFile(params: { relativePath: string; content
   await fs.mkdir(path.dirname(abs), { recursive: true });
   await fs.writeFile(abs, params.content, "utf8");
 }
+
+export async function* globContent(pattern: string): AsyncGenerator<string> {
+  const root = path.resolve(process.cwd(), CONTENT_DIR);
+
+  for await (const relPath of (fs as any).glob(pattern, { cwd: root })) {
+    yield relPath as string;
+  }
+}

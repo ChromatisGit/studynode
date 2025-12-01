@@ -3,7 +3,7 @@ import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
 import path from "node:path";
 import { renderOverview } from "@builder/template/overview.mdx";
 import type { OverviewModel, RoadmapChapter, RoadmapTopic, Status } from "@schema/overview";
-import { computeCourseProgress } from "../domain/courseProgress";
+import { computeCourseProgress, TopicProgress } from "../computeCourseProgress";
 
 export function buildOverview(
   course: CoursePlan,
@@ -18,30 +18,22 @@ export function buildOverview(
   };
 }
 
-type Chapter = CoursePlan["chapters"][number];
-
 function toOverviewModel(
   course: CoursePlan,
-  groupCourses: CoursePlan[],
+  allCourses: CoursePlan[],
   groupsAndSubjects: GroupsAndSubjects,
 ): OverviewModel {
-  const { group, subject, slug, current_worksheets } = course;
+  const { group, subject, slug, current_worksheets, course_variant } = course;
+
+  const hasMultipleSameSubject = allCourses.some(
+    c => c.group === group && c.subject === subject && c.slug !== slug
+  );
 
   const subjectEntry = groupsAndSubjects.subjects[subject]!;
 
-  const effectiveCourses = groupCourses.length ? groupCourses : [course];
-  const coursesWithSameSubject = effectiveCourses.filter(
-    (c) => c.subject === subject,
-  );
-
-  const variantEntry = course.course_variant
-    ? groupsAndSubjects.variants[course.course_variant]!
-    : undefined;
-
-  const label =
-    coursesWithSameSubject.length === 1
-      ? subjectEntry.name
-      : `${subjectEntry.name} (${variantEntry!.short})`;
+  const label = hasMultipleSameSubject && course_variant
+    ? `${subjectEntry.name} (${groupsAndSubjects.variants[course_variant]!.short})`
+    : subjectEntry.name;
 
   const title = `${subjectEntry.name} ${group.toUpperCase()}`;
 
@@ -62,38 +54,24 @@ function toOverviewModel(
 }
 
 function buildRoadmapTopic(
-  topic: ReturnType<typeof computeCourseProgress>["topics"][number],
+  topic: TopicProgress,
   group: string,
   slug: string,
 ): RoadmapTopic {
   const topicLink = ["", group, slug, topic.topic].join("/");
-  const mapChapter = (chapter: Chapter, status: Status): RoadmapChapter => ({
-    label: chapter.label,
-    link: [topicLink, chapter.chapter.slice(3)].join("/"),
-    status,
-  });
-
-  if (topic.status === "locked") {
-    return { label: topic.label, status: "locked", chapters: [] };
-  }
-
-  if (topic.status === "planned") {
-    const preview = topic.chapters.slice(0, 2);
-
+  const chapters: RoadmapChapter[] = topic.chapters.map((chapter) => {
     return {
-      label: topic.label,
-      status: "planned",
-      link: topicLink,
-      chapters: preview.map((chapter) => mapChapter(chapter, "planned")),
-    };
-  }
+      label: chapter.label,
+      // chapter files are named 00_geraden, index must be removed for link
+      link: [topicLink, chapter.chapter.slice(3)].join("/"),
+      status: chapter.status,
+    }
+  });
 
   return {
     label: topic.label,
     status: topic.status,
     link: topicLink,
-    chapters: topic.chapters.map((chapter) =>
-      mapChapter(chapter, chapter.status),
-    ),
+    chapters
   };
 }

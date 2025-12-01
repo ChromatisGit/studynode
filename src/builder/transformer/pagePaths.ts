@@ -1,7 +1,7 @@
 import type { CoursePlan } from "@schema/coursePlan";
 import type { PageSource } from "./pages";
 import path from "node:path";
-import { computeCourseProgress } from "../domain/courseProgress";
+import { computeCourseProgress } from "../computeCourseProgress";
 
 export function getAllPagePaths(courses: CoursePlan[]): PageSource[] {
   return [
@@ -13,28 +13,34 @@ export function getAllPagePaths(courses: CoursePlan[]): PageSource[] {
 function buildCoursePagePaths(course: CoursePlan): PageSource[] {
   const progress = computeCourseProgress(course);
 
-  return progress.topics.flatMap((topic) => {
-    const baseDir = path.join("base", course.subject, topic.topic, "chapters");
+  return progress.topics
+  .filter((topic) => {topic.status !== "locked"})
+  .flatMap((topic) => {
+    const baseDir = path.join("base", course.subject, topic.topic);
     const targetDir = path.join("courses", course.group, course.slug, topic.topic);
     const files: PageSource[] = [];
 
-    const hasMultipleChapters = topic.chapters.length === 1
-    //ToDo
-    if (hasMultipleChapters) {
-      console.log(topic.chapters)
-      files.push({
+    // Topic overview
+    const topicOverview: PageSource = {
         source: path.join(baseDir, pickSourceFile(topic.status)),
         target: path.join(targetDir, "index.md"),
         label: topic.label,
-        sidebar: topic.topic,
-      });
+      }
+
+    if (topic.chapters.length <= 1) {
+      files.push(topicOverview);
+      return files;
     }
 
+    topicOverview.sidebar = topic.topic;
+    files.push(topicOverview);
+
+    // Chapter overview
     topic.chapters.forEach((chapter) => {
       if (chapter.chapter === topic.topic) return;
 
       files.push({
-        source: path.join(baseDir, chapter.chapter, pickSourceFile(chapter.status)),
+        source: path.join(baseDir, "chapters", chapter.chapter, pickSourceFile(chapter.status)),
         target: path.join(targetDir, `${chapter.chapter}.md`),
         label: chapter.label,
         sidebar: topic.topic,

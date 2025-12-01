@@ -34,24 +34,30 @@ export function computeCourseProgress(course: CoursePlan): CourseProgress {
   }
 
   const topics = course.topics.map((topic, topicIndex) => {
-    const topicChapters = course.chapters.filter(
+    let topicChapters = course.chapters.filter(
       (chapter) => chapter.topic === topic.topic,
     );
 
-    const relativeIndex = topicIndex - currentTopicIndex;
+    const topicStatus = statusFromRelativeIndex(topicIndex - currentTopicIndex);
 
-    const topicStatus = statusFromRelativeIndex(relativeIndex);
-    const currentChapterIndex = topicChapters.findIndex(
-      (chapter) => chapter.chapter === course.current_chapter,
-    );
+    let currentChapterIndex = -1;
+    if (topicStatus === "current") {
+      currentChapterIndex = topicChapters.findIndex(
+        (chapter) => chapter.chapter === course.current_chapter,
+      );
+    }
+
+    if(topicStatus === "planned") {
+      topicChapters = topicChapters.slice(0, 2);
+    }
+
+    if(topicStatus === "locked") {
+      topicChapters = [];
+    }
 
     const chaptersWithStatus: ChapterProgress[] = topicChapters.map(
       (chapter, chapterIndex) => {
-        const status = chapterStatusForTopic(
-          topicStatus,
-          currentChapterIndex,
-          chapterIndex,
-        );
+        const status = chapterStatusForTopic(topicStatus, chapterIndex, currentChapterIndex);
 
         if (status === "current") {
           currentChapterLabel = chapter.label;
@@ -80,12 +86,11 @@ function statusFromRelativeIndex(relativeIndex: number): Status {
 
 function chapterStatusForTopic(
   topicStatus: Status,
-  currentChapterIndex: number,
   chapterIndex: number,
+  currentChapterIndex: number
 ): Status {
   if (topicStatus === "finished") return "finished";
   if (topicStatus === "planned") return "planned";
-  if (topicStatus === "locked") return "locked";
 
   // topicStatus === "current"
   if (currentChapterIndex === -1) return "planned";

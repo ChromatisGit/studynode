@@ -1,5 +1,5 @@
 import { renderPageWithFrontmatter } from "@builder/template/pageFrontmatter";
-import { readContentFile } from "../fs";
+import { readContentFile } from "../io";
 
 export type PageSource = {
   source: string;
