@@ -1,60 +1,53 @@
-import type { CoursePlan } from "@schema/coursePlan";
-import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
 import path from "node:path";
 import { renderOverview } from "@builder/template/overview.mdx";
-import type { OverviewModel, RoadmapChapter, RoadmapTopic, Status } from "@schema/overview";
-import { computeCourseProgress, TopicProgress } from "../computeCourseProgress";
+import type { OverviewModel, RoadmapChapter, RoadmapTopic } from "@schema/overview";
+import type { ResolvedCourseTopic, ResolvedCourse } from "../prepareCourses";
 
 export function buildOverview(
-  course: CoursePlan,
-  groupCourses: CoursePlan[],
-  groupsAndSubjects: GroupsAndSubjects,
+  course: ResolvedCourse,
+  groupCourses: ResolvedCourse[],
 ) {
-  const model = toOverviewModel(course, groupCourses, groupsAndSubjects);
+  const model = toOverviewModel(course, groupCourses);
 
   return {
-    relativePath: path.join("courses", course.group, course.slug, "index.mdx"),
+    relativePath: path.join("docs", course.group.id, course.slug, "index.mdx"),
     content: renderOverview(model),
   };
 }
 
 function toOverviewModel(
-  course: CoursePlan,
-  allCourses: CoursePlan[],
-  groupsAndSubjects: GroupsAndSubjects,
+  course: ResolvedCourse,
+  allCourses: ResolvedCourse[],
 ): OverviewModel {
-  const { group, subject, slug, current_worksheets, course_variant } = course;
+  const { group, subject, slug, courseVariant, topics, currentChapter } = course;
 
   const hasMultipleSameSubject = allCourses.some(
-    c => c.group === group && c.subject === subject && c.slug !== slug
+    c => c.group.id === group.id && c.subject.id === subject.id && c.slug !== slug
   );
 
-  const subjectEntry = groupsAndSubjects.subjects[subject]!;
+  const label = hasMultipleSameSubject && courseVariant?.short
+    ? `${subject.label} (${courseVariant.short})`
+    : subject.label;
 
-  const label = hasMultipleSameSubject && course_variant
-    ? `${subjectEntry.name} (${groupsAndSubjects.variants[course_variant]!.short})`
-    : subjectEntry.name;
+  const title = `${subject.label} ${group.id.toUpperCase()}`;
 
-  const title = `${subjectEntry.name} ${group.toUpperCase()}`;
-
-  const progress = computeCourseProgress(course);
-  const roadmap: RoadmapTopic[] = progress.topics.map((topic) =>
-    buildRoadmapTopic(topic, group, slug),
+  const roadmap: RoadmapTopic[] = topics.map((topic) =>
+    buildRoadmapTopic(topic, group.id, slug),
   );
 
   return {
     title,
     label,
-    group,
-    subject,
-    current: progress.currentChapterLabel,
+    group: group.id,
+    subject: subject.id,
+    current: currentChapter?.label ?? undefined,
     roadmap,
-    worksheets: current_worksheets,
+    worksheets: currentChapter?.worksheets ?? [],
   };
 }
 
 function buildRoadmapTopic(
-  topic: TopicProgress,
+  topic: ResolvedCourseTopic,
   group: string,
   slug: string,
 ): RoadmapTopic {

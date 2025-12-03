@@ -33,16 +33,16 @@ export function validateCourses(courses: CoursePlan[], groupsAndSubjects: Groups
       if (list.length <= 1) return;
 
       list.forEach((course) => {
-        if (!course.course_variant) {
+        if (!course.courseVariant) {
           errors.push(
             `Course '${group}/${course.slug}' is missing 'course.variant' but there are multiple '${subject}' courses in this group.`,
           );
           return;
         }
 
-        if (!groupsAndSubjects.variants[course.course_variant]) {
+        if (!groupsAndSubjects.variants[course.courseVariant]) {
           errors.push(
-            `Variant '${course.course_variant}' used in course '${group}/${course.slug}' is not defined in groupsAndSubjects.yml.`,
+            `Variant '${course.courseVariant}' used in course '${group}/${course.slug}' is not defined in groupsAndSubjects.yml.`,
           );
         }
       });

@@ -1,12 +1,5 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "baseUrl": ".",
     "paths": {
       "@builder/*": ["src/builder/*"],
       "@css/*": ["website/src/css/*"],

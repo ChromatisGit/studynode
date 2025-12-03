@@ -4,14 +4,23 @@ import type { Config, PluginConfig } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import COURSES_JSON from './.generated/configs/courses.config.json';
 import { Course } from '../src/builder/transformer/courses';
+import aliasConfig from '../aliases.json';
 
 const COURSES = COURSES_JSON as Course[];
+const aliasPaths = aliasConfig.compilerOptions.paths;
+const webpackAliases = Object.fromEntries(
+  Object.entries(aliasPaths).map(([alias, targetPaths]) => {
+    const resolvedAlias = alias.replace(/\/\*$/, '');
+    const target = (Array.isArray(targetPaths) ? targetPaths[0] : targetPaths).replace(/\/\*$/, '');
+    return [resolvedAlias, path.resolve(__dirname, '..', target)];
+  }),
+);
 const docsPlugins: PluginConfig[] = COURSES.map(c => (
   [
     '@docusaurus/plugin-content-docs',
     {
       id: `${c.group}-${c.slug}`,
-      path: `./.generated/courses/${c.group}/${c.slug}`,
+      path: `./.generated/docs/${c.group}/${c.slug}`,
       routeBasePath: `${c.group}/${c.slug}`,
       sidebarPath: require.resolve(`./.generated/sidebars/${c.group}/${c.slug}.ts`),
       remarkPlugins: [require('remark-math')],
@@ -30,7 +39,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://herr-holst.de',
+  url: 'https://studynodes.net',
   baseUrl: '/',
 
   onBrokenLinks: 'throw',
@@ -48,14 +57,16 @@ const config: Config = {
     { href: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css', type: 'text/css' },
   ],
 
+  staticDirectories: ['static', '.generated/worksheets'],
+
   plugins: [
     ...docsPlugins,
     [
       '@docusaurus/plugin-content-pages',
       {
-        path: './.generated/courses/shared',
+        path: './.generated/resources',
         routeBasePath: '/',
-        id: 'generated-pages',
+        id: 'additional-resources',
       },
     ],
     [require.resolve('@cmfcmf/docusaurus-search-local'), { language: ['de'] }],
@@ -64,18 +75,7 @@ const config: Config = {
         name: 'studynode-aliases',
         configureWebpack: () => ({
           resolve: {
-            alias: {
-              '@builder': path.resolve(__dirname, '../src/builder'),
-              '@css': path.resolve(__dirname, 'src/css'),
-              '@dev': path.resolve(__dirname, '../src/dev'),
-              '@features': path.resolve(__dirname, 'src/features'),
-              '@generated-configs': path.resolve(__dirname, '.generated/configs'),
-              '@marp-styles': path.resolve(__dirname, '../src/marp-styles'),
-              '@pages': path.resolve(__dirname, 'src/pages'),
-              '@schema': path.resolve(__dirname, '../src/schema'),
-              '@theme': path.resolve(__dirname, 'src/theme'),
-              '@worksheet': path.resolve(__dirname, '../src/worksheet'),
-            },
+            alias: webpackAliases,
           },
         }),
       };
@@ -102,7 +102,7 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['python', 'typescript', 'sql'],
+      additionalLanguages: ['typescript'],
     },
   } satisfies Preset.ThemeConfig,
 };

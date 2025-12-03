@@ -1,20 +1,26 @@
+import { WorksheetRef } from "@builder/loadWorksheets";
+import { worksheetCards } from "./worksheetCards";
+
 type PageTemplateInput = {
   label: string;
-  sidebar?: string;
+  isIndexPage: boolean;
   body: string;
+  worksheets: WorksheetRef[];
 };
 
 export function renderPageWithFrontmatter(input: PageTemplateInput) {
   const frontmatterLines = [
     `title: ${input.label}`,
-    ...(input.sidebar ? [`sidebar: ${input.sidebar}`] : []),
+    ...(input.isIndexPage ? [`sidebar_position: -1`] : []),
   ];
 
   return [
     "---",
     ...frontmatterLines,
     "---",
+    worksheetCards(input.worksheets),
     input.body.trim(),
     "",
   ].join("\n");
 }
+

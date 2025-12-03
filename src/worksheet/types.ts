@@ -4,8 +4,6 @@ import type { MathTask } from "./parser/tasks/mathTask";
 import type { McqTask } from "./parser/tasks/mcqTask";
 import type { TextTask } from "./parser/tasks/textTask";
 
-export type RenderMode = "web" | "pdf" | "pdfSolutions";
-
 export type Task = McqTask | GapTask | TextTask | MathTask | CodeTask;
 
 
@@ -36,7 +34,6 @@ export type WorksheetBlock = Category;
 
 export type Worksheet = {
   title: string;
-  format: RenderMode;
   content: Category[];
 };
 

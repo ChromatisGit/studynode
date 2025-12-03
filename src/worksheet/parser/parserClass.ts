@@ -1,4 +1,4 @@
-import { RenderMode, Worksheet } from "@worksheet/types";
+import { Worksheet } from "@worksheet/types";
 import { protectCodeBlocks } from "@worksheet/parser/utils/codeBlocks";
 import {
   collectCategoryBlocks,
@@ -24,7 +24,7 @@ export class WorksheetParser {
     this.rawContent = rawContent;
   }
 
-  parse(format: RenderMode): Worksheet {
+  parse(): Worksheet {
     const { safeContent, restoreCodeBlocks } = protectCodeBlocks(
       this.rawContent
     );
@@ -40,6 +40,6 @@ export class WorksheetParser {
       })
     );
 
-    return { title, format, content };
+    return { title, content };
   }
 }

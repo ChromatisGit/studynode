@@ -1,15 +1,14 @@
-import type { CoursePlan } from "@schema/coursePlan";
 import path from "node:path";
 import { renderSidebar } from "@builder/template/sidebar";
-import { computeCourseProgress } from "@builder/computeCourseProgress";
+import type { ResolvedCourse } from "../prepareCourses";
 
-export function buildSidebar(course: CoursePlan) {
+export function buildSidebar(course: ResolvedCourse) {
 
-  const filteredTopics = computeCourseProgress(course).topics
-  .filter((topic) => {topic.status !== "locked" && topic.chapters.length > 1})
+  const filteredTopics = course.topics
+    .filter((topic) => topic.status !== "locked" && topic.chapters.length > 1);
 
   return {
-    relativePath: path.join("sidebars", course.group, `${course.slug}.ts`),
+    relativePath: path.join("sidebars", course.group.id, `${course.slug}.ts`),
     content: renderSidebar(filteredTopics),
   };
 }

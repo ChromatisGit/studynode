@@ -1,23 +1,23 @@
-import type { CoursePlan } from "@schema/coursePlan";
+import type { Status } from "@schema/overview";
 import type { PageSource } from "./pages";
 import path from "node:path";
-import { computeCourseProgress } from "../computeCourseProgress";
+import type { ResolvedCourse } from "../prepareCourses";
 
-export function getAllPagePaths(courses: CoursePlan[]): PageSource[] {
+export function getAllPagePaths(courses: ResolvedCourse[]) : PageSource[] {
   return [
     ...courses.flatMap(buildCoursePagePaths),
-    ...groupPrinciplesPaths(courses),
+    ...groupInfoPaths(courses),
   ];
 }
 
-function buildCoursePagePaths(course: CoursePlan): PageSource[] {
-  const progress = computeCourseProgress(course);
+function buildCoursePagePaths(course: ResolvedCourse): PageSource[] {
+  const { slug, group, subject, topics } = course;
 
-  return progress.topics
-  .filter((topic) => {topic.status !== "locked"})
+  return topics
+  .filter((topic) => topic.status !== "locked")
   .flatMap((topic) => {
-    const baseDir = path.join("base", course.subject, topic.topic);
-    const targetDir = path.join("courses", course.group, course.slug, topic.topic);
+    const baseDir = path.join("base", subject.id, topic.topic);
+    const targetDir = path.join("docs", group.id, slug, topic.topic);
     const files: PageSource[] = [];
 
     // Topic overview
@@ -32,7 +32,6 @@ function buildCoursePagePaths(course: CoursePlan): PageSource[] {
       return files;
     }
 
-    topicOverview.sidebar = topic.topic;
     files.push(topicOverview);
 
     // Chapter overview
@@ -43,7 +42,7 @@ function buildCoursePagePaths(course: CoursePlan): PageSource[] {
         source: path.join(baseDir, "chapters", chapter.chapter, pickSourceFile(chapter.status)),
         target: path.join(targetDir, `${chapter.chapter}.md`),
         label: chapter.label,
-        sidebar: topic.topic,
+        worksheets: chapter.worksheets
       });
     });
 
@@ -51,16 +50,16 @@ function buildCoursePagePaths(course: CoursePlan): PageSource[] {
   });
 }
 
-function pickSourceFile(status: string) {
+function pickSourceFile(status: Status) {
   return status === "finished" ? "overview.md" : "preview.md";
 }
 
-function groupPrinciplesPaths(courses: CoursePlan[]): PageSource[] {
-  const groups = [...new Set(courses.map((c) => c.group))];
+function groupInfoPaths(courses: ResolvedCourse[]): PageSource[] {
+  const groups = [...new Set(courses.map((c) => c.group.id))];
 
   return groups.map((group) => ({
-    source: path.join("courses", group, "principles.md"),
-    target: path.join("courses", "shared", group, "principles.md"),
+    source: path.join("courses", group, "group_info.md"),
+    target: path.join("resources", group, "group_info.md"),
     label: "Leitsätze",
   }));
 }

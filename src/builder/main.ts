@@ -6,9 +6,11 @@ import { buildPageFile } from "./transformer/pages";
 import { buildNavbarConfig } from "./transformer/navbar";
 import { buildOverview } from "./transformer/overview";
 import { buildSidebar } from "./transformer/sidebar";
-import { setCourseLabels } from "./transformer/courseLabels";
 import { buildGroupsAndSubjects } from "./transformer/groupsAndSubjects";
 import { validateCourses } from "./validateCourses";
+import { prepareCourses } from "./prepareCourses";
+import { getAllWorksheets } from "./loadWorksheets";
+import { buildWorksheet } from "@worksheet/parser/buildWorksheet";
 
 async function main() {
   await deleteGeneratedWebsite()
@@ -17,24 +19,29 @@ async function main() {
 
   validateCourses(courses, groupsAndSubjects);
 
-  const labeledCourses = setCourseLabels(courses, topics)
+  const resolvedCourses = prepareCourses(courses, groupsAndSubjects, topics);
+
+  const worksheetLocations  = await getAllWorksheets(resolvedCourses);
 
   await Promise.all([
     writeGeneratedFile(buildGroupsAndSubjects(groupsAndSubjects)),
 
-    ...getAllPagePaths(labeledCourses).map(async file => writeGeneratedFile(await buildPageFile(file))),
+    ...getAllPagePaths(resolvedCourses).map(async file => writeGeneratedFile(await buildPageFile(file))),
 
-    ...labeledCourses.map(course => writeGeneratedFile(buildSidebar(course))),
-    ...labeledCourses.map(course => writeGeneratedFile(buildOverview(course, labeledCourses, groupsAndSubjects))),
+    ...worksheetLocations.map(async file => buildWorksheet(file)),
 
-    writeGeneratedFile(buildCoursesConfig(labeledCourses, groupsAndSubjects)),
-    writeGeneratedFile(buildNavbarConfig(labeledCourses, groupsAndSubjects)),
+    ...resolvedCourses.map(course => writeGeneratedFile(buildSidebar(course))),
+    ...resolvedCourses.map(course => writeGeneratedFile(buildOverview(course, resolvedCourses))),
+
+    writeGeneratedFile(buildCoursesConfig(resolvedCourses)),
+    writeGeneratedFile(buildNavbarConfig(resolvedCourses)),
   ])
 
-  console.log(`[builder] OK - ${labeledCourses.length} course(s)`);
+  console.log(`[builder] OK - ${resolvedCourses.length} course(s)`);
 }
 
 main().catch((err) => {
   console.error("[builder] FAILED\n", err instanceof Error ? err.stack ?? err.message : err);
   process.exit(1);
 });
+

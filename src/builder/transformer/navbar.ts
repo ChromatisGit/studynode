@@ -1,44 +1,48 @@
-import type { CoursePlan } from "@schema/coursePlan";
-import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
-import type { NavbarConfig} from "@features/overview/GroupBasedNavbar"
+import type { NavbarConfig } from "@features/overview/GroupBasedNavbar";
+import type { ResolvedCourse } from "../prepareCourses";
 
-
-export function buildNavbarConfig(courses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
+export function buildNavbarConfig(courses: ResolvedCourse[]) {
   return {
     relativePath: `configs/navbar.config.json`,
-    content: JSON.stringify(buildNavbarJSON(courses, groupsAndSubjects), null, 2),
+    content: JSON.stringify(buildNavbarJSON(courses), null, 2),
   };
 }
 
-function buildNavbarJSON(courses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects): NavbarConfig  {
+function buildNavbarJSON(courses: ResolvedCourse[]): NavbarConfig {
   return Object.fromEntries(
-    Object.entries(Object.groupBy(courses, (c) => c.group)).map(([group, list = []]) => {
-      const navbar = list.map((course) => ({
-        label: buildLabel(course, list, groupsAndSubjects),
-        to: `${course.group}/${course.slug}`,
-        position: "left" as const,
-      }));
+    Object.entries(Object.groupBy(courses, (c) => c.group.id)).map(
+      ([group, list = []]) => {
+        const navbar = list.map((course) => ({
+          label: buildLabel(course, list),
+          to: `${course.group.id}/${course.slug}`,
+          position: "left" as const,
+        }));
 
-      navbar.push({ label: "Leitsätze", to: `${group}/principles`, position: "left" as const });
+        navbar.push({
+          label: "Leitsätze",
+          to: `${group}/group_info`,
+          position: "left" as const,
+        });
 
-      return [group, navbar];
-    }),
+        return [group, navbar];
+      },
+    ),
   );
 }
 
-function buildLabel(course: CoursePlan, groupCourses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
-  const subjectEntry = groupsAndSubjects.subjects[course.subject]!;
+function buildLabel(course: ResolvedCourse, groupCourses: ResolvedCourse[],): string {
+  const subjectLabel = course.subject.label;
 
   if (groupCourses.length === 1) {
     return "Übersicht";
   }
 
-  const coursesWithSameSubject = groupCourses.filter((item) => item.subject === course.subject);
+  const coursesWithSameSubject = groupCourses.filter((item) => item.subject.id === course.subject.id,);
   if (coursesWithSameSubject.length === 1) {
-    return subjectEntry.name;
+    return subjectLabel;
   }
 
-  const variantEntry = course.course_variant ? ` (${groupsAndSubjects.variants[course.course_variant]!})` : "";
+  const variantEntry = course.courseVariant ? ` (${course.courseVariant.short})` : "";
 
-  return `${subjectEntry.name}` + variantEntry;
+  return `${subjectLabel}${variantEntry}`;
 }

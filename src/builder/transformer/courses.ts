@@ -1,6 +1,5 @@
-import type { CoursePlan } from "@schema/coursePlan";
-import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
-import { AccentColor } from "@schema/colors";
+import type { AccentColor } from "@schema/colors";
+import type { ResolvedCourse } from "../prepareCourses";
 
 export type Course = {
   group: string;
@@ -13,31 +12,27 @@ export type Course = {
 };
 
 
-export function buildCoursesConfig(courses: CoursePlan[], groupsAndSubjects: GroupsAndSubjects) {
-    const content: Course[] = courses.map(c => {
-        const { group, slug, subject, course_variant, current_chapter, chapters } = c
-        const groupId = group.replace(/[0-9]/g, "")
+export function buildCoursesConfig(courses: ResolvedCourse[]) {
+    const content: Course[] = courses.map((course) => {
+        const descriptionBase =
+          course.currentChapter?.label ??
+          course.topics.find((t) => t.chapters.length)?.chapters[0]?.label ??
+          course.topics[0]?.label ??
+          "";
 
-        const groupEntry = groupsAndSubjects.groups[groupId]!;
-        const subjectEntry = groupsAndSubjects.subjects[subject]!;
-        const variantEntry = course_variant ? groupsAndSubjects.variants[course_variant]! : undefined;
-
-        const description = `Aktuelles Thema: ${chapters.find((c) => c.chapter === current_chapter)?.label ?? current_chapter ?? chapters[0].label}`
-
-        const tags = [groupEntry.name, subjectEntry.name]
-
-        if (variantEntry) {
-            tags.push(variantEntry.name);
+        const tags = [course.group.label, course.subject.label];
+        if (course.courseVariant) {
+            tags.push(course.courseVariant.label);
         }
 
         return {
-            group,
-            slug,
-            title: `${subjectEntry.name} ${group.toUpperCase()}`,
-            description,
+            group: course.group.id,
+            slug: course.slug,
+            title: `${course.subject.label} ${course.group.id.toUpperCase()}`,
+            description: `Aktuelles Thema: ${descriptionBase}`,
             tags,
-            color: groupEntry.color,
-            icon: subjectEntry.icon
+            color: course.group.color,
+            icon: course.subject.icon
         }
     })
 

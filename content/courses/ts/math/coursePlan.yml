@@ -2,9 +2,10 @@ course:
   group: ts
   subject: math
 
+worksheet:
+  format: pdf
+
 current_chapter: 12_ebenen
-current_worksheets:
-  - hi.pdf
 
 topics:
   trigonometrie:
