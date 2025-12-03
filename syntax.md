@@ -136,25 +136,22 @@ Eine Variable speichert einen Wert, z. B. eine Zahl oder einen Text.
   ]
 
   #gap[Setze das Wort ein: Ich kann eine {{Lücke}} platzieren. Hier ist eine Lücke mit mehreren richtigen {{Lösungen|Antworten}}!]
-
-  #textTask[
-    Mit welchem Aufgabentyp kann ich freie Antworten zulassen?
-    #hint[Ließ nochmal Aufgaben-Macros.]
-    #solution[Mit dem Macro `#textTask[]`.]
-  ]
 ]
 
 = Aufgaben
+
+#textTask[
+    Mit welchem Aufgabentyp kann ich freie Antworten zulassen?
+    #hint[Ließ nochmal Aufgaben-Macros.]
+    #solution[Mit dem Macro `#textTask[]`.]
+]
+
 #mathTask[
   Rechne: 4 × 2 = ?
   #solution[8]
 ]
 
 = Challenge
-#mathTask[
-  Rechne: 4 × 2 = ?
-  #solution[8]
-]
 
 #info("Code Aufgaben")[
   Hier ist ein kurzer Infotext, der für die folgende Aufgabe relevant sein könnte.

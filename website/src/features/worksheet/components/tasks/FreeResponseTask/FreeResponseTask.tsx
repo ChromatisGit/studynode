@@ -3,7 +3,7 @@ import { CollapsibleSection } from '@features/worksheet/components/CollapsibleSe
 import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/parseTextWithCode';
 import { strings } from '@features/worksheet/config/strings';
 import styles from './FreeResponseTask.module.css';
-import type { MathTask as MathTaskType, TextTask as TextTaskType } from '@worksheet/types';
+import type { MathTask as MathTaskType, TextTask as TextTaskType } from '@worksheet/worksheetModel';
 
 type FreeResponseTaskType = TextTaskType | MathTaskType;
 

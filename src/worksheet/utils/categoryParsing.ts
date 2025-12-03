@@ -1,9 +1,9 @@
-import { Category, CategoryItem, CategoryType, TaskCategory } from "@worksheet/types";
-import { RestoreCodeBlocks } from "./codeBlocks";
+import { Category, CategoryItem, CategoryType, TaskCategory } from "@worksheet/worksheetModel";
+import { ProtectedCodeBlocks, restoreCodeBlocks } from "./codeBlocks";
 import { findNextMacro } from "./inlineMacroParsing";
 import { parseGroupMacro, parseInfoMacro, parseTaskMacro } from "./macroParsing";
 import { dedentFencedCodeBlocks, stripSharedIndentation } from "./text";
-import type { TaskMacroMap } from "./worksheetParsing";
+import { TASK_MACRO_TO_KIND } from "./taskMacroMap";
 
 export type CategoryBlock = {
   name: string;
@@ -57,7 +57,7 @@ export function collectCategoryBlocks(content: string): CategoryBlock[] {
   return blocks;
 }
 
-export function resolveCategoryKind(name: string, filePath: string): CategoryType {
+export function resolveCategoryKind(name: string): CategoryType {
   const normalized = name.trim().toLowerCase();
   const match = CATEGORY_ALIASES[normalized];
 
@@ -66,7 +66,7 @@ export function resolveCategoryKind(name: string, filePath: string): CategoryTyp
       .map((key) => `"${key}"`)
       .join(", ");
     throw new Error(
-      `${filePath}: Unknown category "${name}". Known categories: ${allowed}.`
+      `Unknown category "${name}". Known categories: ${allowed}.`
     );
   }
 
@@ -75,31 +75,25 @@ export function resolveCategoryKind(name: string, filePath: string): CategoryTyp
 
 export function parseCategoryBlock({
   block,
-  restoreCodeBlocks,
-  filePath,
-  taskMacroToKind,
+  protectedBlocks,
 }: {
   block: CategoryBlock;
-  restoreCodeBlocks: RestoreCodeBlocks;
-  filePath: string;
-  taskMacroToKind: TaskMacroMap;
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">;
 }): Category {
-  const categoryKind = resolveCategoryKind(block.name, filePath);
+  const categoryKind = resolveCategoryKind(block.name);
 
   if (categoryKind === "info") {
     const normalized = stripSharedIndentation(block.body);
     return {
       kind: "info",
       title: block.name,
-      text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized.trim())),
+      text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized.trim(), protectedBlocks)),
     };
   }
 
   const items = parseCategoryItems({
     body: block.body,
-    restoreCodeBlocks,
-    filePath,
-    taskMacroToKind,
+    protectedBlocks,
   });
   return {
     kind: categoryKind,
@@ -109,14 +103,10 @@ export function parseCategoryBlock({
 
 function parseCategoryItems({
   body,
-  restoreCodeBlocks,
-  filePath,
-  taskMacroToKind,
+  protectedBlocks,
 }: {
   body: string;
-  restoreCodeBlocks: RestoreCodeBlocks;
-  filePath: string;
-  taskMacroToKind: TaskMacroMap;
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">;
 }): CategoryItem[] {
   const items: CategoryItem[] = [];
   let cursor = 0;
@@ -130,7 +120,7 @@ function parseCategoryItems({
     items.push({
       kind: "info",
       title: "Info",
-      text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized)),
+      text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized, protectedBlocks)),
     });
   };
 
@@ -144,19 +134,16 @@ function parseCategoryItems({
       items.push(
         parseGroupMacro({
           macro,
-          restoreCodeBlocks,
-          filePath,
-          taskMacroToKind,
+          protectedBlocks,
         })
       );
     } else if (macro.name === "info") {
-      items.push(parseInfoMacro(macro, restoreCodeBlocks));
-    } else if (macro.name in taskMacroToKind) {
+      items.push(parseInfoMacro(macro, protectedBlocks));
+    } else if (macro.name in TASK_MACRO_TO_KIND) {
       const task = parseTaskMacro({
         macro,
-        taskKind: taskMacroToKind[macro.name],
-        restoreCodeBlocks,
-        filePath,
+        taskKind: TASK_MACRO_TO_KIND[macro.name],
+        protectedBlocks,
       });
       items.push({
         kind: "taskSet",

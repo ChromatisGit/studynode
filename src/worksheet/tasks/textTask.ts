@@ -1,8 +1,8 @@
-import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
+import { TaskHandlerArgs } from "@worksheet/taskRegistry";
 import {
   dedentFencedCodeBlocks,
   stripSharedIndentation,
-} from "@worksheet/parser/utils/text";
+} from "@worksheet/utils/text";
 
 export type TextTask = {
   type: "text";

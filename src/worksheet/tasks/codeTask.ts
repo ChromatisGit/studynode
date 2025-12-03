@@ -1,7 +1,7 @@
 import z from "zod";
 
-import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
-import { dedentFencedCodeBlocks, stripSharedIndentation } from "@worksheet/parser/utils/text";
+import { TaskHandlerArgs } from "@worksheet/taskRegistry";
+import { dedentFencedCodeBlocks, stripSharedIndentation } from "@worksheet/utils/text";
 
 const codeLanguageSchema = z.enum(["ts", "python"]);
 type CodeLanguage = z.infer<typeof codeLanguageSchema>;

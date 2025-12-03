@@ -5,7 +5,7 @@ import { TaskSetComponent } from '@features/worksheet/components/TaskSet/TaskSet
 import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/parseTextWithCode';
 import styles from './CategorySection.module.css';
 import { strings } from '@features/worksheet/config/strings';
-import type { Category } from '@worksheet/types';
+import type { Category } from '@worksheet/worksheetModel';
 
 interface CategorySectionProps {
   block: Category;

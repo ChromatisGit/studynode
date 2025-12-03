@@ -1,6 +1,6 @@
 import { renderPageWithFrontmatter } from "@builder/template/pageFrontmatter";
+import { WorksheetRef } from "@worksheet/worksheetFiles";
 import { readContentFile } from "../io";
-import { WorksheetRef } from "@builder/loadWorksheets";
 
 export type PageSource = {
   source: string;

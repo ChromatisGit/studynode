@@ -1,6 +1,6 @@
-import { WorksheetRef } from "@builder/loadWorksheets";
+import { WorksheetRef } from "@worksheet/worksheetFiles";
 
-// ToDo needs to convert to a button component
+// ToDo needs to convert to a new component
 export function worksheetCards(worksheets: WorksheetRef[]) {
   if (worksheets.length === 0) return "";
 

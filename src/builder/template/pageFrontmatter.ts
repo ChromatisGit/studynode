@@ -1,4 +1,4 @@
-import { WorksheetRef } from "@builder/loadWorksheets";
+import { WorksheetRef } from "@worksheet/worksheetFiles";
 import { worksheetCards } from "./worksheetCards";
 
 type PageTemplateInput = {

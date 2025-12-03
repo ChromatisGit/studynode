@@ -1,5 +1,5 @@
 import { FreeResponseTask } from '../FreeResponseTask/FreeResponseTask';
-import type { TextTask as TextTaskType } from '@worksheet/types';
+import type { TextTask as TextTaskType } from '@worksheet/worksheetModel';
 
 interface TextTaskProps {
   task: TextTaskType;

@@ -1,25 +1,21 @@
-import { CategoryItem, TaskSet } from "@worksheet/types";
-import { TaskType, callTaskHandler } from "@worksheet/parser/taskRegistry";
-import { RestoreCodeBlocks } from "./codeBlocks";
+import { CategoryItem, TaskSet } from "@worksheet/worksheetModel";
+import { TaskType, callTaskHandler } from "@worksheet/taskRegistry";
+import { restoreCodeBlocks, type ProtectedCodeBlocks } from "./codeBlocks";
 import {
   ParsedMacro,
   extractInlineMacros,
   findNextMacro,
   parseArgs,
 } from "./inlineMacroParsing";
+import { TASK_MACRO_TO_KIND } from "./taskMacroMap";
 import { dedentFencedCodeBlocks, stripSharedIndentation } from "./text";
-import type { TaskMacroMap } from "./worksheetParsing";
 
 export function parseGroupMacro({
   macro,
-  restoreCodeBlocks,
-  filePath,
-  taskMacroToKind,
+  protectedBlocks,
 }: {
   macro: ParsedMacro;
-  restoreCodeBlocks: RestoreCodeBlocks;
-  filePath: string;
-  taskMacroToKind: TaskMacroMap;
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">;
 }): TaskSet {
   const tasks = [] as TaskSet["tasks"];
   const introParts: string[] = [];
@@ -31,13 +27,12 @@ export function parseGroupMacro({
 
     introParts.push(macro.body.slice(cursor, inner.start));
 
-    if (inner.name in taskMacroToKind) {
+    if (inner.name in TASK_MACRO_TO_KIND) {
       tasks.push(
         parseTaskMacro({
           macro: inner,
-          taskKind: taskMacroToKind[inner.name],
-          restoreCodeBlocks,
-          filePath,
+          taskKind: TASK_MACRO_TO_KIND[inner.name],
+          protectedBlocks,
         })
       );
     }
@@ -53,11 +48,11 @@ export function parseGroupMacro({
     .join("\n\n");
 
   if (tasks.length === 0) {
-    throw new Error(`${filePath}: #group[] must contain at least one task.`);
+    throw new Error("#group[] must contain at least one task.");
   }
 
   const introRestored = introText
-    ? dedentFencedCodeBlocks(restoreCodeBlocks(introText))
+    ? dedentFencedCodeBlocks(restoreCodeBlocks(introText, protectedBlocks))
     : undefined;
 
   return {
@@ -69,7 +64,7 @@ export function parseGroupMacro({
 
 export function parseInfoMacro(
   macro: ParsedMacro,
-  restoreCodeBlocks: RestoreCodeBlocks
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">
 ): CategoryItem {
   const args = parseArgs(macro.params);
   const titleArg = args.title;
@@ -82,28 +77,26 @@ export function parseInfoMacro(
   return {
     kind: "info",
     title,
-    text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized.trim())),
+    text: dedentFencedCodeBlocks(restoreCodeBlocks(normalized.trim(), protectedBlocks)),
   };
 }
 
 export function parseTaskMacro({
   macro,
   taskKind,
-  restoreCodeBlocks,
-  filePath,
+  protectedBlocks,
 }: {
   macro: ParsedMacro;
   taskKind: TaskType;
-  restoreCodeBlocks: RestoreCodeBlocks;
-  filePath: string;
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">;
 }) {
   const { cleanedBody, inlineMacros } = extractInlineMacros(macro.body);
   const params = parseArgs(macro.params);
-  const restoredBody = restoreCodeBlocks(cleanedBody);
+  const restoredBody = restoreCodeBlocks(cleanedBody, protectedBlocks);
   const restoredInlineMacros = Object.fromEntries(
     Object.entries(inlineMacros).map(([key, value]) => [
       key,
-      restoreCodeBlocks(value),
+      restoreCodeBlocks(value, protectedBlocks),
     ])
   );
   const normalizedBody = dedentFencedCodeBlocks(
@@ -124,6 +117,6 @@ export function parseTaskMacro({
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`${filePath}: ${message}`);
+    throw new Error(message);
   }
 }

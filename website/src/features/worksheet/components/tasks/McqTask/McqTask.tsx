@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { Check, X } from 'lucide-react';
 import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/parseTextWithCode';
 import styles from './McqTask.module.css';
-import type { McqTask as McqTaskType } from '@worksheet/types';
+import type { McqTask as McqTaskType } from '@worksheet/worksheetModel';
 import { chunkSections } from '@features/homepage/sections/CourseSection/sectionSplitter';
 
 interface McqTaskProps {

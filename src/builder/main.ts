@@ -10,7 +10,7 @@ import { buildGroupsAndSubjects } from "./transformer/groupsAndSubjects";
 import { validateCourses } from "./validateCourses";
 import { prepareCourses } from "./prepareCourses";
 import { getAllWorksheets } from "./loadWorksheets";
-import { buildWorksheet } from "@worksheet/parser/buildWorksheet";
+import { buildWorksheet } from "@worksheet/buildWorksheet";
 
 async function main() {
   await deleteGeneratedWebsite()

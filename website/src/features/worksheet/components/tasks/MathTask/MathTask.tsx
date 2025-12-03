@@ -1,5 +1,5 @@
 import { FreeResponseTask } from '../FreeResponseTask/FreeResponseTask';
-import type { MathTask as MathTaskType } from '@worksheet/types';
+import type { MathTask as MathTaskType } from '@worksheet/worksheetModel';
 
 interface MathTaskProps {
   task: MathTaskType;

@@ -5,7 +5,7 @@ import { renderInlineMarkdown } from '@features/worksheet/components/CodeBlock/p
 import codeStyles from '@features/worksheet/components/CodeBlock/CodeBlock.module.css';
 import { strings } from '@features/worksheet/config/strings';
 import styles from './GapTask.module.css';
-import type { GapField as GapFieldType, GapTask as GapTaskType } from '@worksheet/types';
+import type { GapField as GapFieldType, GapTask as GapTaskType } from '@worksheet/worksheetModel';
 import { Highlight } from 'prism-react-renderer';
 import { transparentCodeTheme } from '@features/worksheet/components/CodeBlock/codeTheme';
 

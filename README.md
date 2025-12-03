@@ -1,54 +1,48 @@
 # StudyNode
 
-Digitale Unterrichtsplattform für Mathematik und Informatik auf Basis von **Docusaurus**.
+Digitale Unterrichtsplattform auf Basis von **Docusaurus**.
 
 ---
 
 ## Ordnerstruktur
-
-
 
 ### Content
 
 ```
 
 content/
-├─ groupsAndSubjects.yml             # Definiert die Fächer und Kursarten
+├─ groupsAndSubjects.yml             # Definiert Fächer, Kursarten und Varianten
 │
-├─ base/                             # Allgemeine Unterrichtsinhalte (kursunabhängig)
-│  ├─ <subject>/                     # math, info ...
+├─ base/                             # Basisinhalte (kursunabhängig, wiederverwendbar)
+│  ├─ <subject>/                     # z. B. math, info
 │  │  └─ <topic>/                    # z. B. vektorgeometrie, trigonometrie
 │  │     ├─ chapters/
 │  │     │  └─ <chapter>/            # z. B. 00_geraden, 01_geraden_lagebeziehung
-│  │     │     ├─ slides/            # Foliensätze
-│  │     │     ├─ worksheets/        # Arbeitsbögen
-│  │     │     ├─ preview.md         # Website vor/während Bearbeitung
-│  │     │     └─ overview.md        # Website nach Abschluss des Kapitels
+│  │     │     ├─ slides/            # Folien (Marp)
+│  │     │     ├─ worksheets/        # Arbeitsblätter
+│  │     │     ├─ preview.md         # Vorschauseite (vor/während der Behandlung)
+│  │     │     └─ overview.md        # Übersichtsseite (nach Abschluss)
 │  │     │
-│  │     ├─ images/                  # Abbildungen für Webseite und Arbeitsbögen
-│  │     ├─ notes.md                 # Interne Notizen
-│  │     ├─ preview.md               # Website vor/während Bearbeitung
-│  │     ├─ overview.md              # Website nach Vollendung des Themenblocks
-│  │     └─ topicPlan.yml            # Stoffverteilungsplan eines Themenblocks (Lernziele + Kapitel)
+│  │     ├─ images/                  # Abbildungen für Webseite & Materialien
+│  │     ├─ notes.md                 # Interne Notizen für die Lehrperson
+│  │     ├─ preview.md               # Vorschauseite zum Themenblock
+│  │     ├─ overview.md              # Übersichtsseite zum Themenblock
+│  │     └─ topicPlan.yml            # Stoffverteilungsplan des Themenblocks (Lernziele & Kapitel)
 │  │
-│  └─ slides/                        # Überfachliche Foliensätze
+│  └─ slides/                        # Übergreifende Präsentationen
 │
 ├─ courses/                          # Konkrete Kurse (sichtbar für Schüler)
 │  └─ <group>/                       # z. B. tg2, bk1
-│     ├─ principles.md               # Leitsätze & Informationen für gesamte Gruppe
+│     ├─ group_info.md               # Kursbezogene Informationen & Leitsätze
 │     │
-│     └─ <subject_variant>/          # z. B. math-lk, info-tm
-│        ├─ coursePlan.yml          # Themenliste + aktueller Fortschritt
-│        │
-│        └─ <topic>/                 # Kurs-spezifische Themen (Alles optional)
-│           └─ chapters/
-│              └─ <chapter>/         # z.B. 10_geraden, 11_geraden_lagebeziehung
-│                 ├─ preview.md      # (optional) überschreibt base/preview.md
-│                 └─ overview.md     # (optional) überschreibt base/summary.md
+│     └─ <subject_variant>/          # z. B. math-lk, info-tgm
+│        ├─ coursePlan.yml           # Themenübersicht & aktueller Fortschritt
+│        ├─ courseVariations.yml     # Anpassungen gegenüber Base (z. B. alternative Arbeitsblätter)
+│        └─ files/                   # Kursbezogene Zusatzdateien
 │
 └─ templates/                        # Vorlagen zum Kopieren
-   ├─ baseTopic/                    # Topic + Chapter Skelett
-   └─ coursePlans/                  # coursePlan.yml Vorlagen für Kursvarianten
+   ├─ baseTopic/                     # Grundgerüst für Topic + Chapter
+   └─ coursePlans/                   # coursePlan.yml-Vorlagen für Kursvarianten
 
 ```
 
@@ -56,15 +50,17 @@ content/
 ```
 src/
 │
-├─ builder/                          # Node-Buildtools
-│  └─ main.ts                        # erzeugt .generated/*
+├─ builder/                          # Node-basierte Buildtools
+│  └─ main.ts                        # Generiert .generated/*
 │
-├─ dev/                              # Development Tools
-│  └─ export-schema.ts               # Erzeugt Schema für YAML Validierung in VSCode
+├─ dev/                              # Entwicklungswerkzeuge
+│  └─ export-schema.ts               # Erzeugt YAML-Schemas für IntelliSense in VSCode
 │
-├─ schema/                           # Zod-Schemas (Quellcode)
+├─ schema/                           # Zod-Schemas (Typdefinitionen)
 │
-└─ marp-styling/                     # CSS/Themes für Marp Foliensätze
+├─ worksheet/                        # Generiert Arbeitsbögen in pdf oder Webformat
+│
+└─ marp-styling/                     # CSS-Themes für Marp-Präsentationen
 ```
 
 ### Weitere
@@ -73,8 +69,7 @@ src/
 website/                             # Docusaurus-Website
 │
 ├─ src/                              # Darstellung & Interaktion mit der Webseite
-├─ static/                           # Vom Builder abgelegte PDFs/Bilder
-└─ .generated/                       # Vom Builder generiertes Layout
+└─ .generated/                       # Vom Builder generierte Webseite
 
 ```
 
@@ -83,45 +78,21 @@ website/                             # Docusaurus-Website
 ├─ settings.json                     # YAML Schema-Zuweisungen
 │
 └─ .schemas/                         # Generierte JSON-Schemas (für IntelliSense)
-   └─ course-plan.schema.json
 ---
 
 ## Begriffe
 
 | Begriff | Bedeutung |
 |----------|------------|
-| **Stunde** | Kleinste Unterrichtseinheit (Einzel- oder Doppelstunde). Eine Stunde behandelt einen klar abgegrenzten Teilaspekt des aktuellen Kapitels. |
-| **Kapitel (chapter)** | Didaktisch abgeschlossene Einheit mit 1–6 Stunden. |
-| **Themenblock (topic)** | Eigenständige thematische Einheit meist in Anlehnung einer Bil­dungs­plan­ein­hei­t. Kann mehrere Kapitel zusammenfassen (z. B. *Vektorgeometrie*) oder als einzelnes Thema ohne Unterkapitel stehen. |
-| **Roadmap** | Fortschrittsübersicht über alle Themenblöcke und Kapitel eines Kurses. Zeigt aktuelle, abgeschlossene und kommende Themen. Wird über die Datei `course-plan.yaml` pro Kurs gesteuert. |
-| **Arbeitsblatt (worksheet)** | Besteht aus mehreren Lernelementen (z. B. Basisaufgaben, Checkpoints, Challenges, Infotexten) und kann als PDF oder interaktive Web-Seite vorliegen. |
-| **Lernelement** | Kleinste Einheit innerhalb eines Arbeitsblatts. Lernelemente werden im Content-Pool gepflegt und zu Arbeitsblättern zusammengesetzt. |
-| **Grundaufgabe (core)** | Aufgabe, die alle Schüler während der Stunde bearbeiten. Sie bildet das erwartete Mindestlernziel ab. |
-| **Checkpoint** | Verständnisfrage mit sofortiger Rückmeldung (Check for Understanding). Dient der Selbstkontrolle und Lernstandserhebung. |
-| **Challenge** | Vertiefungs- oder Transferaufgabe für schnelle oder besonders leistungsstarke Schüler. Fördert Anwendung und Transfer. |
+| **Kapitel (chapter)** | Didaktisch abgeschlossene Einheit mit 1–6 Unterrichtsstunden. |
+| **Themenblock (topic)** | Übergeordnete thematische Einheit, meist entsprechend einer Bildungsplaneinheit. Umfasst mehrere Kapitel oder steht als Einzelthema ohne Unterkapitel. |
+| **Roadmap** | Fortschrittsübersicht über alle Themenblöcke und Kapitel eines Kurses. Zeigt aktuelle, abgeschlossene und kommende Themen. Wird über die Datei `coursePlan.yml` pro Kurs gesteuert. |
+| **Arbeitsblatt (worksheet)** | In `Typst` verfasste Übungsaufgaben. Arbeitsblätter werden abhängig vom Kurs automatisiert in PDF-Dateien oder interaktive Web-Seiten umgewandelt. |
+| **Checkpoint** | Verständnisfragen mit sofortiger Rückmeldung (Check for Understanding). Dient der Selbstkontrolle und Lernstandserhebung. |
+| **Aufgaben** | Pflichtaufgaben, die alle Schüler während der Stunde bearbeiten. Sie bildet das erwartete Mindestlernziel ab. |
+| **Challenge** | Vertiefungs- oder Transferaufgabe für schnelle oder leistungsstarke Schüler. Fördert Anwendung und Transfer. |
 
 ---
-
-## Ablauf einer Stunde
-
-1. Vorbereitung
-2. Einstiegsphase (Marp-Folien)
-3. Erarbeitungsphase
-4. Ergebnissicherung
-5. Nachbereitung
-
----
-
-
-## Arbeitsblatttypen
-
-| Typ | Format |
-|------|---------|
-| PDF-AB | `.pdf` |
-| Web-AB | `.mdx` |
-
----
-
 
 ## ToDo Liste
 

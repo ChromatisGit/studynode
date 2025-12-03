@@ -1,5 +1,3 @@
-export type RestoreCodeBlocks = (value: string) => string;
-
 const FENCED_CODE_BLOCK_REGEX = /```[\s\S]*?```/g;
 const INLINE_CODE_REGEX = /`[^`]*`/g;
 const CODE_BLOCK_PLACEHOLDER_REGEX = /__CODE_BLOCK_(\d+)__/g;
@@ -18,10 +16,13 @@ function substituteWithPlaceholders(
   });
 }
 
-export function protectCodeBlocks(raw: string): {
+export type ProtectedCodeBlocks = {
   safeContent: string;
-  restoreCodeBlocks: RestoreCodeBlocks;
-} {
+  fencedBlocks: string[];
+  inlineBlocks: string[];
+};
+
+export function protectCodeBlocks(raw: string): ProtectedCodeBlocks {
   const fencedBlocks: string[] = [];
   const inlineBlocks: string[] = [];
 
@@ -31,6 +32,7 @@ export function protectCodeBlocks(raw: string): {
     fencedBlocks,
     "CODE_BLOCK"
   );
+
   const safeContent = substituteWithPlaceholders(
     withFencedPlaceholders,
     INLINE_CODE_REGEX,
@@ -38,16 +40,22 @@ export function protectCodeBlocks(raw: string): {
     "INLINE_CODE"
   );
 
-  const restoreCodeBlocks: RestoreCodeBlocks = (value: string) =>
-    value
-      .replace(CODE_BLOCK_PLACEHOLDER_REGEX, (_, idx) => {
-        const index = Number(idx);
-        return fencedBlocks[index] ?? "";
-      })
-      .replace(INLINE_CODE_PLACEHOLDER_REGEX, (_, idx) => {
-        const index = Number(idx);
-        return inlineBlocks[index] ?? "";
-      });
+  return { safeContent, fencedBlocks, inlineBlocks };
+}
 
-  return { safeContent, restoreCodeBlocks };
+export function restoreCodeBlocks(
+  value: string,
+  protectedBlocks: Pick<ProtectedCodeBlocks, "fencedBlocks" | "inlineBlocks">
+): string {
+  const { fencedBlocks, inlineBlocks } = protectedBlocks;
+
+  return value
+    .replace(CODE_BLOCK_PLACEHOLDER_REGEX, (_, idx) => {
+      const index = Number(idx);
+      return fencedBlocks[index] ?? "";
+    })
+    .replace(INLINE_CODE_PLACEHOLDER_REGEX, (_, idx) => {
+      const index = Number(idx);
+      return inlineBlocks[index] ?? "";
+    });
 }

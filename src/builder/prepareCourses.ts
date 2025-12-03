@@ -3,10 +3,11 @@ import type { GroupsAndSubjects } from "@schema/groupsAndSubjects";
 import type { TopicPlan } from "@schema/topicPlan";
 import type { Status } from "@schema/overview";
 import type { AccentColor } from "@schema/colors";
-import { WorksheetRef } from "./loadWorksheets";
+import { WorksheetRef } from "@worksheet/worksheetFiles";
 
 export type ResolvedCourseChapter = {
   chapter: string;
+  slug: string;
   label: string;
   status: Status;
   worksheets: WorksheetRef[];
@@ -59,7 +60,7 @@ export function prepareCourses(
       slug: course.slug,
       currentChapter,
       worksheetFormat: course.worksheetFormat,
-      topics: preparedTopics,
+      topics: preparedTopics
     };
   });
 }
@@ -92,72 +93,52 @@ function computePreparedTopics(course: CoursePlan): {
   currentChapter?: CurrentChapter;
 } {
   let currentChapter: CurrentChapter | undefined;
-
-  const currentTopicIndex =
-    course.currentChapter == null
-      ? 0
-      : Math.max(
-        0,
-        course.topics.findIndex((topic) =>
-          topic.chapters.some((ch) => ch.chapter === course.currentChapter),
-        ),
-      );
+  const currentTopicIndex = findCurrentTopicIndex(course);
+  const currentChapterId = course.currentChapter ?? undefined;
 
   const topics = course.topics.map((topic, topicIndex) => {
     const topicStatus = statusFromRelativeIndex(topicIndex - currentTopicIndex);
 
-    let visibleChapters: typeof topic.chapters;
-
-    switch (topicStatus) {
-      case "locked":
-        return {
-          topic: topic.topic,
-          label: topic.label,
-          status: topicStatus,
-          chapters: [],
-        };
-      case "planned":
-        visibleChapters = topic.chapters.slice(0, 2);
-        break;
-      default:
-        visibleChapters = topic.chapters;
-        break;
+    if (topicStatus === "locked") {
+      return {
+        topic: topic.topic,
+        label: topic.label,
+        status: topicStatus,
+        chapters: [],
+      };
     }
 
-    // Ensure that a single chapter is promoted to topic status
-    if (visibleChapters.length === 1) {
-      visibleChapters[0].chapter = topic.topic
-    };
-
-    // Ensure there is always a chapter
-    if (visibleChapters.length === 0) {
-      visibleChapters.push({
-        topic: topic.topic,
-        chapter: topic.topic,
-        label: topic.label,
-      })
-    };
+    const visibleChapters = ensureVisibleChapters(
+      selectChaptersForTopic(topic, topicStatus),
+      topic,
+    );
 
     const currentChapterIndex =
-      topicStatus === "current" && course.currentChapter
-        ? visibleChapters.findIndex((ch) => ch.chapter === course.currentChapter)
+      topicStatus === "current" && currentChapterId
+        ? visibleChapters.findIndex((ch) => ch.chapter === currentChapterId)
         : -1;
 
     const chapters = visibleChapters.map((chapter, chapterIndex) => {
       const status = chapterStatusForTopic(topicStatus, chapterIndex, currentChapterIndex);
 
-      const worksheets: WorksheetRef[] = []
-
-      if (status === "current") {
-        currentChapter = { id: chapter.chapter, label: chapter.label, worksheets };
-      }
-
-      return {
+      const worksheets: WorksheetRef[] = [];
+      const resolvedChapter = {
         chapter: chapter.chapter,
+        slug: chapterSlug(chapter.chapter),
         label: chapter.label,
         status,
-        worksheets
+        worksheets,
       };
+
+      if (status === "current") {
+        currentChapter = {
+          id: resolvedChapter.chapter,
+          label: resolvedChapter.label,
+          worksheets,
+        };
+      }
+
+      return resolvedChapter;
     });
 
     return {
@@ -176,6 +157,54 @@ function statusFromRelativeIndex(relativeIndex: number): Status {
   if (relativeIndex === 0) return "current";
   if (relativeIndex === 1) return "planned";
   return "locked";
+}
+
+function findCurrentTopicIndex(course: CoursePlan): number {
+  if (!course.currentChapter) return 0;
+
+  const currentTopicIndex = course.topics.findIndex((topic) =>
+    topic.chapters.some((ch) => ch.chapter === course.currentChapter),
+  );
+
+  return currentTopicIndex === -1 ? 0 : currentTopicIndex;
+}
+
+function selectChaptersForTopic(
+  topic: CoursePlan["topics"][number],
+  topicStatus: Status,
+) {
+  if (topicStatus === "planned") {
+    return topic.chapters.slice(0, 2).map(cloneChapter);
+  }
+
+  return topic.chapters.map(cloneChapter);
+}
+
+function cloneChapter(chapter: CoursePlan["topics"][number]["chapters"][number]) {
+  return { ...chapter };
+}
+
+function ensureVisibleChapters(
+  chapters: ReturnType<typeof selectChaptersForTopic>,
+  topic: CoursePlan["topics"][number],
+) {
+  if (chapters.length > 0) {
+    return chapters;
+  }
+
+  return [
+    {
+      topic: topic.topic,
+      chapter: topic.topic,
+      label: topic.label,
+    },
+  ];
+}
+
+const CHAPTER_SLUG_REGEX = /^\d{2}_(.+)$/;
+function chapterSlug(chapterId: string): string {
+  const match = CHAPTER_SLUG_REGEX.exec(chapterId);
+  return match ? match[1] : chapterId;
 }
 
 function chapterStatusForTopic(

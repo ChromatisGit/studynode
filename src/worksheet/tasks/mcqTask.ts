@@ -1,8 +1,9 @@
-import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
+import { TaskHandlerArgs } from "@worksheet/taskRegistry";
+import { deterministicShuffle } from "@worksheet/utils/simpleHash";
 import {
   dedentFencedCodeBlocks,
   stripSharedIndentation,
-} from "@worksheet/parser/utils/text";
+} from "@worksheet/utils/text";
 
 const CHECKBOX_LINE_REGEX = /^-\s*\[[xX ]\]/;
 const CHECKBOX_OPTION_REGEX = /^-\s*\[([xX ])\]\s*(.+)$/;
@@ -61,7 +62,7 @@ export function mcqTaskHandler({
   return {
     type: "mcq",
     question,
-    options,
+    options: deterministicShuffle(options, `${question}?`),
     correct,
     single,
   };

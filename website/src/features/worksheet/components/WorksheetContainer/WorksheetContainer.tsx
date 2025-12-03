@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { CategorySection } from '@features/worksheet/components/CategorySection/CategorySection';
 import styles from './WorksheetContainer.module.css';
-import type { Category } from '@worksheet/types';
+import type { Category } from '@worksheet/worksheetModel';
 
 interface WorksheetContainerProps {
   content: Category[];

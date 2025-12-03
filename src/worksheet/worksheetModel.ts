@@ -1,12 +1,13 @@
-import type { CodeTask } from "./parser/tasks/codeTask";
-import type { GapField, GapPart, GapTask } from "./parser/tasks/gapTask";
-import type { MathTask } from "./parser/tasks/mathTask";
-import type { McqTask } from "./parser/tasks/mcqTask";
-import type { TextTask } from "./parser/tasks/textTask";
+import type { CodeTask } from "./tasks/codeTask";
+import type { GapField, GapPart, GapTask } from "./tasks/gapTask";
+import type { MathTask } from "./tasks/mathTask";
+import type { McqTask } from "./tasks/mcqTask";
+import type { TextTask } from "./tasks/textTask";
 
+// Core worksheet task definitions
 export type Task = McqTask | GapTask | TextTask | MathTask | CodeTask;
 
-
+// Page structure
 export type InfoBlock = {
   kind: "info";
   title: string;

@@ -7,7 +7,7 @@ import { useTsRunner } from '@features/worksheet/components/tasks/CodeTask/codeR
 import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/parseTextWithCode';
 import { strings } from '@features/worksheet/config/strings';
 import styles from './CodeTask.module.css';
-import type { CodeTask as CodeTaskType } from '@worksheet/types';
+import type { CodeTask as CodeTaskType } from '@worksheet/worksheetModel';
 
 interface CodeTaskProps {
   task: CodeTaskType;

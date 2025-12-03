@@ -1,4 +1,4 @@
-import { Category, Worksheet } from "@worksheet/types";
+import { Category, Worksheet } from "@worksheet/worksheetModel";
 
 export function renderWorksheet(worksheet: Worksheet): string {
   const mdx = [

@@ -1,4 +1,4 @@
-import { WorksheetRef } from "@builder/loadWorksheets";
+import { WorksheetRef } from "@worksheet/worksheetFiles";
 import type { CoursePlan } from "./coursePlan"
 
 export type Status = "finished" | "current" | "planned" | "locked";

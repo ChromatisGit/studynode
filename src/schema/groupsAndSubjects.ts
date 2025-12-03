@@ -23,6 +23,7 @@ export const groupsAndSubjectsSchema = z.object({
             short: z.string(),
         })
     ),
+    schoolyear_start: z.enum(["jan", "feb", "apr", "aug", "sep"])
 });
 
 export type GroupsAndSubjects = z.infer<typeof groupsAndSubjectsSchema>;

@@ -7,7 +7,7 @@ import { TextTask } from '@features/worksheet/components/tasks/TextTask/TextTask
 import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/parseTextWithCode';
 import { strings } from '@features/worksheet/config/strings';
 import styles from './TaskSetComponent.module.css';
-import type { Task, TaskSet } from '@worksheet/types';
+import type { Task, TaskSet } from '@worksheet/worksheetModel';
 
 interface TaskSetComponentProps {
   taskSet: TaskSet;

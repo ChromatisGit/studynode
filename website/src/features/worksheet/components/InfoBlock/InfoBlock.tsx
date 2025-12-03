@@ -1,4 +1,4 @@
-import type { InfoBlock as InfoBlockType } from "@worksheet/types";
+import type { InfoBlock as InfoBlockType } from "@worksheet/worksheetModel";
 import { parseTextWithCode } from "@features/worksheet/components/CodeBlock/parseTextWithCode";
 import styles from "./InfoBlock.module.css";
 

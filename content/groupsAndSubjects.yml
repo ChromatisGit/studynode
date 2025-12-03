@@ -30,3 +30,5 @@ variants:
   tgm:
     name: Mechatronik
     short: M
+
+schoolyear_start: sep

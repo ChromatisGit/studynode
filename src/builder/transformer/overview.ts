@@ -55,8 +55,7 @@ function buildRoadmapTopic(
   const chapters: RoadmapChapter[] = topic.chapters.map((chapter) => {
     return {
       label: chapter.label,
-      // chapter files are named 00_geraden, index must be removed for link
-      link: [topicLink, chapter.chapter.slice(3)].join("/"),
+      link: [topicLink, chapter.slug].join("/"),
       status: chapter.status,
     }
   });

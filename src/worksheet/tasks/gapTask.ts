@@ -1,9 +1,10 @@
-import { TaskHandlerArgs } from "@worksheet/parser/taskRegistry";
+import { TaskHandlerArgs } from "@worksheet/taskRegistry";
+import { deterministicShuffle } from "@worksheet/utils/simpleHash";
 import {
   collapseNewlinePadding,
   dedentFencedCodeBlocks,
   stripSharedIndentation,
-} from "@worksheet/parser/utils/text";
+} from "@worksheet/utils/text";
 
 const GAP_PLACEHOLDER_REGEX = /\{\{\s*([^}]+?)\s*\}\}/g;
 
@@ -41,7 +42,11 @@ export function gapTaskHandler({
   let lastIndex = 0;
 
   for (const match of matches) {
-    const matchIndex = match.index ?? 0;
+    if (match.index == null) {
+      throw new Error("Expected match.index to be defined");
+    }
+
+    const matchIndex = match.index;
 
     if (matchIndex > lastIndex) {
       const textPart = collapseNewlinePadding(
@@ -55,19 +60,25 @@ export function gapTaskHandler({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const options = rawEntries.length ? rawEntries : [""];
+    const baseOptions = rawEntries.length ? rawEntries : [""];
+    const correct = mcqMode ? [baseOptions[0]] : baseOptions;
+
+    const options = mcqMode
+      ? deterministicShuffle(baseOptions, match[1])
+      : baseOptions;
 
     parts.push({
       type: "gap",
       gap: {
         mode: mcqMode ? "mcq" : "text",
-        correct: mcqMode ? [options[0]] : options,
+        correct,
         ...(mcqMode ? { options } : {}),
       },
     });
 
     lastIndex = matchIndex + match[0].length;
   }
+
 
   if (lastIndex < content.length) {
     const trailing = collapseNewlinePadding(content.slice(lastIndex));
