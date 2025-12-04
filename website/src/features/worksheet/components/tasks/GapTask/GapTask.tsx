@@ -74,7 +74,10 @@ export function GapTask({ task, isSingleTask = false, triggerCheck }: GapTaskPro
                 >
                   {({ tokens, getTokenProps }) =>
                     tokens[0]?.map((token, tokenIndex) => (
-                      <span key={tokenIndex} {...getTokenProps({ token })} />
+                      <span
+                        key={tokenIndex}
+                        {...(getTokenProps({ token }) as React.HTMLAttributes<HTMLSpanElement>)}
+                      />
                     ))
                   }
                 </Highlight>
@@ -203,13 +206,12 @@ function GapField({ gap, gapIndex, value, onChange, isInCodeBlock = false, isVal
   const stateClass = showWrong
     ? styles.gapWrong
     : showCorrect
-    ? styles.gapCorrect
-    : styles.gapActive;
+      ? styles.gapCorrect
+      : styles.gapActive;
 
   if (gap.mode === "text") {
     return (
       <span className={`${styles.gapField} ${isInCodeBlock ? styles.gapInCode : ''}`} style={{ width: inputWidth }}>
-        <span className={styles.gapGhost}>{longestText}</span>
         <input
           type="text"
           value={value}
@@ -225,7 +227,6 @@ function GapField({ gap, gapIndex, value, onChange, isInCodeBlock = false, isVal
   // MCQ mode - dropdown
   return (
     <span className={`${styles.gapField} ${isInCodeBlock ? styles.gapInCode : ''}`} style={{ width: inputWidth }}>
-      <span className={styles.gapGhost}>{longestText}&nbsp;&nbsp;</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

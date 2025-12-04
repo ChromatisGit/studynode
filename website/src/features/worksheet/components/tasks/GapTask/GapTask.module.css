@@ -21,22 +21,14 @@
 
 .gapField {
   position: relative;
-  display: inline-block;
-  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
   --gap-base-surface: var(--sn-surface);
   --gap-text: var(--sn-text);
   z-index: 1;
 }
 
-.gapGhost {
-  visibility: hidden;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.95rem;
-}
-
 .gapControl {
-  position: absolute;
-  inset: 0;
   width: 100%;
   padding: 0.12rem 0.2rem;
   border: 0;
@@ -69,8 +61,7 @@
 }
 
 .gapActive {
-  --gap-bg: var(--sn-purple-accent-soft-bg);
-  --gap-border: var(--sn-purple-accent);
+  --gap-border: var(--sn-gray-border);
 }
 
 .gapCorrect {

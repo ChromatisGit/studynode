@@ -31,7 +31,7 @@ export function gapTaskHandler({
     dedentFencedCodeBlocks(stripSharedIndentation(body))
   );
 
-  const mcqMode = params?.mcq === true;
+  const textMode = params?.empty === true;
 
   const matches = [...content.matchAll(GAP_PLACEHOLDER_REGEX)];
   if (matches.length === 0) {
@@ -61,24 +61,24 @@ export function gapTaskHandler({
       .filter(Boolean);
 
     const baseOptions = rawEntries.length ? rawEntries : [""];
-    const correct = mcqMode ? [baseOptions[0]] : baseOptions;
 
-    const options = mcqMode
-      ? deterministicShuffle(baseOptions, match[1])
-      : baseOptions;
+    const correct = textMode ? baseOptions : [baseOptions[0]];
+
+    const options = textMode
+      ? baseOptions
+      : deterministicShuffle(baseOptions, match[1]);
 
     parts.push({
       type: "gap",
       gap: {
-        mode: mcqMode ? "mcq" : "text",
+        mode: textMode ? "text" : "mcq",
         correct,
-        ...(mcqMode ? { options } : {}),
+        ...(textMode ? {} : { options }),
       },
     });
 
     lastIndex = matchIndex + match[0].length;
   }
-
 
   if (lastIndex < content.length) {
     const trailing = collapseNewlinePadding(content.slice(lastIndex));
