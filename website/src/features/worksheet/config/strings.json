@@ -6,7 +6,7 @@
     "challenge": "Challenges"
   },
   "buttons": {
-    "checkSolution": "Lösung vergleichen",
+    "checkSolution": "Mit Lösung vergleichen",
     "runCode": "Code ausführen"
   },
   "sections": {
@@ -18,6 +18,8 @@
   "diagnosticsTitle": "TypeScript-Fehler",
   "resultSuccess": "Deine Lösung ist richtig!",
   "resultFailure": "Die Antwort ist noch nicht korrekt.",
+  "resultCompiled": "Dein Code kompiliert! Du kannst ihn mit der Musterlösung vergleichen.",
+  "resultCompileError": "Dein Code konnte nicht ausgeführt werden.",
   "consoleOutput": "Konsolenausgabe",
   "noOutput": "Code wurde erfolgreich ausgeführt (keine Ausgabe)"
 },

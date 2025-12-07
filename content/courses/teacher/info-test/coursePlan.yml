@@ -1,12 +1,12 @@
 course:
-  group: tg2
-  variant: tgtm
+  group: teacher
+  variant: test
   subject: info
 
 worksheet:
   format: web
 
-current_chapter: 04_funktionen
+current_chapter: 02_bedingungen
 
 topics:
 

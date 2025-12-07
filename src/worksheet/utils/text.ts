@@ -8,6 +8,7 @@ export function stripSharedIndentation(text: string): string {
     if (!line.trim()) continue;
     const match = /^([ \t]*)\S/.exec(line);
     if (!match) continue;
+    if(match[1].length === line.length)
     minIndent = Math.min(minIndent, match[1].length);
   }
 
@@ -27,12 +28,4 @@ export function dedentFencedCodeBlocks(text: string): string {
     const langPrefix = language ? `${language}\n` : "\n";
     return `\`\`\`${langPrefix}${dedentedBody}\n\`\`\``;
   });
-}
-
-/**
- * Removes padding spaces/tabs directly before or after line breaks.
- * Example: "foo\\n    bar" -> "foo\\nbar", "foo    \\nbar" -> "foo\\nbar".
- */
-export function collapseNewlinePadding(text: string): string {
-  return text.replace(/[ \t]+\n/g, "\n").replace(/\n[ \t]+/g, "\n");
 }

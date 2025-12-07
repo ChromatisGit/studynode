@@ -8,9 +8,9 @@
 #group[
   Beantworte, was der Code in der Schul-App macht (mehrere Antworten können richtig sein).
 
-  #mcq[
+  #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
-      const wohnort: string = "Stuttgart";
+    const wohnort: string = "Stuttgart";
     ```
 
     - [x] Deklariert die Variable `wohnort`
@@ -19,8 +19,7 @@
     - [ ] Der Code wirft einen Fehler
   ]
 
-  #mcq[
-
+  #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
     let adresse: string;
     ```
@@ -31,8 +30,7 @@
     - [ ] Der Code wirft einen Fehler
   ]
 
-  #mcq[
-
+  #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
     adresse = "Hauptstraße 17";
     console.log(adresse);
@@ -44,8 +42,7 @@
     - [ ] Der Code wirft einen Fehler
   ]
 
-  #mcq[
-
+  #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
     const hausnummer: number = "17a";
     ```
@@ -56,8 +53,7 @@
     - [x] Der Code wirft einen Fehler
   ]
 
-  #mcq[
-
+  #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
     let geburtsort: string;
     console.log(geburtsort);
@@ -71,12 +67,11 @@
 ]
 
 #group[
-  In den untenstehenden Code für die Schul-App haben sich Fehler eingeschlichen.
+  In den untenstehenden Code haben sich Fehler eingeschlichen.
   Korrigiere die Fehler!
 
   #codeTask[
     Die Schul-App soll speichern, ob das Schülerkonto aktiviert ist.
-
 
     #starter[
       ```ts
@@ -91,25 +86,21 @@
 
     #solution[
       ```ts
-      let istAktiv: boolean;
-      istAktiv = true;
+      let istAktiv: boolean = true;
       console.log(istAktiv);
       ```
     ]
 
     #validation[
       ```ts
-      typeof(istAktiv) === "boolean" && istAktiv === true
+      istAktiv === true
       ```
     ]
-
-
   ]
 
   #codeTask[
     In der Schul-App soll eine feste maximale Anzahl von Kursen gespeichert werden.
     `maxKurse` soll eine Konstante sein.
-
 
     #starter[
       ```ts
@@ -120,7 +111,7 @@
     ]
 
     #hint[
-      Bei const musst du den Wert direkt bei der Deklaration festlegen.
+      Bei `const` musst du den Wert direkt bei der Deklaration festlegen.
     ]
 
     #solution[
@@ -135,6 +126,5 @@
       maxKurse === 15
       ```
     ]
-
   ]
 ]

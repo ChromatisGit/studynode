@@ -32,7 +32,7 @@
   ]
 
   #mcq(single: true)[
-    Die Variable `istErwachsen` soll speichern, ob ein Schüler volljährig ist.
+    Die Variable `istVolljaehrig` soll speichern, ob ein Schüler volljährig ist.
     - [ ] number
     - [ ] string
     - [x] boolean

@@ -5,16 +5,14 @@
 
 = Challenge
 
-
-
 #textTask[
-  In der Schul-App sind einige Datentypen unlogisch gewählt.
-  Erkläre, warum der Datentyp richtig gewählt oder warum ein anderer Datentyp geeigneter wäre.
-ToDo
+  In der Schul-App für Schüler sind einige Variablen mit unpassenden Datentypen deklariert.
+  Erkläre für jeder Zeile kurz, welcher besser geeignet wäre oder warum der Datentyp korrekt ist.
+
     ```ts
-    let schulfarbe: number = "Blau";
-    let maxTeilnehmer: string = 30;
-    let hatMensaAbo: string = "true";
+    let unterrichtsstundenHeute: string = 6;
+    let hatParkplatzGebucht: string = "true";
+    let appFarbe: number = "Blau";
     const appVersion: number = 1.0;
     ```
 
@@ -24,72 +22,75 @@ ToDo
 
   #solution[
     ```ts
-    let schulfarbe: number = "Blau"; 
-    // ❌ Falsch: Farbe ist Text, kein number
-
-    let maxTeilnehmer: string = 30;
-    // ❌ Falsch: Anzahl ist Zahl, kein string
-
-    let hatMensaAbo: string = "true";
-    // ❌ Falsch: Wahr/Falsch-Angabe → boolean
-
-    const appVersion: number = 1.0;
-    // ✅ In Ordnung, Versionsnummer als Zahl
+    let unterrichtsstundenHeute: string = 6;
     ```
+    Falsch: Stundenanzahl ist eine Zahl -> besser: number
+
+
+    ```ts
+    let hatParkplatzGebucht: string = "true";
+    ```
+    Falsch: Wahr/Falsch-Angabe -> boolean
+
+    ```ts
+    let appFarbe: number = "Blau";
+    ```
+    Falsch: Farbe ist Text -> string
+
+    ```ts
+    const appVersion: number = 1.0;
+    ```
+    Richtig: Versionsnummer als Zahl, const sinnvoll da fest
   ]
 
 ]
 
 #codeTask[
-  Überlege bei den folgenden Variablen, ob sie besser mit **const** oder mit **let** deklariert werden sollten.
+  Überlege bei den folgenden Variablen, ob sie besser mit `const` oder mit `let` deklariert werden sollten.
   Füge jeweils einen Kommentar hinzu, der deine Entscheidung begründet.
 
   #starter[
     ```ts
-
     schulName: string = "Willhelm-Maybach-Schule";
 
     aktuelleWoche: number = 48;
 
-    hatHausaufgabeAbgegeben: boolean = false;
+    istPause: boolean = false;
 
     maxFehltage: number = 20;
     ```
   ]
 
   #hint[
-    Werte, die sich im Programmverlauf nie ändern sollen → const
-    Werte, die sich ändern können → let
+    Werte, die sich im Programmverlauf nie ändern sollen -> const
+    Werte, die sich ändern können -> let
   ]
 
   #solution[
     ```ts
-    const schulName: string = "Berufliches Gymnasium Süd";
-    // Schulname bleibt immer gleich -> const ist richtig
+    const schulName: string = "Willhelm-Maybach-Schule";
+    // Schulname bleibt immer gleich -> const
 
     let aktuelleWoche: number = 48;
-    // ✅ Ändert sich jede Woche -> let besser
+    // Ändert sich jede Woche -> let besser
 
-    let hatHausaufgabeAbgegeben: boolean = false;
-    // ✅ Kann sich ändern -> let
+    let istPause: boolean = false;
+    // Ändert sich mehrmals pro Tag -> let
 
     const maxFehltage: number = 20;
-    // ✅ Fixer Wert, bleibt gleich -> const passt
+    // Fixer Wert, bleibt gleich -> const
     ```
-  ]
-
-  #validation[
   ]
 ]
 
 #codeTask[
-  Die Schul-App soll Informationen über eine Klasse speichern.
-  Lege sinnvolle Variablen mit passenden Datentypen an. 
+  Die Schul-App soll Informationen über eine Klasse speichern. Lege sinnvolle Variablen mit passenden Datentypen an.
+
   Verwende dabei mindestens:
   - eine Text-Variable (string)
   - eine Zahlen-Variable (number)
   - eine Wahr/Falsch-Variable (boolean)
-  
+
   Gib anschließend alle Werte in der Konsole aus.
 
   #starter[
@@ -108,7 +109,7 @@ ToDo
     let lehrkraft: string = "Herr Holst";
 
     // Anzahl der Schüler in der Klasse
-    let anzahlSchueler: number = ;
+    let anzahlSchueler: number = 20;
 
     // Ob die Klasse ihre Tablets erhalten hat
     let hatTablet: boolean = true;
@@ -116,12 +117,6 @@ ToDo
     console.log(lehrkraft);
     console.log(anzahlSchueler);
     console.log(hatTablet);
-    ```
-  ]
-
-  #validation[
-    ```ts
-   //ToDo
     ```
   ]
 ]

@@ -4,7 +4,7 @@ Mit Variablen können wir Werte speichern.
 
 ### Variable deklarieren:
 
-```ts 
+```ts
 let meineVariable: string;
 ```
 
@@ -14,13 +14,13 @@ Mit `let` sagen wir dem Programm: Reserviere Speicherplatz für `meineVariable`.
 
 Hier sagen wir dem Programm, welchen Wert `meineVariable` haben soll:
 
-```ts 
+```ts
 meineVariable = "Hii";
 ```
 
 Wir können auch in einer Zeile eine Variable initialisieren und einen Wert zuweisen:
 
-```ts 
+```ts
 let meineZweiteVariable: string = "Heyy";
 ```
 
@@ -52,7 +52,7 @@ Außerdem gibt es noch `undefined`, wenn eine Variable zwar existiert, aber noch
 
 ### undefined
 
-TypeScript vergibt den Datentyp `undefined` automatisch, wenn eine Variable zwar deklariert, aber noch kein Wert zugewiesen wurde. In der Konsolenausgabe wird daher nichts angezeigt.
+TypeScript vergibt den Datentyp `undefined` automatisch, wenn eine Variable zwar deklariert, aber noch kein Wert zugewiesen wurde.
 
 <CodeExample>
 let eineVariable: number;
