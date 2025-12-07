@@ -62,7 +62,7 @@ export function gapTaskHandler({
 
     const baseOptions = rawEntries.length ? rawEntries : [""];
 
-    const correct = textMode ? baseOptions : [baseOptions[0]];
+    const correct = textMode ? baseOptions.map(t => t.toLowerCase()) : [baseOptions[0]];
 
     const options = textMode
       ? baseOptions

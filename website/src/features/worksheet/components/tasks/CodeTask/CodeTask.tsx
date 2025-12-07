@@ -26,6 +26,7 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck }: CodeTaskP
     consoleOutput,
     runtimeError,
     lastPassed,
+    hadRuntime,
     runCode,
   } = useTsRunner();
 
@@ -93,7 +94,8 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck }: CodeTaskP
   };
 
   const renderResultPanel = () => {
-    const hasAnyOutput = consoleOutput || runtimeError !== null || showValidation;
+    const showNoOutput = hadRuntime && !runtimeError && !consoleOutput;
+    const hasAnyOutput = showValidation || runtimeError !== null || consoleOutput || showNoOutput;
 
     if (!hasAnyOutput) return null;
 
