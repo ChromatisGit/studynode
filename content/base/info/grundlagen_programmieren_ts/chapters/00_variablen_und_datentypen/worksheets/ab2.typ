@@ -6,38 +6,50 @@
 = Aufgaben
 
 #group[
-  Beantworte, was der Code in der Schul-App macht (mehrere Antworten können richtig sein).
+  Unten siehst du einen ein Ausschnitt eines Programms, das in mehrere kleine Abschnitte unterteilt wurde. Jeder Ausschnitt zeigt den nächsten Schritt des Programms. Markiere bei jedem Ausschnitt, was in diesen Zeilen passiert (mehrere Antworten können richtig sein).
 
   #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
-    const wohnort: string = "Stuttgart";
+    const schulort: string = "Stuttgart";
+    ```
+
+    - [x] Deklariert die Variable `schulort`
+    - [x] Weist der Variable `schulort` einen Wert zu
+    - [ ] Gibt den Wert der Variable in der Konsolenausgabe aus
+    - [ ] Der Code wirft einen Fehler
+  ]
+
+  #mcq(wideLayout: true, shuffleSolutions: false)[
+    ```ts
+    let wohnort: string;
+    console.log(wohnort);
     ```
 
     - [x] Deklariert die Variable `wohnort`
-    - [x] Weist der Variable `wohnort` einen Wert zu
+    - [ ] Legt den Wert der Variable `wohnort` fest
     - [ ] Gibt den Wert der Variable in der Konsolenausgabe aus
     - [ ] Der Code wirft einen Fehler
   ]
 
   #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
-    let adresse: string;
+    let strasse: string;
     ```
 
-    - [x] Deklariert die Variable `adresse`
-    - [ ] Weist der Variable `adresse` einen Wert zu
+    - [x] Deklariert die Variable `strasse`
+    - [ ] Weist der Variable `strasse` einen Wert zu
     - [ ] Gibt den Wert der Variable in der Konsolenausgabe aus
     - [ ] Der Code wirft einen Fehler
   ]
 
   #mcq(wideLayout: true, shuffleSolutions: false)[
     ```ts
-    adresse = "Hauptstraße 17";
+    strasse = "Hauptstraße 17";
     console.log(adresse);
     ```
 
-    - [ ] Deklariert die Variable `adresse`
-    - [x] Legt den Wert der Variable `adresse` fest
+    - [ ] Deklariert die Variable `strasse`
+    - [x] Legt den Wert der Variable `strasse` fest
     - [x] Gibt den Wert der Variable in der Konsolenausgabe aus
     - [ ] Der Code wirft einen Fehler
   ]
@@ -51,18 +63,6 @@
     - [ ] Legt den Wert der Variable `hausnummer` fest
     - [ ] Gibt den Wert der Variable in der Konsolenausgabe aus
     - [x] Der Code wirft einen Fehler
-  ]
-
-  #mcq(wideLayout: true, shuffleSolutions: false)[
-    ```ts
-    let geburtsort: string;
-    console.log(geburtsort);
-    ```
-
-    - [x] Deklariert die Variable `geburtsort`
-    - [ ] Legt den Wert der Variable `geburtsort` fest
-    - [ ] Gibt den Wert der Variable in der Konsolenausgabe aus
-    - [ ] Der Code wirft einen Fehler
   ]
 ]
 
@@ -99,8 +99,7 @@
   ]
 
   #codeTask[
-    In der Schul-App soll eine feste maximale Anzahl von Kursen gespeichert werden.
-    `maxKurse` soll eine Konstante sein.
+    In der Schul-App soll eine feste maximale Anzahl von Kursen gespeichert werden. `maxKurse` soll eine Konstante sein.
 
     #starter[
       ```ts
@@ -126,5 +125,114 @@
       maxKurse === 15
       ```
     ]
+  ]
+]
+
+= Challenge
+
+#textTask[
+  In der Schul-App für Schüler sind einige Variablen mit unpassenden Datentypen deklariert.
+  Erkläre für jeder Zeile kurz, welcher besser geeignet wäre oder warum der Datentyp korrekt ist.
+
+    ```ts
+    let unterrichtsstundenHeute: string = 6;
+    let hatParkplatzGebucht: string = "true";
+    let appFarbe: number = "Blau";
+    const appVersion: number = 1.0;
+    ```
+
+  #hint[
+    Achte darauf, ob der Datentyp zum Wert passt. Werte in Anführungszeichen sind immer Text (string).
+  ]
+
+  #solution[
+    unterrichtsstundenHeute falsch
+    Varriable ist eine Zahl -> besser: number
+
+    hatParkplatzGebucht: string falsch
+    Wahr/Falsch-Angabe -> boolean
+
+    appFarbe: number falsch
+    Farbe ist Text -> string
+
+    appVersion: number richtig
+    Versionsnummer als Zahl, const sinnvoll da fest
+  ]
+
+]
+
+#codeTask[
+  Überlege bei den folgenden Variablen, ob sie besser mit `const` oder mit `let` deklariert werden sollten.
+  Füge jeweils einen Kommentar hinzu, der deine Entscheidung begründet.
+
+  #starter[
+    ```ts
+    schulName: string = "Willhelm-Maybach-Schule";
+
+    aktuelleWoche: number = 48;
+
+    istPause: boolean = false;
+
+    maxFehltage: number = 20;
+    ```
+  ]
+
+  #hint[
+    Werte, die sich im Programmverlauf nie ändern sollen -> const
+    Werte, die sich ändern können -> let
+  ]
+
+  #solution[
+    ```ts
+    const schulName: string = "Willhelm-Maybach-Schule";
+    // Schulname bleibt immer gleich -> const
+
+    let aktuelleWoche: number = 48;
+    // Ändert sich jede Woche -> let besser
+
+    let istPause: boolean = false;
+    // Ändert sich mehrmals pro Tag -> let
+
+    const maxFehltage: number = 20;
+    // Fixer Wert, bleibt gleich -> const
+    ```
+  ]
+]
+
+#codeTask[
+  Die Schul-App soll Informationen über eine Klasse speichern. Lege sinnvolle Variablen mit passenden Datentypen an.
+
+Verwende dabei mindestens:
+- eine Text-Variable (string)
+- eine Zahlen-Variable (number)
+- eine Wahr/Falsch-Variable (boolean)
+
+Gib anschließend alle Werte in der Konsole aus.
+
+  #starter[
+    ```ts
+    // Ergänze sinnvolle Profil-Informationen
+    ```
+  ]
+
+  #hint[
+    Überlege, welche Daten in einer echten Schul-App vorkommen könnten. Wähle zu jedem Wert den passenden Datentyp.
+  ]
+
+  #solution[
+    ```ts
+    // Name des Klassenlehrers
+    let lehrkraft: string = "Herr Holst";
+
+    // Anzahl der Schüler in der Klasse
+    let anzahlSchueler: number = 20;
+
+    // Ob die Klasse ihre Tablets erhalten hat
+    let hatTablet: boolean = true;
+
+    console.log(lehrkraft);
+    console.log(anzahlSchueler);
+    console.log(hatTablet);
+    ```
   ]
 ]

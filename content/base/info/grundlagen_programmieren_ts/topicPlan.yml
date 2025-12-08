@@ -4,11 +4,10 @@ chapters:
     title: Variablen und Datentypen
     time: 2
     goals:
-      - Verstehen, wie Variablen Werte speichern und wie man sie deklariert und initialisiert
-      - Zwischen veränderlichen (`let`) und unveränderlichen (`const`) Variablen unterscheiden
-      - Die grundlegenden Datentypen `string`, `number` und `boolean` erkennen und korrekt verwenden
-      - Den Sonderwert `undefined` verstehen und vermeiden lernen
-      - Mit `console.log()` einfache Ausgaben zur Überprüfung des Programms durchführen
+      - einfache Programme schreiben, die Variablen erzeugen, Werte zuweisen und per console.log ausgeben
+      - die grundlegenden Datentypen `string`, `number` und `boolean` erkennen und korrekt anwenden
+      - zwischen veränderlichen (`let`) und unveränderlichen (`const`) Variablen unterscheiden
+      - nennen, wann der Sonderwert `undefined` auftritt.
 
   - id: 01_ausdruecke_und_operatoren
     title: Ausdrücke und Operatoren

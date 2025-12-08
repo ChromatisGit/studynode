@@ -33,16 +33,16 @@ export function codeTaskHandler({
 }: TaskHandlerArgs): CodeTask {
   const instruction = dedentFencedCodeBlocks(
     stripSharedIndentation(body),
-  ).trim();
+  );
 
-  const hint = stripSharedIndentation(inlineMacros.hint ?? "").trim();
+  const hint = stripSharedIndentation(inlineMacros.hint ?? "");
   const solution = dedentFencedCodeBlocks(
     stripSharedIndentation(inlineMacros.solution ?? ""),
-  ).trim();
-  const starterRaw = stripSharedIndentation(inlineMacros.starter ?? "").trim();
+  );
+  const starterRaw = stripSharedIndentation(inlineMacros.starter ?? "");
   const validationRaw = stripSharedIndentation(
     inlineMacros.validation ?? "",
-  ).trim();
+  );
 
   const { language, starterBlock, validationBlock } = validateCodeTask({
     instruction,

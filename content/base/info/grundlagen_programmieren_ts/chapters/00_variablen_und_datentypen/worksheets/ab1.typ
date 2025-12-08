@@ -10,7 +10,7 @@
 
   #gap(empty: true)[
     ```ts
-    // Der folgende Code erstellt eine Begrüßung in der Schul-App
+    // Der folgende Code erstellt eine Begrüßung für eine Schul-App
 
     {{let}} nachricht: {{string}};
 
@@ -25,13 +25,6 @@
   Wähle den passenden Datentyp für die Schul-App:
 
   #mcq(single: true)[
-    Die Variable `groesse` soll die Körpergröße eines Schülers speichern (ohne Einheit).
-    - [x] number
-    - [ ] string
-    - [ ] boolean
-  ]
-
-  #mcq(single: true)[
     Die Variable `istVolljaehrig` soll speichern, ob ein Schüler volljährig ist.
     - [ ] number
     - [ ] string
@@ -39,19 +32,24 @@
   ]
 
   #mcq(single: true)[
-    Die Variable `wohnort` soll den Wohnort eines Schülers speichern.
+    Die Variable `schulart` soll die Schulart, die ein Schüler besucht, speichern.
     - [ ] number
     - [x] string
     - [ ] boolean
   ]
-]
 
-= Aufgaben
+  #mcq(single: true)[
+    Die Variable `neueNachrichten` soll die Anzahl an Nachrichten, die ein Schüler erhalten hat, speichern.
+    - [x] number
+    - [ ] string
+    - [ ] boolean
+  ]
+]
 
 #codeTask[
   In der Schul-App soll ein Schülerprofil gespeichert werden.
-  Lege eine Variable `name` für deinen Namen und `alter` für dein Alter an.
-  Gib beide Variablen mit `console.log` in der Konsolenausgabe aus.
+Lege eine Variable `name` für deinen Namen und `alter` für dein Alter an.
+Gib beide Variablen mit `console.log` in der Konsolenausgabe aus.
 
   #starter[
     ```ts
