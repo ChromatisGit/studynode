@@ -6,7 +6,7 @@
     "gen:ignoreMissing": "node -r ts-node/register -r tsconfig-paths/register -e \"process.env.IGNORE_MISSING_FILES='true'; require('./src/builder/main.ts')\"",
     "dev": "pnpm run gen:ignoreMissing && pnpm --dir website start",
     "start": "pnpm --dir website start",
-    "build": "pnpm run gen:ignoreMissing && pnpm --dir website build",
+    "build": "pnpm run gen:ignoreMissing && pnpm --dir website install && pnpm --dir website build",
     "serve": "pnpm --dir website serve"
   },
   "dependencies": {
