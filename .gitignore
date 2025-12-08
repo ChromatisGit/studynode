@@ -1,16 +1,16 @@
 # Dependencies
-/website/node_modules
+/website/node_modules/
+/node_modules/
 
-# Dependencies
-/website/node_modules
+# Website production
+/website/build/
+/website/.generated/
+/website/.docusaurus/
+/website/.cache-loader
 
-# Production
-/website/build
-
-# Generated files
-.docusaurus
-.cache-loader
-node_modules
+# Dev tools
+/build/
+/.vscode/.schema/
 
 # Misc
 .DS_Store
