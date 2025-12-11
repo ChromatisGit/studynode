@@ -97,5 +97,6 @@ website/                             # Docusaurus-Website
 ## ToDo Liste
 
 - Warnung wenn Lernelemente die bereits veröffentlicht sind bearbeitet werden (Willst du das nicht lieber in einem neuen Branch machen?)
+- Code Compiler beim ersten Mal nicht timeouten so lange noch nicht gestartet ist
 
 © 2025 Christian Holst

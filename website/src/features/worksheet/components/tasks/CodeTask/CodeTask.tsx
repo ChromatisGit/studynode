@@ -8,15 +8,24 @@ import { parseTextWithCode } from '@features/worksheet/components/CodeBlock/pars
 import { strings } from '@features/worksheet/config/strings';
 import styles from './CodeTask.module.css';
 import type { CodeTask as CodeTaskType } from '@worksheet/worksheetModel';
+import { useTaskPersistence } from '@features/worksheet/storage/useTaskPersistence';
 
 interface CodeTaskProps {
   task: CodeTaskType;
   isSingleTask?: boolean;
   triggerCheck: number;
+  taskKey: string;
 }
 
-export function CodeTask({ task, isSingleTask = false, triggerCheck }: CodeTaskProps) {
-  const [code, setCode] = useState(task.starter);
+export function CodeTask({ task, isSingleTask = false, triggerCheck, taskKey }: CodeTaskProps) {
+  const { value: code, setValue: setCode, worksheetId } = useTaskPersistence<string>(
+    taskKey,
+    task.starter,
+    {
+      serialize: (value) => value,
+      deserialize: (raw) => raw,
+    }
+  );
   const [showValidation, setShowValidation] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
@@ -53,6 +62,11 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck }: CodeTaskP
     setCode(value);
     setShowValidation(false);
   };
+
+  useEffect(() => {
+    setShowValidation(false);
+    setIsChecked(false);
+  }, [worksheetId]);
 
   const handleRunCode = () => {
     setShowValidation(false);
