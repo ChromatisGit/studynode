@@ -13,8 +13,8 @@ chapters:
     title: Operatoren
     time: 2
     goals:
-      - Verstehen, was Operatoren sind und wie sie Werte verändern oder verknüpfen
-      - Arithmetische Operatoren (+, -, *, /, %) anwenden, um Berechnungen durchzuführen
+      - Verstehen, wie Operatoren Werte verändern oder verknüpfen
+      - Arithmetische Operatoren (+, -, *, /) anwenden, um Berechnungen durchzuführen
       - Den Operator `+` sowohl zur Addition von Zahlen als auch zur Verknüpfung von Texten (Strings) einsetzen
       - Vergleichsoperatoren (`===`, `!==`, `>`, `<`, `>=`, `<=`) anwenden, um Werte zu vergleichen
       - Den Unterschied zwischen Zuweisung (`=`) und Vergleich (`===`) erkennen und typische Fehler vermeiden

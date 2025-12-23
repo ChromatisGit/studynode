@@ -38,9 +38,9 @@ console.log(nachricht);
 
 Jede Variable besitzt einen Datentyp, der beschreibt, was für eine Art Wert gespeichert wird.
 
-### Einfache Datentypen
+### Primitive Datentypen
 
-Die wichtigsten, einfachen Datentypen in TypeScript sind:
+Die wichtigsten primitiven Datentypen in TypeScript sind:
 
 | Datentyp | Beispielwert     | Bedeutung                      |
 |-----------|------------------|--------------------------------|

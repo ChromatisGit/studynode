@@ -8,7 +8,6 @@ console.log(x);
 </CodeExample>
 
 Hier wird die Zahl `5` zu `x` addiert und das Ergebnis wieder in `x` gespeichert.
-
 → `x = x + 5` bedeutet also: "Erhöhe den alten Wert von `x` um 5".
 
 ## Arithmetische Operatoren

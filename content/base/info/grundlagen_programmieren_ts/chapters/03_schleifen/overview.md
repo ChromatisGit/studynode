@@ -1,3 +1,5 @@
+# Schleifen
+
 Mit **Schleifen** können wir Code **mehrmals hintereinander** ausführen.
 Das ist nützlich, wenn sich eine Aufgabe **wiederholt** – etwa beim Zählen, Rechnen oder Durchlaufen von Daten.
 
@@ -19,7 +21,7 @@ Das passiert Schritt für Schritt:
 4. `i = i + 1` → Zähler erhöhen
 5. Zurück zu Schritt 2
 
-> **Hinweis:** Wie bei `if` gilt auch hier: Variablen existieren nur innerhalb des Blocks! Wir können also nur innerhalb der `for`-Schleife auf die Variable `i` zugreifen!
+> **Merke:** Die for-Schleife eignet sich, wenn man eine **feste Anzahl** an Durchläufen hat.
 
 ### Kurzschreibweise
 
@@ -50,12 +52,24 @@ while (geld < 200) {
 
 Ablauf:
 
-1. Bedingung prüfen (`geld < 200`)
+1. Bedingung prüfen (`zahl <= 3`)
 2. Wenn `true`: Code ausführen
 3. Danach wieder zur Bedingung springen
 4. Wenn `false`: Schleife endet
 
 > **Achtung:** Wenn die Bedingung nie `false` wird, entsteht eine **Endlosschleife**.
+
+## Schleifen mit Bedingungen kombinieren
+
+<CodeExample>
+for (let i = 1; i <= 5; i++) {
+  if (i % 2 === 0) {
+    console.log(i + " ist gerade");
+  }
+}
+</CodeExample>
+
+Hier wird der Code im `if`-Block nur ausgeführt, wenn `i` gerade ist.
 
 ## Übersicht
 

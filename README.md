@@ -1,101 +1,36 @@
-# StudyNode
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Digitale Unterrichtsplattform auf Basis von **Docusaurus**.
+## Getting Started
 
----
+First, run the development server:
 
-## Ordnerstruktur
-
-### Content
-
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-content/
-├─ groupsAndSubjects.yml             # Definiert Fächer, Kursarten und Varianten
-│
-├─ base/                             # Basisinhalte (kursunabhängig, wiederverwendbar)
-│  ├─ <subject>/                     # z. B. math, info
-│  │  └─ <topic>/                    # z. B. vektorgeometrie, trigonometrie
-│  │     ├─ chapters/
-│  │     │  └─ <chapter>/            # z. B. 00_geraden, 01_geraden_lagebeziehung
-│  │     │     ├─ slides/            # Folien (Marp)
-│  │     │     ├─ worksheets/        # Arbeitsblätter
-│  │     │     ├─ preview.md         # (optional) Vorschauseite (vor/während der Behandlung)
-│  │     │     └─ overview.md        # Übersichtsseite
-│  │     │
-│  │     ├─ images/                  # Abbildungen für Webseite & Materialien
-│  │     ├─ notes.md                 # Interne Notizen für die Lehrperson
-│  │     ├─ preview.md               # (optional) Vorschauseite zum Themenblock
-│  │     ├─ overview.md              # Übersichtsseite zum Themenblock
-│  │     └─ topicPlan.yml            # Stoffverteilungsplan des Themenblocks (Lernziele & Kapitel)
-│  │
-│  └─ slides/                        # Übergreifende Präsentationen
-│
-├─ courses/                          # Konkrete Kurse (sichtbar für Schüler)
-│  └─ <group>/                       # z. B. tg2, bk1
-│     ├─ group_info.md               # Kursbezogene Informationen & Leitsätze
-│     │
-│     └─ <subject_variant>/          # z. B. math-lk, info-tgm
-│        ├─ coursePlan.yml           # Themenübersicht & aktueller Fortschritt
-│        ├─ courseVariations.yml     # Anpassungen gegenüber Base (z. B. alternative Arbeitsblätter)
-│        └─ files/                   # Kursbezogene Zusatzdateien
-│
-└─ templates/                        # Vorlagen zum Kopieren
-   ├─ baseTopic/                     # Grundgerüst für Topic + Chapter
-   └─ coursePlans/                   # coursePlan.yml-Vorlagen für Kursvarianten
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Source (Quellcode)
-```
-src/
-│
-├─ builder/                          # Node-basierte Buildtools
-│  └─ main.ts                        # Generiert .generated/*
-│
-├─ dev/                              # Entwicklungswerkzeuge
-│  └─ export-schema.ts               # Erzeugt YAML-Schemas für IntelliSense in VSCode
-│
-├─ schema/                           # Zod-Schemas (Typdefinitionen)
-│
-├─ worksheet/                        # Generiert Arbeitsbögen in pdf oder Webformat
-│
-└─ marp-styling/                     # CSS-Themes für Marp-Präsentationen
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Weitere
+## Learn More
 
-```
-website/                             # Docusaurus-Website
-│
-├─ src/                              # Darstellung & Interaktion mit der Webseite
-└─ .generated/                       # Vom Builder generierte Webseite
+To learn more about Next.js, take a look at the following resources:
 
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-.vscode/
-│
-├─ settings.json                     # YAML Schema-Zuweisungen
-│
-└─ .schemas/                         # Generierte JSON-Schemas (für IntelliSense)
----
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Begriffe
+## Deploy on Vercel
 
-| Begriff | Bedeutung |
-|----------|------------|
-| **Kapitel (chapter)** | Didaktisch abgeschlossene Einheit mit 1–6 Unterrichtsstunden. |
-| **Themenblock (topic)** | Übergeordnete thematische Einheit, meist entsprechend einer Bildungsplaneinheit. Umfasst mehrere Kapitel oder steht als Einzelthema ohne Unterkapitel. |
-| **Roadmap** | Fortschrittsübersicht über alle Themenblöcke und Kapitel eines Kurses. Zeigt aktuelle, abgeschlossene und kommende Themen. Wird über die Datei `coursePlan.yml` pro Kurs gesteuert. |
-| **Arbeitsblatt (worksheet)** | In `Typst` verfasste Übungsaufgaben. Arbeitsblätter werden abhängig vom Kurs automatisiert in PDF-Dateien oder interaktive Web-Seiten umgewandelt. |
-| **Checkpoint** | Verständnisfragen mit sofortiger Rückmeldung (Check for Understanding). Dient der Selbstkontrolle und Lernstandserhebung. |
-| **Aufgaben** | Pflichtaufgaben, die alle Schüler während der Stunde bearbeiten. Sie bildet das erwartete Mindestlernziel ab. |
-| **Challenge** | Vertiefungs- oder Transferaufgabe für schnelle oder leistungsstarke Schüler. Fördert Anwendung und Transfer. |
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
----
-
-## ToDo Liste
-
-- Warnung wenn Lernelemente die bereits veröffentlicht sind bearbeitet werden (Willst du das nicht lieber in einem neuen Branch machen?)
-
-© 2025 Christian Holst
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

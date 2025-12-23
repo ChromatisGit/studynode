@@ -1,0 +1,35 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--sn-radius-xs);
+  border: 1px solid transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.default {
+  background-color: var(--sn-purple-accent);
+  color: var(--sn-text-on-accent);
+}
+
+.secondary {
+  background-color: var(--sn-surface-raised);
+  color: var(--sn-text);
+  border-color: var(--sn-border);
+}
+
+.outline {
+  background-color: transparent;
+  color: var(--sn-text);
+  border-color: var(--sn-border);
+}
+
+.destructive {
+  background-color: var(--sn-red-accent);
+  color: var(--sn-text-on-accent);
+}
