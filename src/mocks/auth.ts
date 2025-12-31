@@ -1,9 +1,7 @@
 import type { MockCredentials, User } from "@/schema/auth";
 import type { CourseId } from "@/schema/course";
 
-export type MockCredentialRecord = MockCredentials & {
-  userId: string;
-};
+export type MockCredentialRecord = Record<User["id"], MockCredentials>;
 
 const DEFAULT_COURSE_IDS: CourseId[] = ["student/info-test"];
 
@@ -20,15 +18,13 @@ export const MOCK_USERS: Record<string, User> = {
   },
 };
 
-export const MOCK_CREDENTIALS: MockCredentialRecord[] = [
-  {
+export const MOCK_CREDENTIALS: MockCredentialRecord = {
+  "student-1": {
     accessCode: "p",
     pin: "p",
-    userId: "student-1",
   },
-  {
+  "admin-1": {
     accessCode: "t",
     pin: "t",
-    userId: "admin-1",
   },
-];
+};

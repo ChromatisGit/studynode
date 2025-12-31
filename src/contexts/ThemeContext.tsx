@@ -12,24 +12,23 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-
-    const stored = window.localStorage.getItem("sn-theme") as Theme | null;
-    if (stored) return stored;
-
-    if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-      return "dark";
-    }
-
-    return "light";
-  });
+  const [theme, setTheme] = useState<Theme>("light");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("sn-theme") as Theme | null;
+    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+    const initialTheme = stored ?? (prefersDark ? "dark" : "light");
+    setTheme(initialTheme);
+    setIsInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isInitialized || typeof document === "undefined") return;
     document.documentElement.setAttribute("data-theme", theme);
     window.localStorage.setItem("sn-theme", theme);
-  }, [theme]);
+  }, [theme, isInitialized]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));

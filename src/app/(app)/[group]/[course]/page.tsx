@@ -4,7 +4,7 @@ import { buildCourseId, getCourseBySlug } from "@/data/courses";
 import { getCourseOverview } from "@/data/overview";
 import { getCourseRoadmap } from "@/data/roadmap";
 import { CoursepagePage } from "@pages/coursepage/Coursepage";
-import type { CoursepageModel } from "@schema/coursepage";
+import type { CoursepageModel } from "@/schema/coursepage";
 
 type PageParams = {
   params:

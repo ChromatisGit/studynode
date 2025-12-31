@@ -61,7 +61,6 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
 
   const showHamburger = isMobile || routeContext.hasTopicContext;
 
-  const userName = user?.id;
   const isUserAdmin = user ? isAdmin(user) : false;
   const primaryGroupId = user && !isUserAdmin ? user.groupId : undefined;
 
@@ -130,7 +129,6 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
             <NavbarProfileDropdown
               onLogout={handleLogout}
               isMobile={isMobile}
-              userName={userName}
               isAdmin={isUserAdmin}
             />
           ) : (

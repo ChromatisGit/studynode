@@ -3,6 +3,21 @@ import type { ReactNode } from "react";
 import "../styles/globals.css";
 import { Providers } from "./providers";
 
+const themeInitScript = `
+(function () {
+  try {
+    var theme = "light";
+    var stored = localStorage.getItem("sn-theme");
+    if (stored === "light" || stored === "dark") {
+      theme = stored;
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch (e) {}
+})();
+`;
+
 export const metadata: Metadata = {
   title: "StudyNode",
   description: "Lernplattform mit Next.js Komponenten",
@@ -10,7 +25,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

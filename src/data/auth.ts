@@ -10,14 +10,15 @@ export function getMockUserById(userId: string): User | null {
   return MOCK_USERS[userId] ?? null;
 }
 
-export function getMockCredentials(): MockCredentialRecord[] {
+export function getMockCredentials(): MockCredentialRecord {
   return MOCK_CREDENTIALS;
 }
 
 export function resolveUserFromCredentials(accessCode: string, pin: string): User | null {
-  const credential = MOCK_CREDENTIALS.find(
-    (entry) => entry.accessCode === accessCode && entry.pin === pin
+  const match = Object.entries(MOCK_CREDENTIALS).find(
+    ([, entry]) => entry.accessCode === accessCode && entry.pin === pin
   );
-  if (!credential) return null;
-  return getMockUserById(credential.userId);
+  if (!match) return null;
+  const [userId] = match;
+  return getMockUserById(userId);
 }

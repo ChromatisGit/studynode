@@ -6,7 +6,7 @@ import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import { useMockAuth } from "@/contexts/MockAuthContext";
-import { MOCK_CREDENTIALS, MOCK_USERS } from "@/mocks/auth";
+import { resolveUserFromCredentials } from "@/data/auth";
 import { canSeeCourse } from "@/schema/auth";
 import type { CourseId } from "@/schema/course";
 import { getCourseById } from "@/data/courses";
@@ -67,21 +67,18 @@ export default function AccessPage() {
     }
 
     if (hasAccessCode) {
-      const credential = MOCK_CREDENTIALS.find(
-        (entry) => entry.accessCode === accessCode && entry.pin === pin
-      );
+      const authenticatedUser = resolveUserFromCredentials(accessCode, pin);
 
-      if (!credential) {
+      if (!authenticatedUser) {
         setError("Wrong access code or PIN.");
         return;
       }
 
-      const authenticatedUser = MOCK_USERS[credential.userId];
-      setCurrentUser(credential.userId);
+      setCurrentUser(authenticatedUser.id);
 
       const redirectAfterLogin = () => {
         if (isCourseJoin && resolvedCourseId) {
-          if (authenticatedUser && canSeeCourse(authenticatedUser, resolvedCourseId)) {
+          if (canSeeCourse(authenticatedUser, resolvedCourseId)) {
             router.push(`/${resolvedCourseId}`);
           } else {
             toast.error(
@@ -106,12 +103,10 @@ export default function AccessPage() {
     }
 
     if (!isCourseJoin) {
-      const credential = MOCK_CREDENTIALS.find(
-        (entry) => entry.accessCode === pin && entry.pin === pin
-      );
+      const authenticatedUser = resolveUserFromCredentials(pin, pin);
 
-      if (credential) {
-        setCurrentUser(credential.userId);
+      if (authenticatedUser) {
+        setCurrentUser(authenticatedUser.id);
         if (!isAuthenticated) {
           toggleAuth();
         }
