@@ -15,8 +15,7 @@ type PageParams = {
 export default function GroupPrinciplesPage({ params }: PageParams) {
   const router = useRouter();
   const { user, isAuthenticated } = useMockAuth();
-  const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupId = user && !isUserAdmin ? user.groupId : null;
+  const primaryGroupId = user && !isAdmin(user) ? user.groupId : null;
   const isAllowed = Boolean(
     isAuthenticated && primaryGroupId && primaryGroupId === params.group
   );

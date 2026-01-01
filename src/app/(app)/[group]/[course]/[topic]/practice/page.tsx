@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { buildCourseId } from "@/data/courses";
 import { getCourseOverview } from "@/data/overview";
 import { getPracticeTasks } from "@/data/practice";
+import { Practise } from "@pages/practise/Practise";
 
 type PageParams = {
   params:
@@ -29,24 +30,5 @@ export default async function PracticePage({ params }: PageParams) {
 
   const tasks = getPracticeTasks(courseId);
 
-  return (
-    <main style={{ padding: "2rem" }}>
-      <h1>Practice session</h1>
-      <p>Course: {courseId}</p>
-      <p>Topic: {topic.title}</p>
-      <p>Practice routes are stubbed with minimal tasks for now.</p>
-
-      {tasks.length > 0 ? (
-        <ol>
-          {tasks.map((task) => (
-            <li key={task.id}>
-              <strong>{task.title}:</strong> {task.prompt}
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p>No practice tasks are available yet.</p>
-      )}
-    </main>
-  );
+  return <Practise courseId={courseId} topicTitle={topic.title} tasks={tasks} />;
 }

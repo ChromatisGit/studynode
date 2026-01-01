@@ -62,7 +62,7 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
   const showHamburger = isMobile || routeContext.hasTopicContext;
 
   const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupId = user && !isUserAdmin ? user.groupId : undefined;
+  const primaryGroupId = user && !isAdmin(user) ? user.groupId : undefined;
 
   const handleLogout = () => {
     router.push("/");

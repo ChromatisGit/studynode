@@ -68,7 +68,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const isMobile = useIsMobile();
 
   const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupId = user && !isUserAdmin ? user.groupId : undefined;
+  const primaryGroupId = user && !isAdmin(user) ? user.groupId : undefined;
   const accessibleCourses = user ? groupCoursesByAccess(user).accessible : [];
 
   const topics = useMemo(() => {

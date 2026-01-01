@@ -139,7 +139,7 @@ export function getChapterWorksheetList(
   const match = findChapter(overview, params.topicSlug, params.chapterSlug);
   if (!match) return null;
 
-  const worksheets = match.chapter.worksheets
+  const worksheets: WorksheetRef[] = match.chapter.worksheets
     .filter((worksheet) => isWorksheetVisible(worksheet.isVisible))
     .map((worksheet) => ({
       label: worksheet.title,
