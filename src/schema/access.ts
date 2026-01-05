@@ -1,9 +1,7 @@
-import type { CourseId } from "./course";
-
 export type AccessState = "public" | "enrolled" | "admin" | "restricted";
 
 export type CourseAccessState = {
-  courseId: CourseId;
+  courseId: string;
   state: AccessState;
 };
 

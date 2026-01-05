@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { buildCourseId } from "@/data/courses";
 import { getChapterWorksheetList } from "@/data/worksheets";
 import { WorksheetCards } from "@pages/coursepage/components/WorksheetCard/WorksheetCards";
 
