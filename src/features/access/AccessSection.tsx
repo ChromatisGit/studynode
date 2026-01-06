@@ -82,7 +82,7 @@ export default function AccessSection({
           courseRoute,
           isRegistrationOpen,
         },
-        currentUserId: auth.isAuthenticated && auth.user ? auth.user.id : null,
+        currentUserId: auth.user?.id ?? null,
       });
 
       if (!result.ok) {
@@ -96,14 +96,10 @@ export default function AccessSection({
       }
 
       // Update mock auth with the user that the server action decided on
-      const needsLoginChange =
-        !auth.isAuthenticated || !auth.user || auth.user.id !== result.userId;
+      const needsLoginChange = !auth.user || auth.user.id !== result.session.user.id;
 
       if (needsLoginChange) {
-        auth.setCurrentUser(result.userId);
-        if (!auth.isAuthenticated) {
-          auth.toggleAuth();
-        }
+        auth.setSession(result.session);
       }
 
       router.push(result.redirectTo);

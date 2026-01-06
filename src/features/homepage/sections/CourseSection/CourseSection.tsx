@@ -10,13 +10,18 @@ import { getCoursesByAccess } from "@/server/data/courses";
 import { isAdmin } from "@/domain/userTypes";
 import { CourseGroup } from "./CourseGroup";
 
+const EMPTY_GROUPS = {
+  accessible: [],
+  restricted: [],
+  hidden: [],
+};
 
 export function CourseSection() {
   const { courses } = HOMEPAGE_TEXT;
   const { user } = useMockAuth();
 
-  const groups = useMemo(() => getCoursesByAccess(user), [user]);
-  const admin = isAdmin(user);
+  const groups = useMemo(() => (user ? getCoursesByAccess(user) : EMPTY_GROUPS), [user]);
+  const admin = user ? isAdmin(user) : false;
 
   return (
     <HomeSection id="courses" title={courses.title} subtitle={courses.subtitle}>

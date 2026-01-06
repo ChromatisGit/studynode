@@ -9,6 +9,7 @@ import { getCourseOverview } from "@data/overview";
 import { getCourseRoadmap } from "@data/roadmap";
 import { useIsMobile } from "@lib/useMediaQuery";
 import type { CourseId } from "@domain/ids";
+import { isAdmin } from "@domain/userTypes";
 
 import { SidebarMainNav } from "./SidebarMainNav";
 import { SidebarTopicNav } from "./SidebarTopicNav";
@@ -68,7 +69,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, isAuthenticated } = useMockAuth();
   const isMobile = useIsMobile();
 
-  const primaryGroupKey = user && !isAdmin(user) ? user.groupId : undefined;
+  const primaryGroupKey = user && !isAdmin(user) ? user.groupKey : undefined;
   const accessibleCourses = user ? groupCoursesByAccess(user).accessible : [];
   const courseSlug = groupKey && subjectKey ? buildCourseSlug(groupKey, subjectKey) : null;
 

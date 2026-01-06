@@ -15,7 +15,7 @@ import type { CourseId } from "@domain/ids";
 import { NavbarDesktopLinks } from "./NavbarDesktopLinks";
 import { NavbarProfileDropdown } from "./NavbarProfileDropdown";
 import styles from "./Navbar.module.css";
-import { isAdmin } from "@/shared/auth/userTypes";
+import { isAdmin } from "@/domain/userTypes";
 
 type NavbarProps = {
   onSidebarToggle: () => void;
@@ -46,7 +46,7 @@ function getCurrentRouteName({
 
 export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: NavbarProps) {
   const router = useRouter();
-  const { isAuthenticated, user, toggleAuth } = useMockAuth();
+  const { isAuthenticated, user, signOut } = useMockAuth();
   const { theme, toggleTheme } = useTheme();
   const routeContext = useRouteContext();
   const isMobile = useIsMobile();
@@ -63,13 +63,13 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
   const showHamburger = isMobile || routeContext.hasTopicContext;
 
   const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupKey = user && !isAdmin(user) ? user.groupId : undefined;
+  const primaryGroupKey = user && !isAdmin(user) ? user.groupKey : undefined;
 
   const handleLogout = () => {
     router.push("/");
     setTimeout(() => {
       toast.success("Logged out successfully");
-      toggleAuth();
+      signOut();
     }, 100);
   };
 

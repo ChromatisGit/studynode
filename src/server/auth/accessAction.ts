@@ -2,6 +2,7 @@
 
 import { MOCK_CREDENTIALS, MOCK_USERS } from "@auth/auth";
 import type { DefaultUser, User } from "@domain/userTypes";
+import type { Session } from "@domain/session";
 import { isAdmin } from "@domain/userTypes";
 
 // -----------------------------
@@ -30,7 +31,7 @@ export type ContinueAccessInput = {
 };
 
 export type ContinueAccessResult =
-  | { ok: true; redirectTo: string; userId: string }
+  | { ok: true; redirectTo: string; session: Session }
   | { ok: false; error: string; redirectTo?: string };
 
 // -----------------------------
@@ -146,7 +147,7 @@ export async function continueAccessAction(
     return {
       ok: true,
       redirectTo: "/",
-      userId: authenticatedUser.id,
+      session: { user: authenticatedUser },
     };
   }
 
@@ -162,7 +163,7 @@ export async function continueAccessAction(
   // Helper to centralize course-join logic
   const handleCourseJoin = (user: User): ContinueAccessResult => {
     if (hasCourseAccess(user, groupKey, courseId)) {
-      return { ok: true, redirectTo: courseRoute, userId: user.id };
+      return { ok: true, redirectTo: courseRoute, session: { user } };
     }
 
     if (!ctx.isRegistrationOpen) {
@@ -181,12 +182,12 @@ export async function continueAccessAction(
       };
     }
 
-    return { ok: true, redirectTo: courseRoute, userId: user.id };
+    return { ok: true, redirectTo: courseRoute, session: { user } };
   };
 
   // Already logged in AND already has access → go straight to course
   if (isLoggedIn && currentUser && hasCourseAccess(currentUser, groupKey, courseId)) {
-    return { ok: true, redirectTo: courseRoute, userId: currentUser.id };
+    return { ok: true, redirectTo: courseRoute, session: { user: currentUser } };
   }
 
   // Already logged in but no access yet → must re-enter credentials

@@ -3,9 +3,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
-import { useMockAuth } from "@/client/contexts/MockAuthContext";
-import type { CourseId } from "@domain/ids";
-import { buildCourseId } from "@data/courses";
+import { CourseId, getCourseId } from "@data/courses";
 
 type RouteContextValue = {
   pathname: string;
@@ -53,7 +51,7 @@ function buildRouteContext(pathname: string, isAuthenticated: boolean): RouteCon
   const subjectKey =
     !isLibraryRoute && routeParam2 && !isPrinciples ? routeParam2 : undefined;
   const courseId =
-    groupKey && subjectKey ? buildCourseId(groupKey, subjectKey) : undefined;
+    groupKey && subjectKey ? getCourseId(groupKey, subjectKey) : undefined;
   const subject = isLibraryRoute ? routeParam2 : undefined;
 
   const isReservedTopicSegment = rawTopic ? RESERVED_COURSE_SEGMENTS.has(rawTopic) : false;
@@ -91,8 +89,13 @@ function buildRouteContext(pathname: string, isAuthenticated: boolean): RouteCon
   };
 }
 
-export function RouteProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useMockAuth();
+export function RouteProvider({
+  children,
+  isAuthenticated,
+}: {
+  children: ReactNode;
+  isAuthenticated: boolean;
+}) {
   const pathname = usePathname() ?? "/";
   const value = useMemo(
     () => buildRouteContext(pathname, isAuthenticated),

@@ -1,49 +1,47 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { User } from "@domain/auth";
-import { MOCK_USERS } from "@auth/auth";
 
-type MockAuthContextValue = {
-  isAuthenticated: boolean;
+import type { Session } from "@/domain/session";
+import type { User } from "@/domain/userTypes";
+
+type AuthContextValue = {
+  session: Session | null;
   user: User | null;
-  toggleAuth: () => void;
-  setCurrentUser: (userId: string) => void;
+  isAuthenticated: boolean;
+  setSession: (session: Session | null) => void;
+  signOut: () => void;
 };
 
-const MockAuthContext = createContext<MockAuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const DEFAULT_USER_ID = Object.keys(MOCK_USERS)[0] ?? "student-1";
+type MockAuthProviderProps = {
+  children: ReactNode;
+  initialSession: Session | null;
+};
 
-export function MockAuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState(DEFAULT_USER_ID);
+export function MockAuthProvider({ children, initialSession }: MockAuthProviderProps) {
+  const [session, setSession] = useState<Session | null>(initialSession);
+  const user = session?.user ?? null;
+  const isAuthenticated = Boolean(user);
 
-  const toggleAuth = () => {
-    setIsAuthenticated((prev) => !prev);
-  };
+  const value = useMemo(() => {
+    const signOut = () => setSession(null);
 
-  const setCurrentUser = (userId: string) => {
-    setCurrentUserId(userId);
-  };
-
-  const user = isAuthenticated ? MOCK_USERS[currentUserId] ?? null : null;
-
-  const value = useMemo(
-    () => ({
-      isAuthenticated,
+    return {
+      session,
       user,
-      toggleAuth,
-      setCurrentUser,
-    }),
-    [isAuthenticated, user]
-  );
+      isAuthenticated,
+      setSession,
+      signOut,
+    };
+  }, [session, user, isAuthenticated]);
 
-  return <MockAuthContext.Provider value={value}>{children}</MockAuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useMockAuth() {
-  const context = useContext(MockAuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useMockAuth must be used within MockAuthProvider");
   }

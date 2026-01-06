@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@styles/globals.css";
+import { getSession } from "@/server/auth/auth";
 import { Providers } from "./providers";
 
 const themeInitScript = `
@@ -23,14 +24,16 @@ export const metadata: Metadata = {
   description: "Lernplattform mit Next.js Komponenten",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const session = await getSession();
+
   return (
     <html lang="de" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers initialSession={session}>{children}</Providers>
       </body>
     </html>
   );

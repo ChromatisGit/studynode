@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Session } from "@/domain/session";
 import { User, MockCredentials, DefaultUser, isAdmin } from "@/domain/userTypes";
 import { notFound } from "next/navigation";
 import { coursePublic } from "../data/courses";
@@ -31,9 +32,7 @@ export const MOCK_CREDENTIALS: MockCredentialRecord = {
   },
 };
 
-export type Session = {
-  user: User;
-};
+export type { Session } from "@/domain/session";
 
 export async function getSession(): Promise<Session | null> {
   // TODO: replace with real auth
