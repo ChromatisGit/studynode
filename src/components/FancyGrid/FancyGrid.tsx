@@ -2,8 +2,8 @@
 
 import { useMemo, type ReactNode } from "react";
 
-import { chunkBySizes, fancyRows } from "@/lib/fancyGrid";
-import { useResponsiveCols } from "@/lib/useResponsiveCols";
+import { chunkBySizes, fancyRows } from "@lib/fancyGrid";
+import { useResponsiveCols } from "@lib/useResponsiveCols";
 
 type FancyGridProps<T> = {
   items: readonly T[];

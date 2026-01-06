@@ -1,9 +1,9 @@
-import { Hero } from "@pages/homepage/sections/Hero/Hero";
-import { CourseSection } from "@pages/homepage/sections/CourseSection/CourseSection";
-import { About } from "@pages/homepage/sections/About/About";
-import { Footer } from "@pages/homepage/sections/Footer/Footer";
-import { NodeNetwork } from "@pages/homepage/sections/Background/NodeNetwork";
-import styles from "@pages/homepage/Homepage.module.css";
+import { About } from "@/features/homepage/sections/About/About";
+import { NodeNetwork } from "@/features/homepage/sections/Background/NodeNetwork";
+import { CourseSection } from "@/features/homepage/sections/CourseSection/CourseSection";
+import { Footer } from "@/features/homepage/sections/Footer/Footer";
+import { Hero } from "@/features/homepage/sections/Hero/Hero";
+import styles from "@features/homepage/Homepage.module.css";
 
 export default function HomePage() {
   return (

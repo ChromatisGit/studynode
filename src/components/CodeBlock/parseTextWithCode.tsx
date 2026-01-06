@@ -3,18 +3,19 @@ import { Highlight } from 'prism-react-renderer';
 import styles from './CodeBlock.module.css';
 import { transparentCodeTheme } from './codeTheme';
 
-function renderInlineMarkdown(text: string): ReactNode[] {
+function renderInlineMarkdown(text: string, keyPrefix?: string): ReactNode[] {
   const segments = text.split(/(`[^`]*`)/g);
   return segments.map((segment, index) => {
     const isCode = segment.startsWith('`') && segment.endsWith('`');
+    const key = keyPrefix ? `${keyPrefix}-${index}` : index;
     if (isCode) {
       return (
-        <code key={index} className={styles.inlineCode}>
+        <code key={key} className={styles.inlineCode}>
           {segment.slice(1, -1)}
         </code>
       );
     }
-    return <span key={index}>{segment}</span>;
+    return <span key={key}>{segment}</span>;
   });
 }
 
@@ -35,7 +36,7 @@ export function parseTextWithCode(text: string, textClassName?: string): JSX.Ele
     if (paragraphLines.length === 0) return;
     const children: ReactNode[] = [];
     paragraphLines.forEach((line, idx) => {
-      children.push(...renderInlineMarkdown(line));
+      children.push(...renderInlineMarkdown(line, `line-${idx}`));
       if (idx < paragraphLines.length - 1) children.push(<br key={`br-${idx}`} />);
     });
     elements.push(

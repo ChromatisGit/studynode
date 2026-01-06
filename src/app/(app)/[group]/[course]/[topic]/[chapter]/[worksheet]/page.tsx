@@ -1,46 +1,28 @@
-import { notFound } from "next/navigation";
-
-import { buildCourseId } from "@/data/courses";
-import { getWorksheetByRoute } from "@/data/worksheets";
-import { Worksheet } from "@pages/worksheet/Worksheet";
+import { GeneratedPage } from "@components/GeneratedPage/GeneratedPage";
+import { getPage } from "@/server/data/getPage";
+import { getSession, assertCanAccessPage } from "@/server/auth/auth";
+import { getCourseId, getSubject } from "@/server/data/courses";
 
 type PageParams = {
-  params:
-    | {
-        group: string;
-        course: string;
-        topic: string;
-        chapter: string;
-        worksheet: string;
-      }
-    | Promise<{
-        group: string;
-        course: string;
-        topic: string;
-        chapter: string;
-        worksheet: string;
-      }>;
+  params: {
+    groupKey: string;
+    subjectKey: string;
+    topicId: string;
+    chapterId: string;
+    worksheetId: string;
+  };
 };
 
 export default async function WorksheetRoute({ params }: PageParams) {
-  const {
-    group,
-    course,
-    topic: topicSlug,
-    chapter: chapterSlug,
-    worksheet: worksheetSlug,
-  } = await params;
-  const courseId = buildCourseId(group, course);
-  const worksheet = getWorksheetByRoute({
-    courseId,
-    topicSlug,
-    chapterSlug,
-    worksheetSlug,
-  });
+  const {groupKey, subjectKey, topicId, chapterId, worksheetId} = params
 
-  if (!worksheet) {
-    return notFound();
-  }
+  const session = await getSession();
+  assertCanAccessPage(session, groupKey, subjectKey );
 
-  return <Worksheet title={worksheet.title} content={worksheet.content} />;
+  const courseId = getCourseId(groupKey, subjectKey)
+  const subject = getSubject(courseId)
+  const page = await getPage({subject: subject.id, topicId, chapterId, worksheetId});
+
+  return <GeneratedPage title={page.title} content={page.content} />;
 }
+

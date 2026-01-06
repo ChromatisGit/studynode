@@ -1,47 +1,41 @@
-import { notFound } from "next/navigation";
+import { GeneratedPage } from "@/components/GeneratedPage/GeneratedPage";
+import { WorksheetCards } from "@/features/coursepage/components/WorksheetCard/WorksheetCards";
+import { assertCanAccessPage, getSession } from "@/server/auth/auth";
+import { getCourseId, getSubject, getWorksheetRefs } from "@/server/data/courses";
+import { getPage } from "@/server/data/getPage";
 
-import { getChapterWorksheetList } from "@/data/worksheets";
-import { WorksheetCards } from "@pages/coursepage/components/WorksheetCard/WorksheetCards";
 
 type PageParams = {
-  params:
-    | {
-        group: string;
-        course: string;
-        topic: string;
-        chapter: string;
-      }
-    | Promise<{
-        group: string;
-        course: string;
-        topic: string;
-        chapter: string;
-      }>;
+  params: {
+    groupKey: string;
+    subjectKey: string;
+    topicId: string;
+    chapterId: string;
+  };
 };
 
 export default async function ChapterPage({ params }: PageParams) {
-  const { group, course, topic: topicSlug, chapter: chapterSlug } = await params;
-  const courseId = buildCourseId(group, course);
-  const chapter = getChapterWorksheetList({
-    courseId,
-    topicSlug,
-    chapterSlug,
-  });
+  const { groupKey, subjectKey, topicId, chapterId } = params
 
-  if (!chapter) {
-    return notFound();
-  }
+  const session = await getSession();
+  assertCanAccessPage(session, groupKey, subjectKey);
+
+  const courseId = getCourseId(groupKey, subjectKey)
+  const subject = getSubject(courseId)
+  const page = await getPage({ subject: subject.id, topicId, chapterId });
+  const worksheets = getWorksheetRefs({ courseId, topicId, chapterId });
 
   return (
     <main style={{ padding: "2rem" }}>
-      <h1>{chapter.chapterTitle}</h1>
-      <p>Topic: {chapter.topicTitle}</p>
-
-      {chapter.worksheets.length > 0 ? (
-        <WorksheetCards worksheets={chapter.worksheets} />
-      ) : (
-        <p>In diesem Kapitel gibt es noch keine Arbeitsblaetter.</p>
+      {worksheets && (
+        <WorksheetCards worksheets={worksheets} />
       )}
+
+      <GeneratedPage
+        title={page.title}
+        content={page.content}
+      />
     </main>
   );
 }
+

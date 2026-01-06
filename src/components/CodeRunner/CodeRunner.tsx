@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Play } from "lucide-react";
 
 import strings from "@components/components.de.json";
-import { CodeEditor } from "../CodeEditor/CodeEditor";
+import { CodeEditor } from "@components/CodeEditor/CodeEditor";
 import type { TsWorkerDiagnostic } from "./useTsRunner";
 import styles from "./CodeRunner.module.css";
 

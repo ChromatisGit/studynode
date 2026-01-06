@@ -26,26 +26,50 @@
       "@/*": [
         "./src/*"
       ],
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@client/*": [
+        "./src/client/*"
+      ],
       "@components/*": [
         "./src/components/*"
       ],
-      "@pages/*": [
-        "./src/page-modules/*"
+      "@domain/*": [
+        "./src/domain/*"
+      ],
+      "@auth/*": [
+        "./src/server/auth/*"
       ],
       "@builder/*": [
-        "./src/builder/*"
+        "./src/server/builder/*"
       ],
-      "@generated-configs/*": [
-        "./src/generated-configs/*"
+      "@data/*": [
+        "./src/server/data/*"
       ],
-      "@schema/*": [
-        "./src/schema/*"
+      "@viewModel/*": [
+        "./src/client/viewModel/*"
+      ],
+      "@generated/*": [
+        "./.generated/*"
+      ],
+      "@homepage/*": [
+        "./src/features/homepage/*"
+      ],
+      "@coursepage/*": [
+        "./src/features/coursepage/*"
+      ],
+      "@library/*": [
+        "./src/features/library/*"
+      ],
+      "@practise/*": [
+        "./src/features/practise/*"
+      ],
+      "@access/*": [
+        "./src/features/access/*"
       ],
       "@worksheet/*": [
-        "./src/worksheet/*"
-      ],
-      "@site/*": [
-        "./src/*"
+        "./src/features/worksheet/*"
       ]
     }
   },

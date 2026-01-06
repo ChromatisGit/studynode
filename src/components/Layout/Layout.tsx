@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useRouteContext } from "@/contexts/RouteContext";
-import { useIsMobile } from "@/lib/useMediaQuery";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useRouteContext } from "@/client/contexts/RouteContext";
+import { useIsMobile } from "@lib/useMediaQuery";
+import { Navbar } from "@layout/Navbar";
+import { Sidebar } from "@layout/Sidebar";
+import { Breadcrumbs } from "@layout/Breadcrumbs";
 import styles from "./Layout.module.css";
 
 type LayoutProps = {

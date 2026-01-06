@@ -1,44 +1,29 @@
-import { notFound } from "next/navigation";
 
-import { buildCourseId, getCourseBySlug } from "@/data/courses";
-import { getCourseOverview } from "@/data/overview";
-import { getCourseRoadmap } from "@/data/roadmap";
-import { CoursepagePage } from "@pages/coursepage/Coursepage";
-import type { CoursepageModel } from "@/schema/coursepage";
+import { getCourseId } from "@data/courses";
+import { getCourseRoadmap } from "@data/roadmap";
+import { CoursepagePage } from "@features/coursepage/Coursepage";
+import type { CoursepageModel } from "@domain/roadmap";
 
 type PageParams = {
-  params:
-    | {
-        group: string;
-        course: string;
-      }
-    | Promise<{
-        group: string;
-        course: string;
-      }>;
+  params: {
+    groupKey: string;
+    subjectKey: string;
+  };
 };
 
+
 export default async function CourseRoute({ params }: PageParams) {
-  const { group, course: courseSlug } = await params;
-  const course = getCourseBySlug(group, courseSlug);
+  const { groupKey, subjectKey } = params;
+  const course = getCourseId(groupKey, subjectKey);
 
-  if (!course) {
-    return notFound();
-  }
-
-  const courseId = buildCourseId(group, courseSlug);
-  const overview = getCourseOverview(courseId);
   const roadmap = getCourseRoadmap(courseId);
-  const currentTopic =
-    roadmap.find((topic) => topic.status === "current")?.label ??
-    overview?.topics[0]?.title;
 
   const model: CoursepageModel = {
-    title: course.title,
-    label: course.title,
+    title: getCourseTitle(course),
+    label: getCourseLabel(course),
     slug: course.slug,
-    group: course.group,
-    current: currentTopic,
+    group: groupKey,
+    current: null,
     roadmap,
   };
 

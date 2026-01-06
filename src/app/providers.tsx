@@ -3,9 +3,9 @@
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 
-import { MockAuthProvider } from "@/contexts/MockAuthContext";
-import { RouteProvider } from "@/contexts/RouteContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { MockAuthProvider } from "@/client/contexts/MockAuthContext";
+import { RouteProvider } from "@/client/contexts/RouteContext";
+import { ThemeProvider } from "@/client/contexts/ThemeContext";
 
 export function Providers({ children }: { children: ReactNode }) {
   const toasterOffset = {

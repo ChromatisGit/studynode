@@ -4,7 +4,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 
-import { isExternalHref, isHashHref, normalizeHref, resolveLinkRel } from "@/lib/links";
+import { isExternalHref, isHashHref, normalizeHref, resolveLinkRel } from "@lib/links";
 
 export type AppLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   href: string;

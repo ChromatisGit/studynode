@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { buildCourseId } from "@/data/courses";
-import { getCourseOverview } from "@/data/overview";
-import { getPracticeTasks } from "@/data/practice";
-import { Practise } from "@pages/practise/Practise";
+import { buildCourseId } from "@data/courses";
+import { getCourseOverview } from "@data/overview";
+import { getPracticeTasks } from "@data/practice";
+import { Practise } from "@features/practise/Practise";
 
 type PageParams = {
   params:
@@ -20,12 +20,12 @@ type PageParams = {
 };
 
 export default async function PracticePage({ params }: PageParams) {
-  const { group, course, topic: topicSlug } = await params;
-  const courseId = buildCourseId(group, course);
+  const { group: groupKey, course: subjectKey, topic: topicId } = await params;
+  const courseId = buildCourseId(groupKey, subjectKey);
   const overview = getCourseOverview(courseId);
   if (!overview) return notFound();
 
-  const topic = overview.topics.find((item) => item.slug === topicSlug);
+  const topic = overview.topics.find((item) => item.id === topicId);
   if (!topic) return notFound();
 
   const tasks = getPracticeTasks(courseId);
