@@ -9,6 +9,7 @@ import { useTaskPersistence } from "@features/worksheet/storage/useTaskPersisten
 import sharedStyles from "@features/worksheet/styles/shared.module.css";
 import type { CodeTask as CodeTaskType } from "@features/worksheet/worksheetModel";
 import { CollapsibleSection } from "@features/worksheet/components/CollapsibleSection/CollapsibleSection";
+import { getRawText } from "@features/worksheet/worksheetText";
 
 interface CodeTaskProps {
   task: CodeTaskType;
@@ -40,9 +41,12 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck, taskKey }: 
     runCode,
   } = useTsRunner();
 
+  const instructionText = getRawText(task.instruction) ?? "";
+  const hintText = getRawText(task.hint) ?? null;
+  const solutionText = getRawText(task.solution) ?? null;
   const hasValidation = Boolean(task.validation?.trim());
   // Compute number of rows for editor from solution length
-  const solutionLines = task.solution ? task.solution.split('\n').length : 10;
+  const solutionLines = solutionText ? solutionText.split('\n').length : 10;
   const codeRows = Math.max(6, solutionLines + 1);
   const hasTypeErrors = diagnostics.some((diag) => diag.category === "error");
 
@@ -99,19 +103,21 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck, taskKey }: 
   // -----------------------------
 
   const renderHintAndSolution = () => {
-    const hasHint = Boolean(task.hint);
-    const hasSolution = Boolean(task.solution && isChecked);
+    const hasHint = Boolean(hintText);
+    const hasSolution = Boolean(solutionText && isChecked);
 
     if (!hasHint && !hasSolution) return null;
 
     return (
       <div className={sharedStyles.stackSmall}>
-        {hasHint && <CollapsibleSection type="hint" content={task.hint!} />}
+        {hasHint && hintText ? (
+          <CollapsibleSection type="hint" content={hintText} />
+        ) : null}
 
         {hasSolution && (
           <CollapsibleSection
             type="solution"
-            content={parseTextWithCode(task.solution!, sharedStyles.bodyText)}
+            content={parseTextWithCode(solutionText ?? "", sharedStyles.bodyText)}
           />
         )}
       </div>
@@ -124,7 +130,9 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck, taskKey }: 
 
   return (
     <div className={clsx(sharedStyles.stackMedium, isSingleTask && sharedStyles.stackTight)}>
-      <div className={sharedStyles.bodyText}>{parseTextWithCode(task.instruction, sharedStyles.bodyText)}</div>
+      <div className={sharedStyles.bodyText}>
+        {parseTextWithCode(instructionText, sharedStyles.bodyText)}
+      </div>
 
       <CodeRunner
         code={code}

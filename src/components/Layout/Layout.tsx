@@ -3,17 +3,22 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useRouteContext } from "@/client/contexts/RouteContext";
-import { useIsMobile } from "@lib/useMediaQuery";
-import { Navbar } from "@layout/Navbar";
-import { Sidebar } from "@layout/Sidebar";
-import { Breadcrumbs } from "@layout/Breadcrumbs";
+import type { SidebarDTO } from "@domain/sidebarDTO";
+
 import styles from "./Layout.module.css";
+import { useIsMobile } from "@/client/lib/useMediaQuery";
+import { Breadcrumbs } from "./Breadcrumbs/Breadcrumbs";
+import { Navbar } from "./Navbar/Navbar";
+import { Sidebar } from "./Sidebar/Sidebar";
 
 type LayoutProps = {
   children: ReactNode;
+  sidebarData: SidebarDTO;
+  isAdmin: boolean;
+  activeCourseLabel?: string | null;
 };
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, sidebarData, isAdmin, activeCourseLabel }: LayoutProps) {
   const { hasTopicContext, pathname, worksheet } = useRouteContext();
   const isMobile = useIsMobile();
 
@@ -53,11 +58,18 @@ export function Layout({ children }: LayoutProps) {
         onSidebarToggle={toggleSidebar}
         sidebarExists={sidebarExists}
         isSidebarOpen={isSidebarOpen}
+        data={sidebarData}
+        isAdmin={isAdmin}
+        activeCourseLabel={activeCourseLabel}
       />
 
       <div className={styles.container}>
         {sidebarExists && (
-          <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            data={sidebarData}
+          />
         )}
 
         <main
@@ -71,7 +83,7 @@ export function Layout({ children }: LayoutProps) {
             .join(" ")}
         >
           <div className={styles.content}>
-            {hasTopicContext ? <Breadcrumbs /> : null}
+            {hasTopicContext ? <Breadcrumbs data={sidebarData} /> : null}
             {children}
           </div>
         </main>

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { isExternalHref } from "@lib/links";
 import styles from "./WorksheetCard.module.css";
-import { WorksheetFormat, WorksheetRef } from "@/shared/schema/course";
+import type { WorksheetFormat, WorksheetRef } from "@domain/courseContent";
 
 type WorksheetCardProps = WorksheetRef & {
   className?: string;

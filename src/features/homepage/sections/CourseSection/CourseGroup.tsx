@@ -1,11 +1,13 @@
+"use client";
+
 import { FancyGrid } from "@/components/FancyGrid";
 import { CourseCard } from "./CourseCard";
 import styles from "@homepage/sections/CourseSection/CourseGroup.module.css";
-import { getCourseDTO } from "@/server/data/getCourseDTO";
+import type { CourseDTO } from "@/domain/courseDTO";
 
 type CourseGroupProps = {
     title: string;
-    courses: string[];
+    courses: CourseDTO[];
     actionLabel: string;
     accessable: boolean
 };
@@ -26,8 +28,7 @@ export function CourseGroup({ title, courses, accessable, actionLabel }: CourseG
                 maxCols={4}
                 className={styles.courseGrid}
                 rowClassName={styles.courseRow}
-                renderItem={(courseId) => {
-                    const course = getCourseDTO(courseId);
+                renderItem={(course) => {
                     const accessHref = `/access?groupKey=${course.groupKey}&subjectKey=${course.subjectKey}`
                     const courseHref = course.slug;
 

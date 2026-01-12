@@ -4,15 +4,13 @@ import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import type { Course } from "@/server/schema/course";
-import type { CourseId } from "@domain/ids";
-import { getCourseTitle } from "@data/courses";
+import type { SidebarCourseDTO } from "@domain/sidebarDTO";
 import styles from "./Sidebar.module.css";
 
 type SidebarMainNavProps = {
   isAuthenticated: boolean;
-  courses: Course[];
-  activeCourseId: CourseId | null;
+  courses: SidebarCourseDTO[];
+  activeCourseId: string | null;
   groupKey?: string;
   isHome: boolean;
   isLibrary: boolean;
@@ -97,11 +95,11 @@ export function SidebarMainNav({
               {inactiveCourses.map((course) => (
                 <li key={course.id} className={styles.chapterItem}>
                   <AppLink
-                    href={course.slug}
+                    href={course.href}
                     className={styles.chapterLink}
                     onClick={onLinkClick}
                   >
-                    {getCourseTitle(course)}
+                    {course.label}
                   </AppLink>
                 </li>
               ))}
@@ -112,13 +110,13 @@ export function SidebarMainNav({
         inactiveCourses.map((course) => (
           <AppLink
             key={course.id}
-          href={course.slug}
-          className={styles.mainNavLink}
-          onClick={onLinkClick}
-        >
-          {getCourseTitle(course)}
-        </AppLink>
-      ))
+            href={course.href}
+            className={styles.mainNavLink}
+            onClick={onLinkClick}
+          >
+            {course.label}
+          </AppLink>
+        ))
       )}
 
       {!isPrinciples && groupKey ? (

@@ -1,4 +1,4 @@
-import type { WorksheetRef as WorksheetCardRef } from "@features/worksheet/worksheetModel";
+import type { WorksheetRef as WorksheetCardRef } from "@domain/courseContent";
 
 export type Status = "finished" | "current" | "planned" | "locked";
 

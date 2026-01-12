@@ -1,6 +1,7 @@
 "use client";
 
-import { parseTextWithCode, renderInlineMarkdown } from "@components/CodeBlock/parseTextWithCode";
+import { renderInlineMarkdown } from "@components/CodeBlock/parseTextWithCode";
+import { RawTextRenderer } from "@components/RawTextRenderer/RawTextRenderer";
 import type { Macro } from "@domain/macroTypes";
 import type { Node, Page, RawText } from "@domain/page";
 import styles from "./GeneratedPage.module.css";
@@ -25,7 +26,7 @@ function getRawText(value: RawText | string | null | undefined): string | null {
 function renderTextBlock(text: string, key?: string | number) {
   return (
     <div key={key} className={styles.textBlock}>
-      {parseTextWithCode(text, styles.text)}
+      <RawTextRenderer rawText={text} />
     </div>
   );
 }

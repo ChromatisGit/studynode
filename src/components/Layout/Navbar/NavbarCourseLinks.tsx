@@ -3,15 +3,13 @@
 import { ChevronDown } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import type { Course } from "@/server/schema/course";
-import type { CourseId } from "@domain/ids";
-import { getCourseTitle } from "@data/courses";
+import type { SidebarCourseDTO } from "@domain/sidebarDTO";
 import { NavbarDropdown } from "./NavbarDropdown";
 import styles from "./Navbar.module.css";
 
 type NavbarCourseLinksProps = {
-  courses: Course[];
-  activeCourseId: CourseId | null;
+  courses: SidebarCourseDTO[];
+  activeCourseId: string | null;
 };
 
 const MAX_INLINE_COURSES = 2;
@@ -45,12 +43,12 @@ export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinks
           return (
             <AppLink
               key={course.id}
-              href={course.slug}
+              href={course.href}
               className={`${styles.dropdownItem} ${
                 isActive ? styles.dropdownItemActive : ""
               }`.trim()}
             >
-              {getCourseTitle(course)}
+              {course.label}
             </AppLink>
           );
         })}
@@ -65,12 +63,12 @@ export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinks
         return (
           <AppLink
             key={course.id}
-            href={course.slug}
+            href={course.href}
             className={styles.link}
             active={isActive}
             activeClassName={styles.linkActive}
           >
-            {getCourseTitle(course)}
+            {course.label}
           </AppLink>
         );
       })}

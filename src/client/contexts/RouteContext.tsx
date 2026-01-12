@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
-import { CourseId, getCourseId } from "@data/courses";
+type CourseId = string;
 
 type RouteContextValue = {
   pathname: string;
@@ -31,6 +31,10 @@ const RouteContext = createContext<RouteContextValue | undefined>(undefined);
 const RESERVED_ROOTS = new Set(["library", "access", "worksheet"]);
 const RESERVED_COURSE_SEGMENTS = new Set(["practice"]);
 
+function buildCourseId(groupKey: string, subjectKey: string): CourseId {
+  return `${groupKey}-${subjectKey}`;
+}
+
 function buildRouteContext(pathname: string, isAuthenticated: boolean): RouteContextValue {
   const segments = pathname.split("/").filter(Boolean);
   const routeParam1 = segments[0];
@@ -51,7 +55,7 @@ function buildRouteContext(pathname: string, isAuthenticated: boolean): RouteCon
   const subjectKey =
     !isLibraryRoute && routeParam2 && !isPrinciples ? routeParam2 : undefined;
   const courseId =
-    groupKey && subjectKey ? getCourseId(groupKey, subjectKey) : undefined;
+    groupKey && subjectKey ? buildCourseId(groupKey, subjectKey) : undefined;
   const subject = isLibraryRoute ? routeParam2 : undefined;
 
   const isReservedTopicSegment = rawTopic ? RESERVED_COURSE_SEGMENTS.has(rawTopic) : false;

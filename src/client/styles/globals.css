@@ -1,3 +1,5 @@
+@import "katex/dist/katex.min.css";
+
 :root {
   /* === StudyNode base system (light mode) === */
 
@@ -242,4 +244,31 @@ body [data-sonner-toast][data-x-position='right'][data-y-position='top'][data-mo
 
 body [data-sonner-toast][data-x-position='right'][data-y-position='top'][data-removed='true'] {
   --sn-toast-x: 120%;
+}
+
+.sn-rawtext {
+  color: var(--sn-text);
+  line-height: 1.6;
+}
+
+.sn-rawtext > * + * {
+  margin-top: 0.5rem;
+}
+
+.sn-rawtext p {
+  margin: 0;
+}
+
+.sn-rawtext pre {
+  margin: 0;
+}
+
+.sn-rawtext ul,
+.sn-rawtext ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.sn-underline {
+  text-decoration: underline;
 }

@@ -4,17 +4,15 @@ import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import type { CourseOverviewTopic } from "@domain/overview";
+import type { ProgressTopicDTO } from "@domain/progressDTO";
 import styles from "./Sidebar.module.css";
 
 type SidebarTopicNavProps = {
-  topics: CourseOverviewTopic[];
+  topics: ProgressTopicDTO[];
   currentTopic?: string;
   currentChapter?: string;
-  roadmapCurrentTopic?: string;
-  roadmapCurrentChapter?: string;
-  buildTopicUrl: (topicId: string) => string;
-  buildChapterUrl: (topicId: string, chapterId: string) => string;
+  progressCurrentTopicId?: string;
+  progressCurrentChapterId?: string;
   onLinkClick: () => void;
   onTopicClick: (event: React.MouseEvent) => void;
 };
@@ -23,10 +21,8 @@ export function SidebarTopicNav({
   topics,
   currentTopic,
   currentChapter,
-  roadmapCurrentTopic,
-  roadmapCurrentChapter,
-  buildTopicUrl,
-  buildChapterUrl,
+  progressCurrentTopicId,
+  progressCurrentChapterId,
   onLinkClick,
   onTopicClick,
 }: SidebarTopicNavProps) {
@@ -37,13 +33,13 @@ export function SidebarTopicNav({
     if (currentTopic) {
       next.add(currentTopic);
     }
-    if (roadmapCurrentTopic) {
-      next.add(roadmapCurrentTopic);
+    if (progressCurrentTopicId) {
+      next.add(progressCurrentTopicId);
     }
     if (next.size > 0) {
       setExpandedTopics(next);
     }
-  }, [currentTopic, roadmapCurrentTopic]);
+  }, [currentTopic, progressCurrentTopicId]);
 
   const toggleTopic = (topicId: string) => {
     setExpandedTopics((prev) => {
@@ -68,24 +64,24 @@ export function SidebarTopicNav({
   return (
     <nav className={styles.nav}>
       {topics.map((topic) => {
-        const isExpanded = expandedTopics.has(topic.id);
-        const isActive = isActiveTopic(topic.id);
+        const isExpanded = expandedTopics.has(topic.topicId);
+        const isActive = isActiveTopic(topic.topicId);
 
         return (
-          <div key={topic.id} className={styles.topicGroup}>
+          <div key={topic.topicId} className={styles.topicGroup}>
             <div className={styles.topicHeader}>
               <AppLink
-                href={buildTopicUrl(topic.id)}
+                href={topic.href}
                 className={`${styles.topicLink} ${isActive ? styles.topicLinkActive : ""}`.trim()}
                 onClick={onTopicClick}
               >
-                <h4>{topic.title}</h4>
+                <h4>{topic.label}</h4>
               </AppLink>
               <button
                 className={styles.topicToggle}
-                onClick={() => toggleTopic(topic.id)}
+                onClick={() => toggleTopic(topic.topicId)}
                 aria-expanded={isExpanded}
-                aria-label={`Toggle ${topic.title}`}
+                aria-label={`Toggle ${topic.label}`}
               >
                 <ChevronRight
                   size={20}
@@ -99,15 +95,15 @@ export function SidebarTopicNav({
             {isExpanded && topic.chapters.length > 0 ? (
               <ul className={styles.chapterList}>
                 {topic.chapters.map((chapter) => {
-                  const isChapterActive = isActiveChapter(topic.id, chapter.id);
+                  const isChapterActive = isActiveChapter(topic.topicId, chapter.chapterId);
                   const isRoadmapCurrent =
-                    roadmapCurrentTopic === topic.id &&
-                    roadmapCurrentChapter === chapter.id;
+                    progressCurrentTopicId === topic.topicId &&
+                    progressCurrentChapterId === chapter.chapterId;
 
                   return (
-                    <li key={chapter.id} className={styles.chapterItem}>
+                    <li key={chapter.chapterId} className={styles.chapterItem}>
                       <AppLink
-                        href={buildChapterUrl(topic.id, chapter.id)}
+                        href={chapter.href}
                         className={`${styles.chapterLink} ${
                           isChapterActive ? styles.chapterLinkActive : ""
                         } ${isRoadmapCurrent ? styles.chapterLinkRoadmapCurrent : ""}`.trim()}
@@ -116,7 +112,7 @@ export function SidebarTopicNav({
                         {isRoadmapCurrent ? (
                           <span className={styles.roadmapMarker} aria-hidden="true" />
                         ) : null}
-                        {chapter.title}
+                        {chapter.label}
                       </AppLink>
                     </li>
                   );

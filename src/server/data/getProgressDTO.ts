@@ -1,0 +1,97 @@
+import "server-only";
+
+import { ProgressChapterDTO, ProgressDTO, ProgressStatus, ProgressTopicDTO } from "@/domain/progressDTO";
+import { CourseId, resolveCourse } from "./courses";
+
+export async function getProgressDTO(courseId: CourseId): Promise<ProgressDTO> {
+  const { topics } = resolveCourse(courseId);
+
+  const { currentTopicId, currentChapterId } = await getCurrentTopicAndChapter(courseId);
+
+  const currentTopicIndex = topics.findIndex((topic) => topic.topicId === currentTopicId);
+
+  const topicsWithStatus = topics.map((topic, topicIndex) => {
+    const topicStatus = getTopicStatus(topicIndex - currentTopicIndex);
+
+    if (topicStatus === "locked") {
+      return {
+        ...topic,
+        status: "locked" as const,
+        chapters: [],
+      };
+    }
+
+    const currentChapterIndex =
+      topicStatus === "current"
+        ? topic.chapters.findIndex((c) => c.chapterId === currentChapterId)
+        : -1;
+
+    const chaptersWithStatus = topic.chapters.map(
+      ({ chapterId, label, href }, chapterIndex) => ({
+        chapterId,
+        label,
+        href,
+        status: getChapterStatus(topicStatus, chapterIndex, currentChapterIndex),
+      })
+    ) as ProgressChapterDTO[];
+
+    return {
+      ...topic,
+      status: topicStatus,
+      chapters: chaptersWithStatus,
+    };
+  }) as ProgressTopicDTO[];
+
+  return {
+    currentTopicId,
+    currentChapterId,
+    topics: topicsWithStatus,
+  };
+}
+
+
+function getTopicStatus(offset: number): ProgressStatus {
+    if (offset < 0) return "finished";
+    if (offset === 0) return "current";
+    if (offset === 1) return "planned";
+    return "locked"; // offset > 1
+}
+
+function getChapterStatus(
+    topicStatus: ProgressStatus,
+    chapterIndex: number,
+    currentChapterIndex: number
+): ProgressStatus {
+    if (topicStatus === "finished") return "finished";
+    if (topicStatus === "planned") return "planned";
+
+    // only "current" topics reach this point
+    if (chapterIndex < currentChapterIndex) return "finished";
+    if (chapterIndex === currentChapterIndex) return "current";
+    return "planned";
+}
+
+type ProgressCursor = {
+  currentTopicId?: string;
+  currentChapterId?: string;
+};
+
+const progressStore = new Map<string, ProgressCursor>();
+
+async function getCurrentTopicAndChapter(courseId: string): Promise<ProgressCursor> {
+  const cached = progressStore.get(courseId);
+  if (cached) return cached;
+
+  const course = resolveCourse(courseId);
+  const firstTopic = course.topics[0];
+  const firstChapter = firstTopic?.chapters[0];
+
+  const cursor = {
+    currentTopicId: firstTopic?.topicId,
+    currentChapterId: firstChapter?.chapterId,
+  };
+
+  progressStore.set(courseId, cursor);
+  return cursor;
+}
+

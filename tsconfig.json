@@ -35,6 +35,15 @@
       "@components/*": [
         "./src/components/*"
       ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@lib/*": [
+        "./src/client/lib/*"
+      ],
+      "@styles/*": [
+        "./src/client/styles/*"
+      ],
       "@domain/*": [
         "./src/domain/*"
       ],

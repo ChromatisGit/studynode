@@ -10,6 +10,7 @@ import { chunkBySize, chunkPrefer3Or4 } from "@lib/arrays";
 import { useTaskPersistence } from "@features/worksheet/storage/useTaskPersistence";
 import sharedStyles from "@features/worksheet/styles/shared.module.css";
 import type { McqTask as McqTaskType } from "@features/worksheet/worksheetModel";
+import { getRawText } from "@features/worksheet/worksheetText";
 import styles from "./McqTask.module.css";
 
 interface McqTaskProps {
@@ -25,6 +26,13 @@ export function McqTask({ task, isSingleTask = false, triggerCheck, taskKey }: M
   const lastHandledCheckRef = useRef(0);
   const isSingleChoice = task.single;
   const groupName = useId();
+  const questionText = getRawText(task.question) ?? "";
+  const options = (task.options ?? [])
+    .map((option) => getRawText(option))
+    .filter((option): option is string => Boolean(option));
+  const correctOptions = (task.correct ?? [])
+    .map((option) => getRawText(option))
+    .filter((option): option is string => Boolean(option));
 
   useEffect(() => {
     if (triggerCheck === lastHandledCheckRef.current) return;
@@ -41,7 +49,7 @@ export function McqTask({ task, isSingleTask = false, triggerCheck, taskKey }: M
   }, [worksheetId]);
 
   const isLocked = isChecked;
-  const optionRows = task.wideLayout ? chunkBySize(task.options, 2) : chunkPrefer3Or4(task.options);
+  const optionRows = task.wideLayout ? chunkBySize(options, 2) : chunkPrefer3Or4(options);
 
   const handleSelect = (option: string) => {
     if (isLocked) return;
@@ -56,7 +64,7 @@ export function McqTask({ task, isSingleTask = false, triggerCheck, taskKey }: M
   };
 
   const getOptionStyles = (option: string, isSelected: boolean) => {
-    const isCorrect = task.correct.includes(option);
+    const isCorrect = correctOptions.includes(option);
     const showWrong = isLocked && isSelected && !isCorrect;
     const showCorrect = isLocked && isCorrect && isSelected;
     const showMissed = isLocked && isCorrect && !isSelected;
@@ -84,7 +92,7 @@ export function McqTask({ task, isSingleTask = false, triggerCheck, taskKey }: M
 
   return (
     <div className={clsx(sharedStyles.stackMedium, isSingleTask && sharedStyles.stackTight)}>
-      {parseTextWithCode(task.question, sharedStyles.bodyText)}
+      {parseTextWithCode(questionText, sharedStyles.bodyText)}
 
       <div className={styles.optionGrid}>
         {optionRows.map((row, rowIndex) => (

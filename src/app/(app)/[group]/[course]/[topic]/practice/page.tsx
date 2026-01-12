@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { buildCourseId } from "@data/courses";
-import { getCourseOverview } from "@data/overview";
+import { getCourseId } from "@data/courses";
 import { getPracticeTasks } from "@data/practice";
+import { getProgressDTO } from "@data/getProgressDTO";
 import { Practise } from "@features/practise/Practise";
 
 type PageParams = {
@@ -21,14 +21,13 @@ type PageParams = {
 
 export default async function PracticePage({ params }: PageParams) {
   const { group: groupKey, course: subjectKey, topic: topicId } = await params;
-  const courseId = buildCourseId(groupKey, subjectKey);
-  const overview = getCourseOverview(courseId);
-  if (!overview) return notFound();
+  const courseId = getCourseId(groupKey, subjectKey);
+  const progress = await getProgressDTO(courseId);
 
-  const topic = overview.topics.find((item) => item.id === topicId);
+  const topic = progress.topics.find((item) => item.topicId === topicId);
   if (!topic) return notFound();
 
   const tasks = getPracticeTasks(courseId);
 
-  return <Practise courseId={courseId} topicTitle={topic.title} tasks={tasks} />;
+  return <Practise courseId={courseId} topicTitle={topic.label} tasks={tasks} />;
 }

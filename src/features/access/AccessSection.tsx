@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
-import styles from "./AccessPage.module.css";
+import styles from "./AccessSection.module.css";
 import { useMockAuth } from "@/client/contexts/MockAuthContext";
 import type { User } from "@domain/userTypes";
 import { isAdmin } from "@domain/userTypes";

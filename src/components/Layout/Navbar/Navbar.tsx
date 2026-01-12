@@ -5,65 +5,66 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { AppLink } from "@components/AppLink";
-import { getCourseById, getCourseTitle, groupCoursesByAccess } from "@data/courses";
 import { useMockAuth } from "@/client/contexts/MockAuthContext";
 import { useRouteContext } from "@/client/contexts/RouteContext";
 import { useTheme } from "@/client/contexts/ThemeContext";
-import { useIsMobile } from "@lib/useMediaQuery";
-import type { CourseId } from "@domain/ids";
+import type { SidebarDTO } from "@domain/sidebarDTO";
 
 import { NavbarDesktopLinks } from "./NavbarDesktopLinks";
 import { NavbarProfileDropdown } from "./NavbarProfileDropdown";
 import styles from "./Navbar.module.css";
-import { isAdmin } from "@/domain/userTypes";
+import { useIsMobile } from "@/client/lib/useMediaQuery";
 
 type NavbarProps = {
   onSidebarToggle: () => void;
   sidebarExists: boolean;
   isSidebarOpen: boolean;
+  data: SidebarDTO;
+  isAdmin: boolean;
+  activeCourseLabel?: string | null;
 };
 
 function getCurrentRouteName({
   isHome,
   isLibrary,
   isPrinciples,
-  courseId,
+  activeCourseLabel,
 }: {
   isHome: boolean;
   isLibrary: boolean;
   isPrinciples: boolean;
-  courseId: CourseId | undefined;
+  activeCourseLabel?: string | null;
 }): string | null {
   if (isHome) return null;
   if (isPrinciples) return "Principles";
   if (isLibrary) return "Library";
-  if (courseId) {
-    const course = getCourseById(courseId);
-    return course ? getCourseTitle(course) : null;
-  }
+  if (activeCourseLabel) return activeCourseLabel;
   return null;
 }
 
-export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: NavbarProps) {
+export function Navbar({
+  onSidebarToggle,
+  sidebarExists,
+  isSidebarOpen,
+  data,
+  isAdmin,
+  activeCourseLabel,
+}: NavbarProps) {
   const router = useRouter();
-  const { isAuthenticated, user, signOut } = useMockAuth();
+  const { signOut } = useMockAuth();
   const { theme, toggleTheme } = useTheme();
   const routeContext = useRouteContext();
   const isMobile = useIsMobile();
 
-  const accessibleCourses = user ? groupCoursesByAccess(user).accessible : [];
   const activeCourseId = routeContext.courseId ?? null;
   const currentRouteName = getCurrentRouteName({
     isHome: routeContext.isHome,
     isLibrary: routeContext.isLibrary,
     isPrinciples: routeContext.isPrinciples,
-    courseId: routeContext.courseId,
+    activeCourseLabel,
   });
 
   const showHamburger = isMobile || routeContext.hasTopicContext;
-
-  const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupKey = user && !isAdmin(user) ? user.groupKey : undefined;
 
   const handleLogout = () => {
     router.push("/");
@@ -105,12 +106,12 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
             {!isMobile ? (
               <div className={styles.desktopLinks}>
                 <NavbarDesktopLinks
-                  isAuthenticated={isAuthenticated}
-                  courses={accessibleCourses}
+                  isAuthenticated={data.isAuthenticated}
+                  courses={data.courses}
                   activeCourseId={activeCourseId}
                   isLibrary={routeContext.isLibrary}
                   isPrinciples={routeContext.isPrinciples}
-                  groupKey={primaryGroupKey}
+                  groupKey={data.primaryGroupKey}
                 />
               </div>
             ) : null}
@@ -126,11 +127,11 @@ export function Navbar({ onSidebarToggle, sidebarExists, isSidebarOpen }: Navbar
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
 
-          {isAuthenticated ? (
+          {data.isAuthenticated ? (
             <NavbarProfileDropdown
               onLogout={handleLogout}
               isMobile={isMobile}
-              isAdmin={isUserAdmin}
+              isAdmin={isAdmin}
             />
           ) : (
             <button className={styles.authButton} onClick={() => router.push("/access")}>

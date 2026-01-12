@@ -4,10 +4,14 @@ import { ChevronRight, House } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
 import { useRouteContext } from "@/client/contexts/RouteContext";
-import { getCourseOverview } from "@data/overview";
+import type { SidebarDTO } from "@domain/sidebarDTO";
 import styles from "./Breadcrumbs.module.css";
 
-export function Breadcrumbs() {
+type BreadcrumbsProps = {
+  data: SidebarDTO;
+};
+
+export function Breadcrumbs({ data }: BreadcrumbsProps) {
   const {
     hasTopicContext,
     isLibraryRoute,
@@ -17,8 +21,7 @@ export function Breadcrumbs() {
     subjectKey,
     topic,
     chapter,
-  } =
-    useRouteContext();
+  } = useRouteContext();
 
   if (!hasTopicContext) {
     return null;
@@ -30,19 +33,17 @@ export function Breadcrumbs() {
   if (isLibraryRoute && subject) {
     homeUrl = `/library/${subject}`;
   } else if (!isLibraryRoute && courseId) {
-    const overview = getCourseOverview(courseId);
-    homeUrl = overview?.slug ?? (groupKey && subjectKey ? `/${groupKey}/${subjectKey}` : "/");
+    homeUrl = groupKey && subjectKey ? `/${groupKey}/${subjectKey}` : "/";
   }
 
   let topicLabel = topic;
   let chapterLabel = chapter;
 
   if (!isLibraryRoute && courseId) {
-    const overview = getCourseOverview(courseId);
-    const topicData = overview?.topics.find((entry) => entry.id === topic);
-    topicLabel = topicData?.title ?? topicLabel;
-    const chapterData = topicData?.chapters.find((entry) => entry.id === chapter);
-    chapterLabel = chapterData?.title ?? chapterLabel;
+    const topicData = data.topics.find((entry) => entry.topicId === topic);
+    topicLabel = topicData?.label ?? topicLabel;
+    const chapterData = topicData?.chapters.find((entry) => entry.chapterId === chapter);
+    chapterLabel = chapterData?.label ?? chapterLabel;
   }
 
   if (topic) {

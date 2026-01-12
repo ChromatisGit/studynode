@@ -1,19 +1,19 @@
 import { RawText } from "./page";
 
-type CodeLanguage = "ts" | "python";
+export type CodeLanguage = "ts" | "python";
 
-type NoteMacro = {
+export type NoteMacro = {
   type: "note";
   content: RawText;
 };
 
-type CodeRunnerMacro = {
+export type CodeRunnerMacro = {
   type: "codeRunner";
   code: string;
   language: CodeLanguage;
 };
 
-type CodeTaskMacro = {
+export type CodeTaskMacro = {
   type: "codeTask";
   instruction: RawText;
   hint: RawText;
@@ -23,29 +23,29 @@ type CodeTaskMacro = {
   language: CodeLanguage;
 };
 
-type GapField = {
+export type GapField = {
   mode: "text" | "mcq";
   correct: string[];
   options?: string[];
 };
 
-type GapPart =
+export type GapPart =
   | { type: "text"; content: string }
   | { type: "gap"; gap: GapField };
 
-type GapMacro = {
+export type GapMacro = {
   type: "gap";
   parts: GapPart[];
 };
 
-type MathTaskMacro = {
+export type MathTaskMacro = {
   type: "mathTask";
   instruction: RawText;
   hint: RawText;
   solution: RawText;
 };
 
-type McqMacro = {
+export type McqMacro = {
   type: "mcq";
   question: RawText;
   correct: RawText[];
@@ -55,26 +55,26 @@ type McqMacro = {
   wideLayout: boolean;
 };
 
-type TextTaskMacro = {
+export type TextTaskMacro = {
   type: "textTask";
   instruction: RawText;
   hint: RawText;
   solution: RawText;
 };
 
-type TableMacro = {
+export type TableMacro = {
   type: "table";
   headers: RawText[];
   rows: RawText[][];
 };
 
-type ImageMacro = {
+export type ImageMacro = {
   type: "image";
   source: string;
   size: "S" | "M" | "L";
 };
 
-type HighlightMacro = {
+export type HighlightMacro = {
   type: "highlight";
   icon: "info" | "warning";
   content: RawText

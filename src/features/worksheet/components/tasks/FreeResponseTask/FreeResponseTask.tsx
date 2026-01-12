@@ -8,6 +8,7 @@ import sharedStyles from '@features/worksheet/styles/shared.module.css';
 import styles from './FreeResponseTask.module.css';
 import type { MathTask as MathTaskType, TextTask as TextTaskType } from '@features/worksheet/worksheetModel';
 import { useTaskPersistence } from '@features/worksheet/storage/useTaskPersistence';
+import { getRawText } from '@features/worksheet/worksheetText';
 
 type FreeResponseTaskType = TextTaskType | MathTaskType;
 
@@ -28,16 +29,19 @@ export function FreeResponseTask({
 }: FreeResponseTaskProps) {
   const { value: answer, setValue: setAnswer } = useTaskPersistence<string>(taskKey, '');
   const isChecked = triggerCheck > 0 && Boolean(answer.trim());
+  const instructionText = getRawText(task.instruction) ?? "";
+  const hintText = getRawText(task.hint) ?? null;
+  const solutionText = getRawText(task.solution) ?? null;
 
   const textareaRows = useMemo(() => {
-    const solutionLines = task.solution ? task.solution.split('\n').length : 0;
+    const solutionLines = solutionText ? solutionText.split('\n').length : 0;
     return Math.max(3, solutionLines + 1);
-  }, [task.solution]);
+  }, [solutionText]);
 
   return (
     <div className={`${sharedStyles.stackMedium} ${isSingleTask ? sharedStyles.stackTight : ''}`}>
       <div className={sharedStyles.bodyText}>
-        {parseTextWithCode(task.instruction, sharedStyles.bodyText)}
+        {parseTextWithCode(instructionText, sharedStyles.bodyText)}
       </div>
 
       <textarea
@@ -49,11 +53,11 @@ export function FreeResponseTask({
       />
 
       <div className={sharedStyles.stackSmall}>
-        {task.hint && <CollapsibleSection type="hint" content={task.hint} />}
+        {hintText ? <CollapsibleSection type="hint" content={hintText} /> : null}
 
-        {task.solution && isChecked && (
-          <CollapsibleSection type="solution" content={task.solution} />
-        )}
+        {solutionText && isChecked ? (
+          <CollapsibleSection type="solution" content={solutionText} />
+        ) : null}
       </div>
     </div>
   );

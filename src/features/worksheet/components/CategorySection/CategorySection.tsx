@@ -2,7 +2,7 @@
 
 import { Info, Flag, Target, Zap } from 'lucide-react';
 import { InfoBlock } from '@features/worksheet/components/InfoBlock/InfoBlock';
-import { TaskSetComponent } from '@features/worksheet/components/TaskSet/TaskSetComponent';
+import { TaskSetComponent } from '@features/worksheet/components/Group/TaskSetComponent';
 import { parseTextWithCode } from '@components/CodeBlock/parseTextWithCode';
 import styles from './CategorySection.module.css';
 import WORKSHEET_TEXT from '@features/worksheet/worksheet.de.json';

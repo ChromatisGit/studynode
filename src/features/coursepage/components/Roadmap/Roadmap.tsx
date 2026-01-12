@@ -11,11 +11,11 @@ import {
   LockKeyholeOpen,
 } from "lucide-react";
 
-import type { RoadmapViewModel, Status } from "@domain/roadmap";
+import type { ProgressStatus, ProgressTopicDTO } from "@domain/progressDTO";
 import styles from "./Roadmap.module.css";
 
 type RoadmapTrackerProps = {
-  roadmap: RoadmapViewModel;
+  roadmap: ProgressTopicDTO[];
   isAdmin?: boolean;
 };
 
@@ -43,14 +43,7 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
     plannedHeight: number;
   }>(null);
 
-  const [expandedTopics, setExpandedTopics] = useState<Set<number>>(
-    () =>
-      new Set(
-        roadmap
-          .map((topic, index) => (topic.isExpanded ? index : null))
-          .filter((index): index is number => index !== null)
-      )
-  );
+  const [expandedTopics, setExpandedTopics] = useState<Set<number>>(() => new Set());
 
   useEffect(() => {
     if (expandedTopics.size > 0) return;
@@ -71,7 +64,7 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
     });
   };
 
-  const getCircleStyle = (status: Status): CSSProperties => {
+  const getCircleStyle = (status: ProgressStatus): CSSProperties => {
     const base: CSSProperties = {
       borderRadius: "50%",
       display: "flex",
@@ -110,18 +103,18 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
     };
   };
 
-  const getTopicColor = (status: Status): string => {
+  const getTopicColor = (status: ProgressStatus): string => {
     if (status === "finished") return ACCENT_SOFT_BORDER_COLOR;
     if (status === "current") return ACCENT_COLOR;
     return MUTED_TEXT_COLOR;
   };
 
-  const getTopicFontWeight = (status: Status): number => {
+  const getTopicFontWeight = (status: ProgressStatus): number => {
     if (status === "current") return 600;
     return 400;
   };
 
-  const getChapterStyle = (status: Status): CSSProperties => {
+  const getChapterStyle = (status: ProgressStatus): CSSProperties => {
     const base: CSSProperties = {
       padding: "0.4rem var(--sn-space-md)",
       textDecoration: "none",
@@ -250,11 +243,11 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
         const status = topic.status;
         const panelId = `roadmap-topic-${index}-panel`;
         const isLocked = status === "locked";
-        const isClickable = (isAdmin || !isLocked) && Boolean(topic.link);
+        const isClickable = (isAdmin || !isLocked) && Boolean(topic.href);
 
         return (
           <div
-            key={topic.id}
+            key={topic.topicId}
             style={{
               marginBottom: index === lastIndex ? 0 : "var(--sn-space-md)",
               position: "relative",
@@ -311,7 +304,7 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
               >
                 {isClickable ? (
                   <Link
-                    href={topic.link}
+                    href={topic.href}
                     className={styles.linkHoverBox}
                     style={{
                       flex: 1,
@@ -370,8 +363,8 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
                 >
                   {topic.chapters.map((chapter) => (
                     <Link
-                      key={chapter.id}
-                      href={chapter.link}
+                      key={chapter.chapterId}
+                      href={chapter.href}
                       className={styles.chapterHoverBox}
                       style={getChapterStyle(chapter.status)}
                     >

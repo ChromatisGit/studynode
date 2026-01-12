@@ -1,5 +1,11 @@
-import type { WorksheetFormat } from "../schema/course";
-import type { ChapterId, CourseId, SubjectKey, GroupKey, TopicId, WorksheetId } from "../schema/ids";
+import type { WorksheetFormat } from "@domain/courseContent";
+
+type ChapterId = string;
+type CourseId = string;
+type SubjectKey = string;
+type GroupKey = string;
+type TopicId = string;
+type WorksheetId = string;
 
 export type CourseOverviewWorksheet = {
   id: WorksheetId;

@@ -1,16 +1,15 @@
 "use client";
 
 import { AppLink } from "@components/AppLink";
-import type { Course } from "@/server/schema/course";
-import type { CourseId } from "@domain/ids";
+import type { SidebarCourseDTO } from "@domain/sidebarDTO";
 
 import { NavbarCourseLinks } from "./NavbarCourseLinks";
 import styles from "./Navbar.module.css";
 
 type NavbarDesktopLinksProps = {
   isAuthenticated: boolean;
-  courses: Course[];
-  activeCourseId: CourseId | null;
+  courses: SidebarCourseDTO[];
+  activeCourseId: string | null;
   isLibrary: boolean;
   isPrinciples: boolean;
   groupKey?: string;

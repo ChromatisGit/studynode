@@ -11,6 +11,7 @@ import WORKSHEET_TEXT from '@features/worksheet/worksheet.de.json';
 import sharedStyles from '@features/worksheet/styles/shared.module.css';
 import styles from './TaskSetComponent.module.css';
 import type { Task, TaskSet } from '@features/worksheet/worksheetModel';
+import { getRawText } from '@features/worksheet/worksheetText';
 
 interface TaskSetComponentProps {
   taskSet: TaskSet;
@@ -115,14 +116,14 @@ function buildTaskKey(task: Task, index: number) {
 
   switch (task.type) {
     case 'mcq':
-      return `mcq-${normalize(task.question) || index}`;
+      return `mcq-${normalize(getRawText(task.question) ?? "") || index}`;
     case 'gap':
       return `gap-${task.parts.length}-${index}`;
-    case 'text':
-    case 'math':
-      return `${task.type}-${normalize(task.instruction) || index}`;
-    case 'code':
-      return `code-${normalize(task.instruction) || index}`;
+    case 'textTask':
+    case 'mathTask':
+      return `${task.type}-${normalize(getRawText(task.instruction) ?? "") || index}`;
+    case 'codeTask':
+      return `code-${normalize(getRawText(task.instruction) ?? "") || index}`;
     default:
       return `task-${index}`;
   }
@@ -143,15 +144,15 @@ function TaskRenderer({ task, isSingleTask, triggerCheck, taskKey }: {
       return (
         <GapTask task={task} isSingleTask={isSingleTask} triggerCheck={triggerCheck} taskKey={taskKey} />
       );
-    case 'text':
+    case 'textTask':
       return (
         <TextTask task={task} isSingleTask={isSingleTask} triggerCheck={triggerCheck} taskKey={taskKey} />
       );
-    case 'math':
+    case 'mathTask':
       return (
         <MathTask task={task} isSingleTask={isSingleTask} triggerCheck={triggerCheck} taskKey={taskKey} />
       );
-    case 'code':
+    case 'codeTask':
       return (
         <CodeTask task={task} isSingleTask={isSingleTask} triggerCheck={triggerCheck} taskKey={taskKey} />
       );
