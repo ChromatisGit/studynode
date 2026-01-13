@@ -1,6 +1,6 @@
 "use server";
 
-import { MOCK_CREDENTIALS, MOCK_USERS } from "@auth/auth";
+import { clearSessionCookie, getSession, MOCK_CREDENTIALS, MOCK_USERS, setSessionCookie } from "@auth/auth";
 import type { DefaultUser, User } from "@domain/userTypes";
 import type { Session } from "@domain/session";
 import { isAdmin } from "@domain/userTypes";
@@ -72,6 +72,14 @@ function generateAccessCode(): string {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+async function buildSuccessResult(
+  user: User,
+  redirectTo: string
+): Promise<ContinueAccessResult> {
+  await setSessionCookie(user.id);
+  return { ok: true, redirectTo, session: { user } };
+}
+
 /**
  * Enroll a user in a course, respecting group and admin rules.
  * Returns true on success (user has the course afterwards), false otherwise.
@@ -125,7 +133,10 @@ export async function continueAccessAction(
   const hasAccessCode = isNonEmpty(accessCode);
   const hasPin = isNonEmpty(pin);
 
-  const currentUser = currentUserId ? (MOCK_USERS[currentUserId] ?? null) : null;
+  const session = await getSession();
+  const currentUser =
+    session?.user ??
+    (currentUserId ? (MOCK_USERS[currentUserId] ?? null) : null);
   const isLoggedIn = !!currentUser;
 
   if (!hasAccessCode && !hasPin) {
@@ -143,12 +154,7 @@ export async function continueAccessAction(
       return { ok: false, error: "Invalid credentials." };
     }
 
-    // TODO: When moving to real auth, set the server-side session here.
-    return {
-      ok: true,
-      redirectTo: "/",
-      session: { user: authenticatedUser },
-    };
+    return buildSuccessResult(authenticatedUser, "/");
   }
 
   // --------- COURSE JOIN MODE ----------
@@ -161,9 +167,9 @@ export async function continueAccessAction(
   const courseRoute = ctx.courseRoute;
 
   // Helper to centralize course-join logic
-  const handleCourseJoin = (user: User): ContinueAccessResult => {
+  const handleCourseJoin = async (user: User): Promise<ContinueAccessResult> => {
     if (hasCourseAccess(user, groupKey, courseId)) {
-      return { ok: true, redirectTo: courseRoute, session: { user } };
+      return buildSuccessResult(user, courseRoute);
     }
 
     if (!ctx.isRegistrationOpen) {
@@ -182,12 +188,12 @@ export async function continueAccessAction(
       };
     }
 
-    return { ok: true, redirectTo: courseRoute, session: { user } };
+    return buildSuccessResult(user, courseRoute);
   };
 
   // Already logged in AND already has access → go straight to course
   if (isLoggedIn && currentUser && hasCourseAccess(currentUser, groupKey, courseId)) {
-    return { ok: true, redirectTo: courseRoute, session: { user: currentUser } };
+    return buildSuccessResult(currentUser, courseRoute);
   }
 
   // Already logged in but no access yet → must re-enter credentials
@@ -232,4 +238,8 @@ export async function continueAccessAction(
 
   const pinUser = resolveOrCreateUserByPin(pin, groupKey);
   return handleCourseJoin(pinUser);
+}
+
+export async function signOutAction(): Promise<void> {
+  await clearSessionCookie();
 }

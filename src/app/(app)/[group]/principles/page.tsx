@@ -1,16 +1,16 @@
 type PageParams = {
-  params: {
+  params: Promise<{
     group: string;
-    principles: string
-  };
+  }>;
 };
 
-export default function GroupPrinciplesPage({ params }: PageParams) {
+export default async function GroupPrinciplesPage({ params }: PageParams) {
+  const { group } = await params;
 
   return (
-    <main style={{ padding: "2rem" }}>
+    <main>
       <h1>Group principles</h1>
-      <p>Group: {params.group}</p>
+      <p>Group: {group}</p>
       <p>This route is stubbed until the group principles UI is integrated.</p>
     </main>
   );

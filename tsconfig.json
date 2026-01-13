@@ -56,9 +56,6 @@
       "@data/*": [
         "./src/server/data/*"
       ],
-      "@viewModel/*": [
-        "./src/client/viewModel/*"
-      ],
       "@generated/*": [
         "./.generated/*"
       ],

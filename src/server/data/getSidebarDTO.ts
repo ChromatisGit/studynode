@@ -16,10 +16,9 @@ export async function getSidebarDTO({
   user: User | null;
 }): Promise<SidebarDTO> {
   const isAuthenticated = Boolean(user);
-  const isUserAdmin = user ? isAdmin(user) : false;
-  const primaryGroupKey = user && !isUserAdmin ? user.groupKey : undefined;
+  const primaryGroupKey = user && !isAdmin(user) ? user.groupKey : undefined;
 
-  const courses = user && !isUserAdmin ? getNavbarCourses(user, courseId ?? null) : [];
+  const courses = user && !isAdmin(user) ? getNavbarCourses(user, courseId ?? null) : [];
   const progress = courseId ? await getProgressDTO(courseId) : EMPTY_PROGRESS;
 
   return {

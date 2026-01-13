@@ -5,15 +5,15 @@ import { getProgressDTO } from "@data/getProgressDTO";
 import { CoursepagePage } from "@features/coursepage/Coursepage";
 
 type PageParams = {
-  params: {
-    groupKey: string;
-    subjectKey: string;
-  };
+  params: Promise<{
+    group: string;
+    course: string;
+  }>;
 };
 
 
 export default async function CourseRoute({ params }: PageParams) {
-  const { groupKey, subjectKey } = params;
+  const { group: groupKey, course: subjectKey } = await params;
   const courseId = getCourseId(groupKey, subjectKey);
   const course = getCourseDTO(courseId);
   const progress = await getProgressDTO(courseId);

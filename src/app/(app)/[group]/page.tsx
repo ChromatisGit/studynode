@@ -1,14 +1,16 @@
 type PageParams = {
-  params: {
+  params: Promise<{
     group: string;
-  };
+  }>;
 };
 
-export default function GroupOverviewPage({ params }: PageParams) {
+export default async function GroupOverviewPage({ params }: PageParams) {
+  const { group } = await params;
+
   return (
-    <main style={{ padding: "2rem" }}>
+    <main>
       <h1>Group overview</h1>
-      <p>Group: {params.group}</p>
+      <p>Group: {group}</p>
       <p>This route is stubbed until the group overview UI is integrated.</p>
     </main>
   );

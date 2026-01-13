@@ -6,17 +6,11 @@ import { getProgressDTO } from "@data/getProgressDTO";
 import { Practise } from "@features/practise/Practise";
 
 type PageParams = {
-  params:
-    | {
-        group: string;
-        course: string;
-        topic: string;
-      }
-    | Promise<{
-        group: string;
-        course: string;
-        topic: string;
-      }>;
+  params: Promise<{
+    group: string;
+    course: string;
+    topic: string;
+  }>;
 };
 
 export default async function PracticePage({ params }: PageParams) {
@@ -25,7 +19,7 @@ export default async function PracticePage({ params }: PageParams) {
   const progress = await getProgressDTO(courseId);
 
   const topic = progress.topics.find((item) => item.topicId === topicId);
-  if (!topic) return notFound();
+  if (!topic) notFound();
 
   const tasks = getPracticeTasks(courseId);
 

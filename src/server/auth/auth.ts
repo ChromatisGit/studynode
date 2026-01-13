@@ -1,12 +1,15 @@
 import "server-only";
 
 import type { Session } from "@/domain/session";
-import { User, MockCredentials, DefaultUser, isAdmin } from "@/domain/userTypes";
+import { User, MockCredentials, isAdmin } from "@/domain/userTypes";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { coursePublic } from "../data/courses";
 
 
 export type MockCredentialRecord = Record<User["id"], MockCredentials>;
+
+const SESSION_COOKIE_NAME = "sn-session";
 
 export const MOCK_USERS: Record<string, User> = {
   "s1234": {
@@ -34,25 +37,35 @@ export const MOCK_CREDENTIALS: MockCredentialRecord = {
 
 export type { Session } from "@/domain/session";
 
+export async function setSessionCookie(userId: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, userId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
+}
+
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+}
+
 export async function getSession(): Promise<Session | null> {
-  // TODO: replace with real auth
-  const user: DefaultUser = {
-    id: "mock-user",
-    role: "user",
-    groupKey: "TG1",
-    courseIds: ["TG1-inf-1", "TG1-math-1"],
-  };
-
-  // TODO: admin test user
-  // const user: AdminUser = {
-  //   id: "admin-1",
-  //   role: "admin",
-  // };
-
+  const cookieStore = await cookies();
+  const userId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  if (!userId) return null;
+  const user = MOCK_USERS[userId];
+  if (!user) return null;
   return { user };
-
-  // TODO: logged-out state
-  // return null;
 }
 
 export function assertLoggedIn(

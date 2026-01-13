@@ -1,15 +1,12 @@
 .footer {
   position: relative;
   z-index: 1;
-  margin-top: 2.5rem;
-  padding: 2rem var(--sn-page-padding) 1.5rem;
   background: var(--sn-surface);
-  border-top: 1px solid var(--sn-border);
 }
 
 .footerInner {
-  max-width: var(--sn-content-width-wide, 1120px);
-  margin: 0 auto;
+  max-width: var(--sn-content-width-wide);
+  margin: 2rem var(--sn-page-padding) 1.5rem;
 }
 
 .footerGrid {

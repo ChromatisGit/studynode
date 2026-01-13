@@ -22,6 +22,7 @@ type NavbarProps = {
   data: SidebarDTO;
   isAdmin: boolean;
   activeCourseLabel?: string | null;
+  logoutAction: () => Promise<void>;
 };
 
 function getCurrentRouteName({
@@ -49,6 +50,7 @@ export function Navbar({
   data,
   isAdmin,
   activeCourseLabel,
+  logoutAction,
 }: NavbarProps) {
   const router = useRouter();
   const { signOut } = useMockAuth();
@@ -66,12 +68,22 @@ export function Navbar({
 
   const showHamburger = isMobile || routeContext.hasTopicContext;
 
+  // Admin panel link: go to course-specific admin if in a course, otherwise general admin
+  const adminPanelLink = activeCourseId ? `/admin/${activeCourseId}` : "/admin";
+
   const handleLogout = () => {
-    router.push("/");
-    setTimeout(() => {
-      toast.success("Logged out successfully");
+    void (async () => {
+      try {
+        await logoutAction();
+      } catch {
+        toast.error("Unable to log out right now.");
+        return;
+      }
       signOut();
-    }, 100);
+      router.refresh(); // Force server to clear session state
+      router.push("/");
+      toast.success("Logged out successfully");
+    })();
   };
 
   return (
@@ -132,6 +144,7 @@ export function Navbar({
               onLogout={handleLogout}
               isMobile={isMobile}
               isAdmin={isAdmin}
+              adminPanelLink={adminPanelLink}
             />
           ) : (
             <button className={styles.authButton} onClick={() => router.push("/access")}>

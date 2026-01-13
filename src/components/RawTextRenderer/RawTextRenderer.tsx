@@ -8,18 +8,14 @@ import remarkRehype from "remark-rehype";
 import rehypeReact from "rehype-react";
 import { BlockMath, InlineMath } from "react-katex";
 import { visit } from "unist-util-visit";
+import type { Node } from "unist";
 
-type MarkdownNode = {
-  type: string;
+type MarkdownNode = Node & {
   value?: string;
   alt?: string;
   data?: {
     hName?: string;
     hProperties?: Record<string, unknown>;
-  };
-  position?: {
-    start?: { offset?: number | null };
-    end?: { offset?: number | null };
   };
   children?: MarkdownNode[];
 };
@@ -100,6 +96,8 @@ const processor = unified()
   .use(rehypeReact, {
     createElement,
     Fragment,
+    jsx: createElement,
+    jsxs: createElement,
     components: {
       InlineMath,
       BlockMath,

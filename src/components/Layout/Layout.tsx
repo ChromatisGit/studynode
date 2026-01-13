@@ -16,9 +16,16 @@ type LayoutProps = {
   sidebarData: SidebarDTO;
   isAdmin: boolean;
   activeCourseLabel?: string | null;
+  logoutAction: () => Promise<void>;
 };
 
-export function Layout({ children, sidebarData, isAdmin, activeCourseLabel }: LayoutProps) {
+export function Layout({
+  children,
+  sidebarData,
+  isAdmin,
+  activeCourseLabel,
+  logoutAction,
+}: LayoutProps) {
   const { hasTopicContext, pathname, worksheet } = useRouteContext();
   const isMobile = useIsMobile();
 
@@ -61,6 +68,7 @@ export function Layout({ children, sidebarData, isAdmin, activeCourseLabel }: La
         data={sidebarData}
         isAdmin={isAdmin}
         activeCourseLabel={activeCourseLabel}
+        logoutAction={logoutAction}
       />
 
       <div className={styles.container}>

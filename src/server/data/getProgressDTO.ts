@@ -76,10 +76,10 @@ type ProgressCursor = {
   currentChapterId?: string;
 };
 
-const progressStore = new Map<string, ProgressCursor>();
-
 async function getCurrentTopicAndChapter(courseId: string): Promise<ProgressCursor> {
-  const cached = progressStore.get(courseId);
+  const { getProgressStore } = await import("../database/progressStore");
+  const store = await getProgressStore();
+  const cached = store.get(courseId);
   if (cached) return cached;
 
   const course = resolveCourse(courseId);
@@ -91,7 +91,20 @@ async function getCurrentTopicAndChapter(courseId: string): Promise<ProgressCurs
     currentChapterId: firstChapter?.chapterId,
   };
 
-  progressStore.set(courseId, cursor);
+  store.set(courseId, cursor);
   return cursor;
+}
+
+/**
+ * Update the current progress cursor for a course.
+ * This is an admin-only function to advance chapters for all students.
+ */
+export async function setProgressCursor(
+  courseId: CourseId,
+  topicId: string,
+  chapterId: string
+): Promise<void> {
+  const { setProgressInStore } = await import("../database/progressStore");
+  await setProgressInStore(courseId, topicId, chapterId);
 }
 

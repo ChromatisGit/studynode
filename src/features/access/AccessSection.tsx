@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import styles from "./AccessSection.module.css";
 import { useMockAuth } from "@/client/contexts/MockAuthContext";
-import type { User } from "@domain/userTypes";
-import { isAdmin } from "@domain/userTypes";
 import { continueAccessAction } from "@/server/auth/accessAction";
 
 type AccessSectionProps = {
@@ -19,12 +17,6 @@ type AccessSectionProps = {
   courseName: string;
   isRegistrationOpen: boolean;
 };
-
-function hasCourseAccessClient(user: User, groupKey: string, courseId: string): boolean {
-  if (isAdmin(user)) return true;
-  if (user.groupKey !== groupKey) return false;
-  return user.courseIds.includes(courseId);
-}
 
 export default function AccessSection({
   isCourseJoin,
@@ -42,30 +34,8 @@ export default function AccessSection({
   const router = useRouter();
   const auth = useMockAuth();
 
-  // If already logged in and already has access to the course, redirect directly
-  useEffect(() => {
-    if (
-      !auth.isAuthenticated ||
-      !auth.user ||
-      !isCourseJoin ||
-      !groupKey ||
-      !courseId ||
-      !courseRoute
-    ) {
-      return;
-    }
-
-    if (!hasCourseAccessClient(auth.user, groupKey, courseId)) return;
-    router.push(courseRoute);
-  }, [
-    auth.isAuthenticated,
-    auth.user,
-    courseRoute,
-    courseId,
-    router,
-    groupKey,
-    isCourseJoin,
-  ]);
+  // Note: We don't attempt client-side redirect for course join.
+  // The server will validate access and redirect appropriately in continueAccessAction.
 
   const handleContinue = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,12 +66,9 @@ export default function AccessSection({
       }
 
       // Update mock auth with the user that the server action decided on
-      const needsLoginChange = !auth.user || auth.user.id !== result.session.user.id;
+      auth.setSession(result.session);
 
-      if (needsLoginChange) {
-        auth.setSession(result.session);
-      }
-
+      router.refresh(); // Force server to re-fetch session
       router.push(result.redirectTo);
     });
   };

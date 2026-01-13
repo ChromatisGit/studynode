@@ -6,10 +6,11 @@ import { getCourseId } from "@/server/data/courses";
 import { getCourseDTO } from "@/server/data/getCourseDTO";
 import { getSidebarDTO } from "@/server/data/getSidebarDTO";
 import { isAdmin } from "@/domain/userTypes";
+import { signOutAction } from "@/server/auth/accessAction";
 
 type AppLayoutProps = {
   children: ReactNode;
-  params?: Record<string, string | string[] | undefined>;
+  params?: Record<string, string | string[] | undefined> | Promise<Record<string, string | string[] | undefined>>;
 };
 
 function getParam(value?: string | string[]) {
@@ -17,13 +18,19 @@ function getParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+async function logoutAction() {
+  "use server";
+  await signOutAction();
+}
+
 export default async function AppLayout({ children, params }: AppLayoutProps) {
   const session = await getSession();
   const user = session?.user ?? null;
   const isUserAdmin = user ? isAdmin(user) : false;
 
-  const groupKey = getParam(params?.groupKey ?? params?.group);
-  const subjectKey = getParam(params?.subjectKey ?? params?.course);
+  const resolvedParams = params ? await params : undefined;
+  const groupKey = getParam(resolvedParams?.groupKey ?? resolvedParams?.group);
+  const subjectKey = getParam(resolvedParams?.subjectKey ?? resolvedParams?.course);
   const courseId = groupKey && subjectKey ? getCourseId(groupKey, subjectKey) : null;
   const activeCourseLabel = courseId ? getCourseDTO(courseId).label : null;
 
@@ -34,6 +41,7 @@ export default async function AppLayout({ children, params }: AppLayoutProps) {
       sidebarData={sidebarData}
       isAdmin={isUserAdmin}
       activeCourseLabel={activeCourseLabel}
+      logoutAction={logoutAction}
     >
       {children}
     </Layout>

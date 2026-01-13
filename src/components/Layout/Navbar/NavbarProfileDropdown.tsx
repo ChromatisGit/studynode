@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, LogOut, Shield, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { NavbarDropdown } from "./NavbarDropdown";
 import styles from "./Navbar.module.css";
@@ -10,6 +11,7 @@ type NavbarProfileDropdownProps = {
   isMobile: boolean;
   userName?: string;
   isAdmin?: boolean;
+  adminPanelLink?: string;
 };
 
 export function NavbarProfileDropdown({
@@ -17,7 +19,10 @@ export function NavbarProfileDropdown({
   isMobile,
   userName,
   isAdmin,
+  adminPanelLink,
 }: NavbarProfileDropdownProps) {
+  const router = useRouter();
+
   return (
     <NavbarDropdown
       trigger={(isOpen) => (
@@ -35,10 +40,15 @@ export function NavbarProfileDropdown({
       align="right"
     >
       {isAdmin ? (
-        <div className={styles.dropdownItem} style={{ cursor: "default", opacity: 0.7 }}>
-          <Shield size={16} />
-          <span>Admin User</span>
-        </div>
+        <>
+          <button
+            className={styles.dropdownItem}
+            onClick={() => router.push(adminPanelLink || "/admin")}
+          >
+            <Shield size={16} />
+            <span>Admin Panel</span>
+          </button>
+        </>
       ) : null}
       <button className={styles.dropdownItem} onClick={onLogout}>
         <LogOut size={16} />
