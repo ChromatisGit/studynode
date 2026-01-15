@@ -1,7 +1,8 @@
 import AccessSectionClient from "@/features/access/AccessSection";
-import { isRegistrationOpen } from "@/server/auth/registrationWindow";
 import { getCourseId } from "@/server/data/courses";
 import { getCourseDTO } from "@/server/data/getCourseDTO";
+import { getSession, getUserAccessCode } from "@/server/auth/auth";
+import { isRegistrationOpen } from "@/server/database/registrationStore";
 
 type AccessPageProps = {
   searchParams?: Promise<{
@@ -21,6 +22,12 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
   const subjectKey = getSearchParam(resolvedSearchParams?.subjectKey);
   const isCourseJoin = Boolean(groupKey && subjectKey);
 
+  // Get current user's access code if logged in
+  const session = await getSession();
+  const currentUserAccessCode = session?.user
+    ? await getUserAccessCode(session.user.id)
+    : null;
+
   let courseId: string | null = null;
   let courseName = "this course";
   let courseRoute: string | null = null;
@@ -32,7 +39,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
     courseId = resolvedCourseId;
     courseName = course.label;
     courseRoute = course.slug;
-    registrationOpen = isRegistrationOpen(courseId);
+    registrationOpen = await isRegistrationOpen(courseId);
   }
 
   return (
@@ -43,6 +50,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
       courseRoute={courseRoute}
       courseName={courseName}
       isRegistrationOpen={registrationOpen}
+      currentUserAccessCode={currentUserAccessCode}
     />
   );
 }

@@ -1,9 +1,17 @@
 "use server";
 
-import { clearSessionCookie, getSession, MOCK_CREDENTIALS, MOCK_USERS, setSessionCookie } from "@auth/auth";
-import type { DefaultUser, User } from "@domain/userTypes";
-import type { Session } from "@domain/session";
-import { isAdmin } from "@domain/userTypes";
+import { clearSessionCookie, getSession, setSessionCookie } from "@/server/auth/auth";
+import type { DefaultUser, User } from "@/domain/userTypes";
+import type { Session } from "@/domain/session";
+import { isAdmin } from "@/domain/userTypes";
+import {
+  authenticateUser,
+  findUserByPin,
+  createUser,
+  addCourseToUser,
+  getUserById,
+  generateAccessCode,
+} from "@/server/database/userStore";
 
 // -----------------------------
 // Types
@@ -23,9 +31,8 @@ export type ContinueAccessInput = {
   ctx: AccessContext;
 
   /**
-   * Optional: current logged-in user ID (from your client mock).
-   * When you later move to real auth, this can be ignored
-   * and replaced by reading from the server-side session.
+   * Optional: current logged-in user ID (from your client).
+   * Used to check if user is already logged in.
    */
   currentUserId?: string | null;
 };
@@ -44,32 +51,9 @@ function isNonEmpty(s: string) {
 
 function hasCourseAccess(user: User, groupKey: string, courseId: string): boolean {
   if (isAdmin(user)) return true;
+  if (user.role !== "user") return false; // Only default users have groupKey and courseIds
   if (user.groupKey !== groupKey) return false;
   return user.courseIds.includes(courseId);
-}
-
-function findUserIdByCredentials(accessCode: string, pin: string): string | null {
-  for (const [userId, credentials] of Object.entries(MOCK_CREDENTIALS)) {
-    if (credentials.accessCode === accessCode && credentials.pin === pin) return userId;
-  }
-  return null;
-}
-
-function findUserIdByPin(pin: string): string | null {
-  for (const [userId, credentials] of Object.entries(MOCK_CREDENTIALS)) {
-    if (credentials.pin === pin) return userId;
-  }
-  return null;
-}
-
-function resolveUserFromCredentials(accessCode: string, pin: string): User | null {
-  const userId = findUserIdByCredentials(accessCode, pin);
-  if (!userId) return null;
-  return MOCK_USERS[userId] ?? null;
-}
-
-function generateAccessCode(): string {
-  return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
 async function buildSuccessResult(
@@ -84,10 +68,18 @@ async function buildSuccessResult(
  * Enroll a user in a course, respecting group and admin rules.
  * Returns true on success (user has the course afterwards), false otherwise.
  */
-function enrollUserInCourse(user: User, groupKey: string, courseId: string): boolean {
+async function enrollUserInCourse(
+  user: User,
+  groupKey: string,
+  courseId: string
+): Promise<boolean> {
   if (isAdmin(user)) return true;
+  if (user.role !== "user") return false; // Only default users can be enrolled
   if (user.groupKey !== groupKey) return false;
-  if (!user.courseIds.includes(courseId)) user.courseIds.push(courseId);
+
+  // Add course to user
+  await addCourseToUser(user.id, courseId);
+
   return true;
 }
 
@@ -95,18 +87,17 @@ function enrollUserInCourse(user: User, groupKey: string, courseId: string): boo
  * Find an existing user by PIN or create a new one.
  * Does NOT enroll the user into the course; that is handled by handleCourseJoin.
  */
-function resolveOrCreateUserByPin(
+async function resolveOrCreateUserByPin(
   pin: string,
   groupKey: string
-): User {
-  const existingUserId = findUserIdByPin(pin);
-  if (existingUserId) {
-    const existingUser = MOCK_USERS[existingUserId];
-    if (existingUser) {
-      return existingUser;
-    }
+): Promise<User> {
+  // Try to find existing user by PIN
+  const existingUser = await findUserByPin(pin);
+  if (existingUser) {
+    return existingUser;
   }
 
+  // Create new user
   const userId = `u${Date.now().toString(36)}`;
   const accessCode = generateAccessCode();
   const newUser: DefaultUser = {
@@ -116,8 +107,8 @@ function resolveOrCreateUserByPin(
     courseIds: [],
   };
 
-  MOCK_USERS[userId] = newUser;
-  MOCK_CREDENTIALS[userId] = { accessCode, pin };
+  await createUser(newUser, pin, accessCode);
+
   return newUser;
 }
 
@@ -134,9 +125,7 @@ export async function continueAccessAction(
   const hasPin = isNonEmpty(pin);
 
   const session = await getSession();
-  const currentUser =
-    session?.user ??
-    (currentUserId ? (MOCK_USERS[currentUserId] ?? null) : null);
+  const currentUser = session?.user ?? (currentUserId ? await getUserById(currentUserId) : null);
   const isLoggedIn = !!currentUser;
 
   if (!hasAccessCode && !hasPin) {
@@ -149,7 +138,7 @@ export async function continueAccessAction(
       return { ok: false, error: "Invalid credentials." };
     }
 
-    const authenticatedUser = resolveUserFromCredentials(accessCode, pin);
+    const authenticatedUser = await authenticateUser(accessCode, pin);
     if (!authenticatedUser) {
       return { ok: false, error: "Invalid credentials." };
     }
@@ -180,15 +169,26 @@ export async function continueAccessAction(
       };
     }
 
-    if (!enrollUserInCourse(user, groupKey, courseId)) {
+    const enrolled = await enrollUserInCourse(user, groupKey, courseId);
+    if (!enrolled) {
       return {
         ok: false,
-        error: "Registration window not open.",
+        error: "Failed to enroll in course.",
         redirectTo: "/",
       };
     }
 
-    return buildSuccessResult(user, courseRoute);
+    // Reload user to get updated courseIds
+    const updatedUser = await getUserById(user.id);
+    if (!updatedUser) {
+      return {
+        ok: false,
+        error: "Failed to load user data.",
+        redirectTo: "/",
+      };
+    }
+
+    return buildSuccessResult(updatedUser, courseRoute);
   };
 
   // Already logged in AND already has access → go straight to course
@@ -202,12 +202,11 @@ export async function continueAccessAction(
       return { ok: false, error: "Invalid credentials." };
     }
 
-    const authenticatedUser = resolveUserFromCredentials(accessCode, pin);
+    const authenticatedUser = await authenticateUser(accessCode, pin);
     if (!authenticatedUser) {
       return { ok: false, error: "Invalid credentials." };
     }
 
-    // TODO: Later, ensure re-auth is wired to your real session (if needed).
     return handleCourseJoin(authenticatedUser);
   }
 
@@ -219,7 +218,7 @@ export async function continueAccessAction(
       return { ok: false, error: "Invalid credentials." };
     }
 
-    const authenticatedUser = resolveUserFromCredentials(accessCode, pin);
+    const authenticatedUser = await authenticateUser(accessCode, pin);
     if (!authenticatedUser) {
       return { ok: false, error: "Invalid credentials." };
     }
@@ -236,7 +235,7 @@ export async function continueAccessAction(
     };
   }
 
-  const pinUser = resolveOrCreateUserByPin(pin, groupKey);
+  const pinUser = await resolveOrCreateUserByPin(pin, groupKey);
   return handleCourseJoin(pinUser);
 }
 

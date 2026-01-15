@@ -26,6 +26,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@pipeline/*": [
+        "./pipeline/*"
+      ],
       "@app/*": [
         "./src/app/*"
       ],
@@ -46,6 +49,10 @@
       ],
       "@domain/*": [
         "./src/domain/*"
+      ],
+      "@schema/*": [
+        "./src/domain/*",
+        "./src/server/schema/*"
       ],
       "@auth/*": [
         "./src/server/auth/*"

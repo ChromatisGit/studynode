@@ -45,7 +45,7 @@ export function coursePublic(courseId: CourseId) {
 
 export function getCourseGroupAndSubjectKey(courseId: CourseId) {
   const course = resolveCourse(courseId)
-  return {groupKey: course.group.key, subjectKey: course.subject.key} ;
+  return { groupKey: course.group.key, subjectKey: course.subject.key };
 }
 
 export async function getWorksheetRefs({
@@ -100,11 +100,11 @@ type CourseAccessGroups = {
   hidden: string[];
 };
 
-export function getCoursesByAccess(user: User): CourseAccessGroups {
+export function getCoursesByAccess(user: User | null): CourseAccessGroups {
   return courses.reduce<CourseAccessGroups>(
     (groups, course) => {
       if (!course.isListed) {
-        if (isAdmin(user)) groups.hidden.push(course.id);
+        if (user && isAdmin(user)) groups.hidden.push(course.id);
 
         return groups;
       }

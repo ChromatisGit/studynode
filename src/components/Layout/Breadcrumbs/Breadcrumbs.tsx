@@ -21,6 +21,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
     subjectKey,
     topic,
     chapter,
+    worksheet,
   } = useRouteContext();
 
   if (!hasTopicContext) {
@@ -38,12 +39,17 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
 
   let topicLabel = topic;
   let chapterLabel = chapter;
+  let worksheetLabel = worksheet;
 
   if (!isLibraryRoute && courseId) {
     const topicData = data.topics.find((entry) => entry.topicId === topic);
     topicLabel = topicData?.label ?? topicLabel;
     const chapterData = topicData?.chapters.find((entry) => entry.chapterId === chapter);
     chapterLabel = chapterData?.label ?? chapterLabel;
+    const worksheetData = chapterData?.worksheets?.find(
+      (entry) => entry.worksheetId === worksheet
+    );
+    worksheetLabel = worksheetData?.label ?? worksheetLabel;
   }
 
   if (topic) {
@@ -71,6 +77,20 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
     items.push({
       label: chapterLabel || chapter,
       href: chapterUrl,
+    });
+  }
+
+  if (worksheet) {
+    const worksheetUrl =
+      isLibraryRoute && subject && topic && chapter
+        ? `/library/${subject}/${topic}/${chapter}/${worksheet}`
+        : groupKey && subjectKey && topic && chapter
+        ? `/${groupKey}/${subjectKey}/${topic}/${chapter}/${worksheet}`
+        : "/";
+
+    items.push({
+      label: worksheetLabel || worksheet,
+      href: worksheetUrl,
     });
   }
 

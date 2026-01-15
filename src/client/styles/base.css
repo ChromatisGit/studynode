@@ -1,0 +1,13 @@
+/* === Base Styles === */
+
+body {
+  margin: 0;
+  background: var(--sn-bg);
+  color: var(--sn-text);
+  font-family: var(--sn-font-body);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+}

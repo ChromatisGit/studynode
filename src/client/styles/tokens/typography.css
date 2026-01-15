@@ -1,0 +1,14 @@
+:root {
+  /* === Font Families === */
+  --sn-font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --sn-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* === Font Sizes === */
+  --sn-font-size-h4: 1.05rem;
+
+  /* === Font Weights === */
+  --sn-font-normal: 400;
+  --sn-font-medium: 500;
+  --sn-font-semibold: 600;
+  --sn-font-bold: 700;
+}

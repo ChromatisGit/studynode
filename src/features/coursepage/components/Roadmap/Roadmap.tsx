@@ -116,7 +116,7 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
 
   const getChapterStyle = (status: ProgressStatus): CSSProperties => {
     const base: CSSProperties = {
-      padding: "0.4rem var(--sn-space-md)",
+      padding: "0.4rem var(--sn-space-lg)",
       textDecoration: "none",
       display: "block",
       borderRadius: "var(--sn-radius-md)",
@@ -249,7 +249,7 @@ export default function Roadmap({ roadmap, isAdmin = false }: RoadmapTrackerProp
           <div
             key={topic.topicId}
             style={{
-              marginBottom: index === lastIndex ? 0 : "var(--sn-space-md)",
+              marginBottom: index === lastIndex ? 0 : "var(--sn-space-lg)",
               position: "relative",
             }}
           >

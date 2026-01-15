@@ -1,6 +1,6 @@
 # StudyNode
 
-Digitale Unterrichtsplattform auf Basis von **next.js**.
+Digitale Unterrichtsplattform
 
 ---
 
@@ -40,16 +40,16 @@ content/
 │  │     │  └─ <chapter>/            # z. B. 00-geraden, 01-geraden-lagebeziehung
 │  │     │     ├─ slides/            # Folien (Marp)
 │  │     │     ├─ worksheets/        # Arbeitsblätter
-│  │     │     └─ page.typ           # Zusammenfassung der Inhalte des Kapitels
+│  │     │     └─ overview.typ       # Zusammenfassung der Inhalte des Kapitels
 │  │     │
 │  │     ├─ images/                  # Abbildungen für Webseite & Materialien
-│  │     └─ chapter.typ              # Titel und Stoffverteilungsplan des Themenblocks
+│  │     └─ chapters.typ             # Titel und Stoffverteilungsplan des Themenblocks
 │  │
 │  └─ slides/                        # Fachübergreifende Präsentationen
 │
 ├─ courses/                          # Konkrete Kurse (sichtbar für Schüler)
 │  └─ <groupID>/                     # z. B. tg1-math-lk, bk1-info
-│     ├─ course-plan.yml             # Themenübersicht & aktueller Fortschritt
+│     ├─ course.yml                  # Kurs- und Themenkonfiguration
 │     ├─ course-variations.yml       # Anpassungen gegenüber Base (z. B. alternative Arbeitsblätter)
 │     └─ files/                      # Kursbezogene Zusatzdateien
 │
@@ -74,3 +74,40 @@ content/
 | **Challenge** | Vertiefungs- oder Transferaufgabe für schnelle oder leistungsstarke Schüler. Fördert Anwendung und Transfer. |
 
 © 2025 Christian Holst
+
+
+## Typst-Dateien im Detail
+
+### `chapters.typ`
+
+Enthält:
+
+* Titel des Themenblocks
+* Lernziele der einzelnen Kapitel
+
+
+### `overview.typ` (Kapitelübersicht)
+
+Beinhaltet:
+
+* Theoretische Erklärung
+* Beispiele
+
+### `worksheet.typ` (Arbeitsblatt)
+
+Beinhaltet:
+
+* Checkpoint
+* Aufgaben
+* Challenges
+
+Wird automatisch zur Web- oder PDF-Version gebaut.
+
+---
+
+## YAML-Dateien
+
+### `course.yaml`
+
+
+### `definitions.yml`

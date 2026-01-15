@@ -20,9 +20,9 @@ function AuthenticatedRouteProvider({ children }: { children: ReactNode }) {
 
 export function Providers({ children, initialSession }: ProvidersProps) {
   const toasterOffset = {
-    top: "calc(var(--sn-navbar-height) + var(--sn-space-half))",
-    right: "var(--sn-space-half)",
-    left: "var(--sn-space-half)",
+    top: "calc(var(--sn-navbar-height) + var(--sn-space-sm))",
+    right: "var(--sn-space-sm)",
+    left: "var(--sn-space-sm)",
   };
 
   return (

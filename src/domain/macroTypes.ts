@@ -1,10 +1,10 @@
-import { RawText } from "./page";
+import { Markdown } from "./page";
 
 export type CodeLanguage = "ts" | "python";
 
 export type NoteMacro = {
   type: "note";
-  content: RawText;
+  content: Markdown;
 };
 
 export type CodeRunnerMacro = {
@@ -15,9 +15,9 @@ export type CodeRunnerMacro = {
 
 export type CodeTaskMacro = {
   type: "codeTask";
-  instruction: RawText;
-  hint: RawText;
-  solution: RawText;
+  instruction: Markdown;
+  hint: Markdown;
+  solution: Markdown;
   starter: string;
   validation?: string;
   language: CodeLanguage;
@@ -40,16 +40,16 @@ export type GapMacro = {
 
 export type MathTaskMacro = {
   type: "mathTask";
-  instruction: RawText;
-  hint: RawText;
-  solution: RawText;
+  instruction: Markdown;
+  hint: Markdown;
+  solution: Markdown;
 };
 
 export type McqMacro = {
   type: "mcq";
-  question: RawText;
-  correct: RawText[];
-  options: RawText[];
+  question: Markdown;
+  correct: Markdown[];
+  options: Markdown[];
   single: boolean;
   shuffleOptions: boolean;
   wideLayout: boolean;
@@ -57,15 +57,15 @@ export type McqMacro = {
 
 export type TextTaskMacro = {
   type: "textTask";
-  instruction: RawText;
-  hint: RawText;
-  solution: RawText;
+  instruction: Markdown;
+  hint: Markdown;
+  solution: Markdown;
 };
 
 export type TableMacro = {
   type: "table";
-  headers: RawText[];
-  rows: RawText[][];
+  headers: Markdown[];
+  rows: Markdown[][];
 };
 
 export type ImageMacro = {
@@ -77,7 +77,7 @@ export type ImageMacro = {
 export type HighlightMacro = {
   type: "highlight";
   icon: "info" | "warning";
-  content: RawText
+  content: Markdown
 };
 
 export type Macro =

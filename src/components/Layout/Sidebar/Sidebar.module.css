@@ -33,7 +33,7 @@
 }
 
 .nav {
-  padding: var(--sn-space-half);
+  padding: var(--sn-space-sm);
 }
 
 .mainNav {
@@ -155,7 +155,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  margin-left: var(--sn-space-half);
+  margin-left: var(--sn-space-sm);
 }
 
 .chapterItem {

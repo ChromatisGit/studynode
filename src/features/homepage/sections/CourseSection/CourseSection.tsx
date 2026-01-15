@@ -1,11 +1,11 @@
 import { getSession } from "@/server/auth/auth";
-import styles from "@homepage/sections/CourseSection/CourseGroup.module.css";
 import HOMEPAGE_TEXT from "@homepage/homepage.de.json";
 import { HomeSection } from "@homepage/Homepage";
 import { getCoursesByAccess } from "@/server/data/courses";
 import { getCourseDTO } from "@/server/data/getCourseDTO";
 import type { CourseDTO } from "@/domain/courseDTO";
 import { isAdmin } from "@/domain/userTypes";
+import { Stack } from "@components/Stack";
 import { CourseGroup } from "./CourseGroup";
 
 type CourseGroups = {
@@ -25,7 +25,7 @@ export async function CourseSection() {
   const session = await getSession();
   const user = session?.user ?? null;
 
-  const accessGroups = user ? getCoursesByAccess(user) : null;
+  const accessGroups = getCoursesByAccess(user);
   const groups = accessGroups
     ? {
         accessible: accessGroups.accessible.map((courseId) => getCourseDTO(courseId)),
@@ -37,7 +37,7 @@ export async function CourseSection() {
 
   return (
     <HomeSection id="courses" title={courses.title} subtitle={courses.subtitle}>
-      <div className={styles.courseGroups}>
+      <Stack gap="xl">
         <CourseGroup
           title={admin? courses.accessibleCoursesAdmin : courses.accessibleCourses}
           courses={groups.accessible}
@@ -60,7 +60,7 @@ export async function CourseSection() {
             accessable={true}
           />
         )}
-      </div>
+      </Stack>
     </HomeSection>
   );
 }

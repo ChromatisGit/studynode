@@ -1,4 +1,4 @@
-import { GeneratedPage } from "@/components/GeneratedPage/GeneratedPage";
+import { ContentPageRenderer } from "@features/contentpage/renderers/ContentPageRenderer";
 import { WorksheetCards } from "@/features/coursepage/components/WorksheetCard/WorksheetCards";
 import { assertCanAccessPage, getSession } from "@/server/auth/auth";
 import { getCourseId, getSubject, getWorksheetRefs } from "@/server/data/courses";
@@ -42,7 +42,7 @@ export default async function ChapterPage({ params }: PageParams) {
         <WorksheetCards worksheets={worksheets} />
       )}
 
-      <GeneratedPage
+      <ContentPageRenderer
         title={page.title}
         content={page.content}
       />

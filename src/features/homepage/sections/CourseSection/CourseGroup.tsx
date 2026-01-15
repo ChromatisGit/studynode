@@ -1,6 +1,7 @@
 "use client";
 
 import { FancyGrid } from "@/components/FancyGrid";
+import { Stack } from "@components/Stack";
 import { CourseCard } from "./CourseCard";
 import styles from "@homepage/sections/CourseSection/CourseGroup.module.css";
 import type { CourseDTO } from "@/domain/courseDTO";
@@ -16,18 +17,15 @@ export function CourseGroup({ title, courses, accessable, actionLabel }: CourseG
     if (!courses.length) return null;
 
     return (
-        <section className={styles.courseGroup}>
-            <div className={styles.groupHeader}>
+        <section>
+            <Stack gap="sm">
                 <h3 className={styles.groupTitle}>{title}</h3>
-            </div>
 
-            <FancyGrid
+                <FancyGrid
                 items={courses}
                 minItemWidth={240}
                 gap={16}
                 maxCols={4}
-                className={styles.courseGrid}
-                rowClassName={styles.courseRow}
                 renderItem={(course) => {
                     const accessHref = `/access?groupKey=${course.groupKey}&subjectKey=${course.subjectKey}`
                     const courseHref = course.slug;
@@ -42,6 +40,7 @@ export function CourseGroup({ title, courses, accessable, actionLabel }: CourseG
                     );
                 }}
             />
+            </Stack>
         </section>
     );
 }

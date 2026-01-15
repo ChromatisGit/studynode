@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { Topic } from "@/domain/courseContent";
 import type { CourseId } from "@/server/data/courses";
 import { setProgressAction } from "@/server/admin/progressActions";
+import { Button } from "@components/Button";
 import styles from "./ProgressControl.module.css";
 
 type ProgressControlProps = {
@@ -122,13 +123,13 @@ export function ProgressControl({
         </div>
 
         {/* Submit Button */}
-        <button
+        <Button
           type="submit"
           disabled={isPending || !selectedTopicId || !selectedChapterId}
-          className={`${styles.submitButton} button button--primary`}
+          variant="primary"
         >
           {isPending ? "Updating..." : "Update Progress"}
-        </button>
+        </Button>
       </div>
     </form>
   );

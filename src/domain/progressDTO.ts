@@ -1,3 +1,5 @@
+import type { WorksheetRef } from "./courseContent";
+
 export type ProgressStatus = "finished" | "current" | "planned" | "locked";
 
 export type ProgressChapterDTO = {
@@ -5,6 +7,7 @@ export type ProgressChapterDTO = {
   label: string;
   href: string;
   status: ProgressStatus;
+  worksheets?: WorksheetRef[];
 };
 
 export type ProgressTopicDTO = {

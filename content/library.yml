@@ -1,0 +1,12 @@
+subjects:
+  info:
+    grundlagen-programmieren-ts:
+      - variablen-und-datentypen
+      - operatoren
+      - bedingungen
+      - schleifen
+      - funktionen
+      - arrays
+      - objekte
+  math:
+    brueche:

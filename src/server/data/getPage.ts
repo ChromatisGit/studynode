@@ -16,7 +16,7 @@ export async function getPage(args: Args): Promise<Page> {
 
     let sourcePath = [".generated", subject, topicId].join("/");
 
-    sourcePath += worksheetId ? `/${chapterId}/worksheet/${worksheetId}.json` : `/${chapterId}.json`;
+    sourcePath += worksheetId ? `/${chapterId}/worksheets/${worksheetId}.json` : `/${chapterId}.json`;
 
     const fullPath = join(process.cwd(), sourcePath);
 

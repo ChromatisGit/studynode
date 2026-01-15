@@ -1,4 +1,4 @@
-import { GeneratedPage } from "@components/GeneratedPage/GeneratedPage";
+import { WorksheetRenderer } from "@features/contentpage/renderers/WorksheetRenderer";
 import { getPage } from "@/server/data/getPage";
 import { getSession, assertCanAccessPage } from "@/server/auth/auth";
 import { getCourseId, getSubject } from "@/server/data/courses";
@@ -29,5 +29,5 @@ export default async function WorksheetRoute({ params }: PageParams) {
   const subject = getSubject(courseId)
   const page = await getPage({subject: subject.id, topicId, chapterId, worksheetId});
 
-  return <GeneratedPage title={page.title} content={page.content} />;
+  return <WorksheetRenderer page={page} worksheetSlug={`${courseId}-${topicId}-${chapterId}-${worksheetId}`} />;
 }

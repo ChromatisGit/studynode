@@ -27,10 +27,11 @@ export async function getProgressDTO(courseId: CourseId): Promise<ProgressDTO> {
         : -1;
 
     const chaptersWithStatus = topic.chapters.map(
-      ({ chapterId, label, href }, chapterIndex) => ({
+      ({ chapterId, label, href, worksheets }, chapterIndex) => ({
         chapterId,
         label,
         href,
+        worksheets,
         status: getChapterStatus(topicStatus, chapterIndex, currentChapterIndex),
       })
     ) as ProgressChapterDTO[];
