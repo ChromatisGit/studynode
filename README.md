@@ -1,83 +1,64 @@
 # StudyNode
 
-Digitale Unterrichtsplattform auf Basis von **Docusaurus**.
+Digitale Unterrichtsplattform
 
 ---
 
-## Ordnerstruktur
+## Installationsanleitung
 
-### Content
+- Installiere [https://bun.com/](Bun) in der Powershell
+
+- Klone das Repository mit VS-Code und öffne das Projekt
+
+- Führe über das Terminal in VS-Code `bun install` aus
+
+- Um das Projekt lokal zu starten, schreibe ins Terminal `bun dev`
+
+- Der Webserver kann im Terminal gestoppt werden mit der Tastenkombination `Strg + C`
+
+
+
+---
+
+## Inhalte erstellen
+
+`base` enthält die grundlegenden Inhalte für ein Fach.
+
+`courses` beschreibt die konkreten Inhalte, die aus Basis verwendet werden sollen und in welcher Reihenfolge. Dabei kann konfiguriert werden, welche konkreten Kapitel angezeigt werden und auch in welcher Reihenfolge diese angezeigt werden.
+
+### Ordnerstruktur
 
 ```
 
 content/
-├─ groupsAndSubjects.yml             # Definiert Fächer, Kursarten und Varianten
+├─ groups-and-subjects.yml           # Definiert Fächer, Kursarten und Varianten
 │
 ├─ base/                             # Basisinhalte (kursunabhängig, wiederverwendbar)
 │  ├─ <subject>/                     # z. B. math, info
 │  │  └─ <topic>/                    # z. B. vektorgeometrie, trigonometrie
 │  │     ├─ chapters/
-│  │     │  └─ <chapter>/            # z. B. 00_geraden, 01_geraden_lagebeziehung
+│  │     │  └─ <chapter>/            # z. B. 00-geraden, 01-geraden-lagebeziehung
 │  │     │     ├─ slides/            # Folien (Marp)
 │  │     │     ├─ worksheets/        # Arbeitsblätter
-│  │     │     ├─ preview.md         # (optional) Vorschauseite (vor/während der Behandlung)
-│  │     │     └─ overview.md        # Übersichtsseite
+│  │     │     └─ overview.typ       # Zusammenfassung der Inhalte des Kapitels
 │  │     │
 │  │     ├─ images/                  # Abbildungen für Webseite & Materialien
-│  │     ├─ notes.md                 # Interne Notizen für die Lehrperson
-│  │     ├─ preview.md               # (optional) Vorschauseite zum Themenblock
-│  │     ├─ overview.md              # Übersichtsseite zum Themenblock
-│  │     └─ topicPlan.yml            # Stoffverteilungsplan des Themenblocks (Lernziele & Kapitel)
+│  │     └─ chapters.typ             # Titel und Stoffverteilungsplan des Themenblocks
 │  │
-│  └─ slides/                        # Übergreifende Präsentationen
+│  └─ slides/                        # Fachübergreifende Präsentationen
 │
 ├─ courses/                          # Konkrete Kurse (sichtbar für Schüler)
-│  └─ <group>/                       # z. B. tg2, bk1
-│     ├─ group_info.md               # Kursbezogene Informationen & Leitsätze
-│     │
-│     └─ <subject_variant>/          # z. B. math-lk, info-tgm
-│        ├─ coursePlan.yml           # Themenübersicht & aktueller Fortschritt
-│        ├─ courseVariations.yml     # Anpassungen gegenüber Base (z. B. alternative Arbeitsblätter)
-│        └─ files/                   # Kursbezogene Zusatzdateien
+│  └─ <groupID>/                     # z. B. tg1-math-lk, bk1-info
+│     ├─ course.yml                  # Kurs- und Themenkonfiguration
+│     ├─ course-variations.yml       # Anpassungen gegenüber Base (z. B. alternative Arbeitsblätter)
+│     └─ files/                      # Kursbezogene Zusatzdateien
 │
 └─ templates/                        # Vorlagen zum Kopieren
-   ├─ baseTopic/                     # Grundgerüst für Topic + Chapter
-   └─ coursePlans/                   # coursePlan.yml-Vorlagen für Kursvarianten
+   ├─ base-topic/                    # Grundgerüst für Topic + Chapter
+   └─ course-plans/                  # course-plan.yml-Vorlagen für Kursvarianten
 
 ```
 
-### Source (Quellcode)
-```
-src/
-│
-├─ builder/                          # Node-basierte Buildtools
-│  └─ main.ts                        # Generiert .generated/*
-│
-├─ dev/                              # Entwicklungswerkzeuge
-│  └─ export-schema.ts               # Erzeugt YAML-Schemas für IntelliSense in VSCode
-│
-├─ schema/                           # Zod-Schemas (Typdefinitionen)
-│
-├─ worksheet/                        # Generiert Arbeitsbögen in pdf oder Webformat
-│
-└─ marp-styling/                     # CSS-Themes für Marp-Präsentationen
-```
-
-### Weitere
-
-```
-website/                             # Docusaurus-Website
-│
-├─ src/                              # Darstellung & Interaktion mit der Webseite
-└─ .generated/                       # Vom Builder generierte Webseite
-
-```
-
-.vscode/
-│
-├─ settings.json                     # YAML Schema-Zuweisungen
-│
-└─ .schemas/                         # Generierte JSON-Schemas (für IntelliSense)
 ---
 
 ## Begriffe
@@ -85,17 +66,48 @@ website/                             # Docusaurus-Website
 | Begriff | Bedeutung |
 |----------|------------|
 | **Kapitel (chapter)** | Didaktisch abgeschlossene Einheit mit 1–6 Unterrichtsstunden. |
-| **Themenblock (topic)** | Übergeordnete thematische Einheit, meist entsprechend einer Bildungsplaneinheit. Umfasst mehrere Kapitel oder steht als Einzelthema ohne Unterkapitel. |
-| **Roadmap** | Fortschrittsübersicht über alle Themenblöcke und Kapitel eines Kurses. Zeigt aktuelle, abgeschlossene und kommende Themen. Wird über die Datei `coursePlan.yml` pro Kurs gesteuert. |
+| **Themenblock (topic)** | Übergeordnete thematische Einheit, meist entsprechend einer Bildungsplaneinheit und enthält ein oder mehrere Kapitel. |
+| **Roadmap** | Fortschrittsübersicht über alle Themenblöcke und Kapitel eines Kurses. Zeigt aktuelle, abgeschlossene und kommende Themen. Wird über die Datei `course-plan.yml` pro Kurs gesteuert. |
 | **Arbeitsblatt (worksheet)** | In `Typst` verfasste Übungsaufgaben. Arbeitsblätter werden abhängig vom Kurs automatisiert in PDF-Dateien oder interaktive Web-Seiten umgewandelt. |
 | **Checkpoint** | Verständnisfragen mit sofortiger Rückmeldung (Check for Understanding). Dient der Selbstkontrolle und Lernstandserhebung. |
-| **Aufgaben** | Pflichtaufgaben, die alle Schüler während der Stunde bearbeiten. Sie bildet das erwartete Mindestlernziel ab. |
+| **Aufgaben** | Pflichtaufgaben, die alle Schüler während des Unterrichts bearbeiten. Sie bildet das erwartete Mindestlernziel ab. |
 | **Challenge** | Vertiefungs- oder Transferaufgabe für schnelle oder leistungsstarke Schüler. Fördert Anwendung und Transfer. |
+
+© 2025 Christian Holst
+
+
+## Typst-Dateien im Detail
+
+### `chapters.typ`
+
+Enthält:
+
+* Titel des Themenblocks
+* Lernziele der einzelnen Kapitel
+
+
+### `overview.typ` (Kapitelübersicht)
+
+Beinhaltet:
+
+* Theoretische Erklärung
+* Beispiele
+
+### `worksheet.typ` (Arbeitsblatt)
+
+Beinhaltet:
+
+* Checkpoint
+* Aufgaben
+* Challenges
+
+Wird automatisch zur Web- oder PDF-Version gebaut.
 
 ---
 
-## ToDo Liste
+## YAML-Dateien
 
-- Warnung wenn Lernelemente die bereits veröffentlicht sind bearbeitet werden (Willst du das nicht lieber in einem neuen Branch machen?)
+### `course.yaml`
 
-© 2025 Christian Holst
+
+### `definitions.yml`

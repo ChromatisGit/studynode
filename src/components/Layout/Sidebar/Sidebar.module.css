@@ -1,0 +1,233 @@
+/* === SIDEBAR === */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: var(--sn-navbar-height);
+  bottom: 0;
+  width: 280px;
+  background: var(--sn-surface);
+  border-right: 1px solid var(--sn-border);
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 250ms ease;
+  z-index: 101;
+}
+
+.sidebarOpen {
+  transform: translateX(0);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 85;
+  display: block;
+}
+
+@media (min-width: 770px) {
+  .overlay {
+    display: none;
+  }
+}
+
+.nav {
+  padding: var(--sn-space-sm);
+}
+
+.mainNav {
+  padding: var(--sn-space-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 770px) {
+  .mainNav {
+    display: none;
+  }
+}
+
+.mainNavLink {
+  display: block;
+  padding: var(--sn-space-xs) var(--sn-space-xs);
+  text-decoration: none;
+  color: var(--sn-text-muted);
+  font-size: var(--sn-font-size-1);
+  font-weight: var(--sn-font-medium);
+  border-radius: var(--sn-radius-xs);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.mainNavLink:hover {
+  background: var(--sn-surface-raised);
+  color: var(--sn-text);
+}
+
+.separator {
+  height: 1px;
+  background: var(--sn-border);
+  margin: var(--sn-space-xs) var(--sn-space-md);
+}
+
+@media (min-width: 770px) {
+  .separator {
+    display: none;
+  }
+}
+
+.separatorMobileOnly {
+  display: block;
+}
+
+@media (min-width: 770px) {
+  .separatorMobileOnly {
+    display: none;
+  }
+}
+
+.topicGroup {
+  margin-bottom: var(--sn-space-xs);
+}
+
+.topicHeader {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.topicHeader h4 {
+  margin: 0;
+}
+
+.topicToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--sn-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 120ms ease, background 120ms ease;
+  margin-left: auto;
+  border-radius: var(--sn-radius-xs);
+}
+
+.topicToggle:hover {
+  color: var(--sn-text);
+  background: var(--sn-surface-raised);
+}
+
+.topicChevron {
+  transition: transform 200ms ease;
+}
+
+.topicChevronExpanded {
+  transform: rotate(90deg);
+}
+
+.topicLink {
+  flex: 1;
+  display: block;
+  padding: var(--sn-space-xs) var(--sn-space-xs) var(--sn-space-xs) var(--sn-space-xs);
+  text-decoration: none;
+  color: var(--sn-text);
+  font-weight: var(--sn-font-bold);
+  font-size: var(--sn-font-size-1);
+  border-radius: var(--sn-radius-xs);
+  transition: background 120ms ease, color 120ms ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topicLink:hover {
+  background: var(--sn-surface-raised);
+}
+
+.topicLinkActive {
+  background: var(--sn-purple-accent-soft-bg);
+  color: var(--sn-purple-accent);
+}
+
+.chapterList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chapterItem {
+  margin: 0;
+}
+
+.chapterLink {
+  display: flex;
+  align-items: center;
+  gap: var(--sn-space-xs);
+  padding: var(--sn-space-xs) var(--sn-space-xs);
+  text-decoration: none;
+  color: var(--sn-text-muted);
+  font-size: var(--sn-font-size-1);
+  font-weight: var(--sn-font-medium);
+  border-radius: var(--sn-radius-xs);
+  transition: background 120ms ease, color 120ms ease;
+  position: relative;
+}
+
+.chapterLink:hover {
+  background: var(--sn-surface-raised);
+  color: var(--sn-text);
+}
+
+.chapterLinkActive {
+  background: var(--sn-purple-accent-soft-bg);
+  color: var(--sn-purple-accent);
+  font-weight: var(--sn-font-semibold);
+}
+
+.roadmapMarker {
+  width: 3px;
+  height: 1em;
+  background: var(--sn-purple-accent-strong);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.coursesToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--sn-space-xs) var(--sn-space-xs);
+  border: none;
+  background: transparent;
+  color: var(--sn-text-muted);
+  font-size: var(--sn-font-size-1);
+  font-weight: var(--sn-font-medium);
+  cursor: pointer;
+  border-radius: var(--sn-radius-xs);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.coursesToggle:hover {
+  background: var(--sn-surface-raised);
+  color: var(--sn-text);
+}
+
+.coursesContent {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 200ms ease;
+}
+
+.coursesContentExpanded {
+  grid-template-rows: 1fr;
+}
+
+.coursesContent > ul {
+  overflow: hidden;
+}
