@@ -3,16 +3,25 @@ export type NestedRecord<Keys extends readonly PropertyKey[], Leaf> =
     ? Record<K, NestedRecord<Rest, Leaf>>
     : Leaf;
 
+type MutableRecord = Record<PropertyKey, unknown>;
+
 export function ensurePath<
-  Obj extends Record<PropertyKey, any>,
+  Obj extends MutableRecord,
   const Keys extends readonly PropertyKey[]
 >(
   obj: Obj,
   ...keys: Keys
-): any {
-  let cur: any = obj;
-  for (const k of keys) {
-    cur = cur[k] ?? (cur[k] = {});
+): MutableRecord {
+  let cur: MutableRecord = obj;
+  for (const key of keys) {
+    const next = cur[key];
+    if (next && typeof next === "object") {
+      cur = next as MutableRecord;
+      continue;
+    }
+    const created: MutableRecord = {};
+    cur[key] = created;
+    cur = created;
   }
   return cur;
 }

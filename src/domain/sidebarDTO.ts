@@ -10,4 +10,5 @@ export type SidebarDTO = ProgressDTO & {
   courses: SidebarCourseDTO[];
   isAuthenticated: boolean;
   primaryGroupKey?: string;
+  accessCode?: string;
 };

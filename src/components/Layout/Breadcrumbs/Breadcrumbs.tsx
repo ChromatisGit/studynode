@@ -14,8 +14,6 @@ type BreadcrumbsProps = {
 export function Breadcrumbs({ data }: BreadcrumbsProps) {
   const {
     hasTopicContext,
-    isLibraryRoute,
-    subject,
     courseId,
     groupKey,
     subjectKey,
@@ -31,9 +29,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
   const items: Array<{ label: string; href: string }> = [];
 
   let homeUrl = "/";
-  if (isLibraryRoute && subject) {
-    homeUrl = `/library/${subject}`;
-  } else if (!isLibraryRoute && courseId) {
+  if (courseId) {
     homeUrl = groupKey && subjectKey ? `/${groupKey}/${subjectKey}` : "/";
   }
 
@@ -41,7 +37,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
   let chapterLabel = chapter;
   let worksheetLabel = worksheet;
 
-  if (!isLibraryRoute && courseId) {
+  if (courseId) {
     const topicData = data.topics.find((entry) => entry.topicId === topic);
     topicLabel = topicData?.label ?? topicLabel;
     const chapterData = topicData?.chapters.find((entry) => entry.chapterId === chapter);
@@ -54,9 +50,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
 
   if (topic) {
     const topicUrl =
-      isLibraryRoute && subject
-        ? `/library/${subject}/${topic}`
-        : groupKey && subjectKey
+      groupKey && subjectKey
         ? `/${groupKey}/${subjectKey}/${topic}`
         : "/";
 
@@ -68,9 +62,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
 
   if (chapter) {
     const chapterUrl =
-      isLibraryRoute && subject && topic
-        ? `/library/${subject}/${topic}/${chapter}`
-        : groupKey && subjectKey && topic
+      groupKey && subjectKey && topic
         ? `/${groupKey}/${subjectKey}/${topic}/${chapter}`
         : "/";
 
@@ -82,9 +74,7 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
 
   if (worksheet) {
     const worksheetUrl =
-      isLibraryRoute && subject && topic && chapter
-        ? `/library/${subject}/${topic}/${chapter}/${worksheet}`
-        : groupKey && subjectKey && topic && chapter
+      groupKey && subjectKey && topic && chapter
         ? `/${groupKey}/${subjectKey}/${topic}/${chapter}/${worksheet}`
         : "/";
 

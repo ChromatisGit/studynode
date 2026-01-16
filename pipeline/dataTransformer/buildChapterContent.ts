@@ -3,7 +3,7 @@ import { getFileNames, getFolderNames, writeJSONFile } from "../io";
 import { ContentIssueCollector, issueCatalog, type ContentIssue } from "../errorHandling";
 import { parsePage } from "../pageParser/parsePage";
 import { WorksheetFormat } from "@schema/course";
-import { NestedRecord, ensurePath } from "../../../src/server/lib/nestedRecord";
+import { NestedRecord, ensurePath } from "../../src/server/lib/nestedRecord";
 import { fileNameToId } from "../pageParser/utils/fileNameToId";
 
 type WorksheetSummary = { worksheetId: string; label: string };
@@ -25,7 +25,7 @@ type ChapterSummary = {
 export async function buildChapterContent(
     topicPaths: TopicPath[]
 ): Promise<{ pageSummaries: PageSummaries; pdfConversionPaths: PdfConversionPath[] }> {
-    const pageSummaries: PageSummaries = {} as any;
+    const pageSummaries: PageSummaries = {} as PageSummaries;
     const pdfConversionPaths: PdfConversionPath[] = [];
     const collector = new ContentIssueCollector();
 

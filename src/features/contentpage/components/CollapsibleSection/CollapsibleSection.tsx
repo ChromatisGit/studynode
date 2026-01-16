@@ -9,10 +9,11 @@ import sharedStyles from '@features/contentpage/styles/shared.module.css';
 interface CollapsibleSectionProps {
   type: 'hint' | 'solution';
   content: React.ReactNode;
+  defaultOpen?: boolean;
 }
 
-export function CollapsibleSection({ type, content }: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CollapsibleSection({ type, content, defaultOpen = false }: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const config = type === 'hint'
     ? {

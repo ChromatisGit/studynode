@@ -62,6 +62,12 @@ export function assertCanAccessPage(
   groupKey: string,
   courseId?: string
 ): void {
+  // Check public course access first (doesn't require login)
+  if (courseId && coursePublic(courseId)) {
+    return;
+  }
+
+  // For non-public courses, require login
   assertLoggedIn(session);
   if (!canUserAccessPage(session.user, groupKey, courseId)) {
     notFound();

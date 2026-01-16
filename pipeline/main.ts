@@ -12,7 +12,7 @@ async function main() {
     const topicLabels = await getTopicLabels(pagePaths)
     const courses = resolveCourses(coursePlans, pageSummaries, topicLabels)
     writeJSONFile("config/courses.json", courses)
-    console.log("[builder] OK")
+    console.log("[builder] SUCCESS")
 }
 
 try {

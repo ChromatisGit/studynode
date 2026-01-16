@@ -5,9 +5,9 @@ paginate: true
 headingDivider: 2
 backgroundColor: "#fffaf3"
 style: |
-section { font-size: 32px; }
+section { font-size: var(--sn-font-size-presentation, 32px); }
 h1, h2, h3 { color: #1a1b2f; }
-.muted { color: #6b7280; font-size: 0.8em; }
+.muted { color: #6b7280; font-size: var(--sn-font-size-muted, 0.8em); }
 .pill { display: inline-block; padding: .2em .6em; border-radius: 999px; background: #eef2ff; color: #1e3a8a; font-weight: 600; }
 .ok { color: #16a34a; font-weight: 700; }
 .warn { color: #b45309; font-weight: 700; }

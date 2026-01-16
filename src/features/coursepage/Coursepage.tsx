@@ -1,4 +1,5 @@
 import { SectionShell } from "@components/SectionShell";
+import { PageHeader } from "@components/PageHeader/PageHeader";
 import type { ProgressTopicDTO } from "@domain/progressDTO";
 import type { WorksheetRef } from "@domain/courseContent";
 import Roadmap from "./components/Roadmap/Roadmap";
@@ -29,7 +30,7 @@ export function CoursepagePage({ model }: CoursepagePageProps) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.pageTitle}>{pageTitle}</h1>
+        <PageHeader title={pageTitle} />
         <p className={styles.pageWelcome}>{welcomeText}</p>
         <p className={styles.pageDescription}>{COURSEPAGE_TEXT.intro.description}</p>
       </header>

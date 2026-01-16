@@ -11,9 +11,6 @@ type ProgressCursor = {
 const PROGRESS_DIR = join(process.cwd(), ".data", "progress");
 const PROGRESS_FILE = join(PROGRESS_DIR, "courses.json");
 
-// In-memory cache
-let progressCache: Map<string, ProgressCursor> | null = null;
-
 async function ensureProgressDir() {
   try {
     await mkdir(PROGRESS_DIR, { recursive: true });
@@ -40,10 +37,7 @@ async function saveProgressToFile(progressMap: Map<string, ProgressCursor>): Pro
 }
 
 export async function getProgressStore(): Promise<Map<string, ProgressCursor>> {
-  if (!progressCache) {
-    progressCache = await loadProgressFromFile();
-  }
-  return progressCache;
+  return loadProgressFromFile();
 }
 
 export async function setProgressInStore(
@@ -51,20 +45,14 @@ export async function setProgressInStore(
   topicId: string,
   chapterId: string
 ): Promise<void> {
-  // Clear cache first to ensure we're working with fresh data
-  progressCache = null;
-
-  const store = await getProgressStore();
+  const store = await loadProgressFromFile();
   store.set(courseId, {
     currentTopicId: topicId,
     currentChapterId: chapterId,
   });
   await saveProgressToFile(store);
-
-  // Clear cache again to force reload on next access
-  progressCache = null;
 }
 
 export function clearProgressCache(): void {
-  progressCache = null;
+  // No-op: progress is always read fresh from disk.
 }

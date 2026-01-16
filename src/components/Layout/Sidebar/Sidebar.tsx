@@ -21,7 +21,6 @@ export function Sidebar({ isOpen, onClose, data }: SidebarProps) {
     chapter,
     hasTopicContext,
     isHome,
-    isLibrary,
     isPrinciples,
   } = useRouteContext();
   const isMobile = useIsMobile();
@@ -33,21 +32,6 @@ export function Sidebar({ isOpen, onClose, data }: SidebarProps) {
     if (isMobile) {
       onClose();
     }
-  };
-
-  const handleTopicClick = (event: React.MouseEvent) => {
-    if (isMobile) {
-      const topicElement = event.currentTarget.closest(`.${styles.topicGroup}`);
-      const toggle = topicElement?.querySelector("button");
-      const isExpanded = toggle?.getAttribute("aria-expanded") === "true";
-
-      if (!isExpanded) {
-        event.preventDefault();
-        toggle?.click();
-        return;
-      }
-    }
-    handleLinkClick();
   };
 
   const hasMainNavSection = showMainNav;
@@ -68,7 +52,6 @@ export function Sidebar({ isOpen, onClose, data }: SidebarProps) {
             activeCourseId={courseId ?? null}
             groupKey={data.primaryGroupKey}
             isHome={isHome}
-            isLibrary={isLibrary}
             isPrinciples={isPrinciples}
             onLinkClick={handleLinkClick}
           />
@@ -84,7 +67,6 @@ export function Sidebar({ isOpen, onClose, data }: SidebarProps) {
             progressCurrentTopicId={data.currentTopicId}
             progressCurrentChapterId={data.currentChapterId}
             onLinkClick={handleLinkClick}
-            onTopicClick={handleTopicClick}
           />
         ) : null}
       </aside>

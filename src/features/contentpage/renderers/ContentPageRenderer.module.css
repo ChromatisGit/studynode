@@ -5,7 +5,7 @@
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: var(--sn-font-size-2);
   margin: 0;
 }
 
@@ -22,12 +22,12 @@
 }
 
 .sectionTitle {
-  font-size: 1.2rem;
+  font-size: var(--sn-font-size-1-6);
   margin: 0;
 }
 
 .subheader {
-  font-size: 1rem;
+  font-size: var(--sn-font-size-1-4);
   font-weight: 600;
   margin: 0;
   color: var(--sn-text);
@@ -61,7 +61,7 @@
   padding: 1rem;
   overflow-x: auto;
   font-family: var(--sn-font-mono);
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
   margin: 0;
 }
 
@@ -91,7 +91,7 @@
 }
 
 .noteLabel {
-  font-size: 0.8rem;
+  font-size: var(--sn-font-size-0-8);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--sn-text-muted);
@@ -129,7 +129,7 @@
 }
 
 .taskLabel {
-  font-size: 0.75rem;
+  font-size: var(--sn-font-size-0-75);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--sn-text-muted);

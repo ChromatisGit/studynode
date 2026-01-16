@@ -17,6 +17,7 @@ type LayoutProps = {
   isAdmin: boolean;
   activeCourseLabel?: string | null;
   logoutAction: () => Promise<void>;
+  fullWidth?: boolean;
 };
 
 export function Layout({
@@ -25,39 +26,71 @@ export function Layout({
   isAdmin,
   activeCourseLabel,
   logoutAction,
+  fullWidth = false,
 }: LayoutProps) {
-  const { hasTopicContext, pathname, worksheet } = useRouteContext();
+  const { hasTopicContext, topic } = useRouteContext();
   const isMobile = useIsMobile();
 
   const sidebarExists = isMobile || hasTopicContext;
-  const isWorksheetRoute = pathname.startsWith("/worksheet") || Boolean(worksheet);
 
   const getSidebarDefaultState = useCallback((): boolean => {
     if (isMobile) return false;
-    return !isWorksheetRoute;
-  }, [isMobile, isWorksheetRoute]);
+    if (!hasTopicContext || !topic) return false;
+
+    const currentTopicStatus = sidebarData.topics.find(
+      (entry) => entry.topicId === topic
+    )?.status;
+
+    return currentTopicStatus === "finished";
+  }, [hasTopicContext, isMobile, sidebarData.topics, topic]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(getSidebarDefaultState);
   const [hasEverInteracted, setHasEverInteracted] = useState(false);
-  const prevWorksheetRef = useRef(isWorksheetRoute);
   const prevMobileRef = useRef(isMobile);
+  const prevTopicRef = useRef(topic);
 
   useEffect(() => {
-    const worksheetChanged = prevWorksheetRef.current !== isWorksheetRoute;
     const mobileChanged = prevMobileRef.current !== isMobile;
-    prevWorksheetRef.current = isWorksheetRoute;
+    const topicChanged = prevTopicRef.current !== topic;
     prevMobileRef.current = isMobile;
+    prevTopicRef.current = topic;
 
-    if (worksheetChanged || mobileChanged) {
+    if (mobileChanged || topicChanged) {
       setHasEverInteracted(true);
       setIsSidebarOpen(getSidebarDefaultState());
     }
-  }, [getSidebarDefaultState, isWorksheetRoute, isMobile]);
+  }, [getSidebarDefaultState, isMobile, topic]);
 
   const toggleSidebar = () => {
     setHasEverInteracted(true);
     setIsSidebarOpen((prev) => !prev);
   };
+
+  if (fullWidth) {
+    return (
+      <div className={styles.layout}>
+        <Navbar
+          onSidebarToggle={toggleSidebar}
+          sidebarExists={sidebarExists}
+          isSidebarOpen={isSidebarOpen}
+          data={sidebarData}
+          isAdmin={isAdmin}
+          activeCourseLabel={activeCourseLabel}
+          logoutAction={logoutAction}
+        />
+
+        {sidebarExists && (
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            data={sidebarData}
+          />
+        )}
+
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className={styles.layout}>

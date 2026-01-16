@@ -13,7 +13,6 @@ type SidebarMainNavProps = {
   activeCourseId: string | null;
   groupKey?: string;
   isHome: boolean;
-  isLibrary: boolean;
   isPrinciples: boolean;
   onLinkClick: () => void;
 };
@@ -26,7 +25,6 @@ export function SidebarMainNav({
   activeCourseId,
   groupKey,
   isHome,
-  isLibrary,
   isPrinciples,
   onLinkClick,
 }: SidebarMainNavProps) {
@@ -42,13 +40,8 @@ export function SidebarMainNav({
     return (
       <div className={styles.mainNav}>
         {!isHome ? (
-          <AppLink href="/" className={styles.mainNavLink} onClick={onLinkClick}>
+          <AppLink href="/" className={styles.topicLink} onClick={onLinkClick}>
             Homepage
-          </AppLink>
-        ) : null}
-        {!isLibrary ? (
-          <AppLink href="/library" className={styles.mainNavLink} onClick={onLinkClick}>
-            Library
           </AppLink>
         ) : null}
       </div>
@@ -61,36 +54,31 @@ export function SidebarMainNav({
   return (
     <div className={styles.mainNav}>
       {!isHome ? (
-        <AppLink href="/" className={styles.mainNavLink} onClick={onLinkClick}>
+        <AppLink href="/" className={styles.topicLink} onClick={onLinkClick}>
           Homepage
-        </AppLink>
-      ) : null}
-
-      {!isLibrary ? (
-        <AppLink href="/library" className={styles.mainNavLink} onClick={onLinkClick}>
-          Library
         </AppLink>
       ) : null}
 
       {shouldShowCoursesDropdown && inactiveCourses.length > 0 ? (
         <div className={styles.topicGroup}>
-          <div className={styles.topicHeader}>
-            <div className={styles.topicLink}>Courses</div>
-            <button
-              className={styles.topicToggle}
-              onClick={() => setIsCoursesExpanded((prev) => !prev)}
-              aria-expanded={isCoursesExpanded}
-              aria-label="Toggle Courses"
-            >
-              <ChevronRight
-                size={20}
-                className={`${styles.topicChevron} ${
-                  isCoursesExpanded ? styles.topicChevronExpanded : ""
-                }`.trim()}
-              />
-            </button>
-          </div>
-          {isCoursesExpanded ? (
+          <button
+            className={styles.coursesToggle}
+            onClick={() => setIsCoursesExpanded((prev) => !prev)}
+            aria-expanded={isCoursesExpanded}
+          >
+            <span>Courses</span>
+            <ChevronRight
+              size={20}
+              className={`${styles.topicChevron} ${
+                isCoursesExpanded ? styles.topicChevronExpanded : ""
+              }`.trim()}
+            />
+          </button>
+          <div
+            className={`${styles.coursesContent} ${
+              isCoursesExpanded ? styles.coursesContentExpanded : ""
+            }`.trim()}
+          >
             <ul className={styles.chapterList}>
               {inactiveCourses.map((course) => (
                 <li key={course.id} className={styles.chapterItem}>
@@ -104,7 +92,7 @@ export function SidebarMainNav({
                 </li>
               ))}
             </ul>
-          ) : null}
+          </div>
         </div>
       ) : (
         inactiveCourses.map((course) => (

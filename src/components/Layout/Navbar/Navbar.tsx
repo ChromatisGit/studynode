@@ -27,18 +27,15 @@ type NavbarProps = {
 
 function getCurrentRouteName({
   isHome,
-  isLibrary,
   isPrinciples,
   activeCourseLabel,
 }: {
   isHome: boolean;
-  isLibrary: boolean;
   isPrinciples: boolean;
   activeCourseLabel?: string | null;
 }): string | null {
   if (isHome) return null;
   if (isPrinciples) return "Principles";
-  if (isLibrary) return "Library";
   if (activeCourseLabel) return activeCourseLabel;
   return null;
 }
@@ -61,7 +58,6 @@ export function Navbar({
   const activeCourseId = routeContext.courseId ?? null;
   const currentRouteName = getCurrentRouteName({
     isHome: routeContext.isHome,
-    isLibrary: routeContext.isLibrary,
     isPrinciples: routeContext.isPrinciples,
     activeCourseLabel,
   });
@@ -105,7 +101,9 @@ export function Navbar({
           <div className={styles.brandNav}>
             <AppLink href="/" className={styles.brand}>
               <BookOpen size={20} />
-              {(routeContext.isHome || !isMobile) && <span>StudyNode</span>}
+              {(routeContext.isHome || !isMobile) && (
+                <span className={styles.brandText}>StudyNode</span>
+              )}
             </AppLink>
 
             {isMobile && currentRouteName ? (
@@ -118,10 +116,8 @@ export function Navbar({
             {!isMobile ? (
               <div className={styles.desktopLinks}>
                 <NavbarDesktopLinks
-                  isAuthenticated={data.isAuthenticated}
                   courses={data.courses}
                   activeCourseId={activeCourseId}
-                  isLibrary={routeContext.isLibrary}
                   isPrinciples={routeContext.isPrinciples}
                   groupKey={data.primaryGroupKey}
                 />
@@ -145,6 +141,7 @@ export function Navbar({
               isMobile={isMobile}
               isAdmin={isAdmin}
               adminPanelLink={adminPanelLink}
+              accessCode={data.accessCode}
             />
           ) : (
             <button className={styles.authButton} onClick={() => router.push("/access")}>

@@ -7,6 +7,7 @@ import type { InfoBlock } from "@features/contentpage/components/InfoBlock/InfoB
 import type { TaskSet } from "@features/contentpage/components/Group/TaskSetComponent";
 import { getCategoryType } from "@features/contentpage/config/categoryConfig";
 import { WorksheetStorageProvider } from "@features/contentpage/storage/WorksheetStorageContext";
+import { PageHeader } from "@components/PageHeader/PageHeader";
 import styles from "./WorksheetRenderer.module.css";
 
 interface WorksheetRendererProps {
@@ -125,7 +126,7 @@ export function WorksheetRenderer({ page, className, worksheetSlug }: WorksheetR
   return (
     <WorksheetStorageProvider worksheetSlug={worksheetSlug} pageContent={page.content}>
       <div className={`${styles.worksheet} ${className ?? ""}`.trim()}>
-        {page.title && <h1 className={styles.title}>{page.title}</h1>}
+        {page.title && <PageHeader title={page.title} />}
         <div className={styles.categoryList}>
           {categories.map((category, index) => (
             <CategorySection

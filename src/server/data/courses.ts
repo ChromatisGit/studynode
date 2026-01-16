@@ -43,6 +43,12 @@ export function coursePublic(courseId: CourseId) {
   return resolveCourse(courseId).isPublic;
 }
 
+export function getPublicCourses(): CourseId[] {
+  return courses
+    .filter((course) => course.isPublic && course.isListed)
+    .map((course) => course.id as CourseId);
+}
+
 export function getCourseGroupAndSubjectKey(courseId: CourseId) {
   const course = resolveCourse(courseId)
   return { groupKey: course.group.key, subjectKey: course.subject.key };

@@ -21,7 +21,7 @@
   min-height: 100%;
   line-height: 1.5;
   font-family: var(--sn-font-mono);
-  font-size: 0.98rem;
+  font-size: var(--sn-font-size-0-98);
   color: var(--sn-code-text);
   background: transparent;
   white-space: pre-wrap;
@@ -38,7 +38,7 @@
   overflow: hidden;
   line-height: 1.5;
   font-family: var(--sn-font-mono);
-  font-size: 0.98rem;
+  font-size: var(--sn-font-size-0-98);
   outline: none;
   caret-color: var(--sn-text-on-accent);
 }

@@ -47,7 +47,7 @@
   border: 1px solid var(--sn-border);
   background: var(--sn-surface);
   color: var(--sn-text);
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 .select:focus-visible {

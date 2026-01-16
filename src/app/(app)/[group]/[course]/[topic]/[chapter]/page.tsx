@@ -1,5 +1,4 @@
 import { ContentPageRenderer } from "@features/contentpage/renderers/ContentPageRenderer";
-import { WorksheetCards } from "@/features/coursepage/components/WorksheetCard/WorksheetCards";
 import { assertCanAccessPage, getSession } from "@/server/auth/auth";
 import { getCourseId, getSubject, getWorksheetRefs } from "@/server/data/courses";
 import { getPage } from "@/server/data/getPage";
@@ -37,15 +36,10 @@ export default async function ChapterPage({ params }: PageParams) {
   const worksheets = await getWorksheetRefs({ courseId, topicId, chapterId });
 
   return (
-    <main>
-      {worksheets && (
-        <WorksheetCards worksheets={worksheets} />
-      )}
-
-      <ContentPageRenderer
-        title={page.title}
-        content={page.content}
-      />
-    </main>
+    <ContentPageRenderer
+      title={page.title}
+      content={page.content}
+      worksheets={worksheets || undefined}
+    />
   );
 }

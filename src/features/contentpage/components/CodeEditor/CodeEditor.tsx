@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Highlight } from "prism-react-renderer";
 import { codeTheme } from "@features/contentpage/components/MarkdownRenderer/codeTheme";
 
@@ -14,17 +14,10 @@ interface CodeEditorProps {
   readOnly?: boolean;
 }
 
-export function CodeEditor({ value, onChange, rows = 10, readOnly = false }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, rows = 3, readOnly = false }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-
-  const adjustHeight = () => {
-    if (!textareaRef.current) return;
-    const el = textareaRef.current;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  };
 
   const handleScroll = () => {
     if (textareaRef.current) {
@@ -35,13 +28,8 @@ export function CodeEditor({ value, onChange, rows = 10, readOnly = false }: Cod
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (readOnly) return;
-    adjustHeight();
     onChange(e.target.value);
   };
-
-  useEffect(() => {
-    adjustHeight();
-  }, [value]);
 
   return (
     <div className={styles.codeEditor}>
@@ -85,7 +73,7 @@ export function CodeEditor({ value, onChange, rows = 10, readOnly = false }: Cod
         tabIndex={readOnly ? -1 : undefined}
         style={{
           caretColor: "white",
-          minHeight: `${rows * 1.5}em`,
+          minHeight: `${rows * 1.2}em`,
         }}
       />
     </div>

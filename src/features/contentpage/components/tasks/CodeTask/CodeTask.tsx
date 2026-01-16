@@ -119,7 +119,8 @@ export function CodeTask({ task, isSingleTask = false, triggerCheck, taskKey }: 
         {hasSolution && (
           <CollapsibleSection
             type="solution"
-            content={<MarkdownRenderer markdown={solutionText ?? ""} />}
+            defaultOpen={!hasValidation}
+            content={<MarkdownRenderer markdown={solutionText!} />}
           />
         )}
       </div>

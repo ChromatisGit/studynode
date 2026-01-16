@@ -12,7 +12,7 @@ function normalizeLucideIconInput(input: string): string {
   return input.trim().toLowerCase().replace(/[\s_-]+/g, "");
 }
 
-function isIconExport(v: unknown): v is (...args: any[]) => any {
+function isIconExport(v: unknown): v is (...args: unknown[]) => unknown {
   if (typeof v === "function") return true;
   if (!v || typeof v !== "object") return false;
   return "$$typeof" in v;

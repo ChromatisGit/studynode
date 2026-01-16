@@ -5,8 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ConfigableIcon, type IconName } from "@/components/ConfigableIcon/ConfigableIcon";
 import styles from "./Card.module.css";
-
-export type CardColor = "purple" | "blue" | "green" | "orange" | "teal" | "red";
+import { AccentColor } from "@/domain/accentColors";
 
 export type CardProps = {
   title: string;
@@ -15,7 +14,7 @@ export type CardProps = {
   tags?: string[];
   actionLabel?: string;
   href: string;
-  color?: CardColor;
+  color?: AccentColor;
   className?: string;
 };
 

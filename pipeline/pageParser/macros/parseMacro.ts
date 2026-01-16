@@ -22,6 +22,10 @@ type MacroGroup = {
 type InlineMacros = Record<string, RawText>
 
 export function parseGroupMacro(node: RawMacroBlock, protectedBlocks: ProtectedBlock[]): MacroGroup {
+    if (!node.content) {
+        throw new Error("#group needs content.")
+    }
+
     const groupNodes = splitMacroAndText(node.content)
 
     const macroGroup: MacroGroup = {
@@ -29,8 +33,12 @@ export function parseGroupMacro(node: RawMacroBlock, protectedBlocks: ProtectedB
         macros: []
     }
 
-    if ("rawText" in groupNodes[0]) {
-        macroGroup.intro = parseRawText(groupNodes.shift() as RawText, protectedBlocks)
+    const maybeIntro = groupNodes[0]
+    if (maybeIntro && "rawText" in maybeIntro) {
+        const intro = groupNodes.shift()
+        if (intro && "rawText" in intro) {
+            macroGroup.intro = parseRawText(intro, protectedBlocks)
+        }
     }
 
     assertOnlyMacroBlocks(groupNodes)
@@ -77,11 +85,15 @@ export function parseMacro(node: RawMacroBlock, protectedBlocks: ProtectedBlock[
 
 
 function extractInlineMacros(src: string): { inlineMacros: InlineMacros, content: RawText } {
-    let inlineNodes = splitMacroAndText(src)
-    let content: RawText;
+    const inlineNodes = splitMacroAndText(src)
+    let content: RawText = { rawText: "" };
 
-    if ("rawText" in inlineNodes[0]) {
-        content = inlineNodes.shift() as RawText
+    const firstNode = inlineNodes[0]
+    if (firstNode && "rawText" in firstNode) {
+        const textNode = inlineNodes.shift()
+        if (textNode && "rawText" in textNode) {
+            content = textNode
+        }
     }
 
     assertOnlyMacroBlocks(inlineNodes)
@@ -94,6 +106,9 @@ function extractInlineMacros(src: string): { inlineMacros: InlineMacros, content
     const inlineMacros: InlineMacros = {};
 
     inlineNodes.forEach((node) => {
+        if (node.content == null) {
+            throw new Error("Inline macros must include content.")
+        }
         inlineMacros[node.type] = {
             rawText: node.content
         }

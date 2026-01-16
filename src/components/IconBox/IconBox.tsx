@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { CSSProperties, ComponentType } from "react";
+import type { ComponentType } from "react";
 import type { LucideProps } from "lucide-react";
 import styles from "./IconBox.module.css";
 

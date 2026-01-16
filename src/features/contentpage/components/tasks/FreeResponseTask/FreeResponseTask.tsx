@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CollapsibleSection } from '@features/contentpage/components/CollapsibleSection/CollapsibleSection';
 import { MarkdownRenderer } from '@features/contentpage/components/MarkdownRenderer/MarkdownRenderer';
 
@@ -28,16 +28,29 @@ export function FreeResponseTask({
   placeholder = CONTENTPAGE_TEXT.freeResponseTask.placeholder,
   taskKey,
 }: FreeResponseTaskProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { value: answer, setValue: setAnswer } = useTaskPersistence<string>(taskKey, '');
   const isChecked = triggerCheck > 0 && Boolean(answer.trim());
   const instructionText = getMarkdown(task.instruction) ?? "";
   const hintText = getMarkdown(task.hint) ?? null;
   const solutionText = getMarkdown(task.solution) ?? null;
 
-  const textareaRows = useMemo(() => {
+  const minRows = useMemo(() => {
     const solutionLines = solutionText ? solutionText.split('\n').length : 0;
     return Math.max(3, solutionLines + 1);
   }, [solutionText]);
+
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    const minHeight = minRows * 1.5 * 16; // 1.5 line-height * 16px base font
+    textarea.style.height = `${Math.max(minHeight, textarea.scrollHeight)}px`;
+  }, [minRows]);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [answer, adjustHeight]);
 
   return (
     <div className={`${sharedStyles.stackMedium} ${isSingleTask ? sharedStyles.stackTight : ''}`}>
@@ -46,10 +59,11 @@ export function FreeResponseTask({
       </div>
 
       <textarea
+        ref={textareaRef}
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
         placeholder={placeholder}
-        rows={textareaRows}
+        rows={minRows}
         className={styles.responseField}
       />
 
@@ -59,7 +73,11 @@ export function FreeResponseTask({
         ) : null}
 
         {solutionText && isChecked ? (
-          <CollapsibleSection type="solution" content={<MarkdownRenderer markdown={solutionText} />} />
+          <CollapsibleSection
+            type="solution"
+            defaultOpen
+            content={<MarkdownRenderer markdown={solutionText} />}
+          />
         ) : null}
       </div>
     </div>

@@ -33,7 +33,7 @@ export function CodeRunner({
   onChange,
   onRun,
   isLoading = false,
-  rows = 10,
+  rows = 5,
   readOnly = false,
   diagnostics = [],
   runtimeError = null,

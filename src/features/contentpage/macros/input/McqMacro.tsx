@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, X, Circle } from "lucide-react";
+import { Check, X } from "lucide-react";
 import type { McqMacro as McqMacroType } from "@domain/macroTypes";
 import type { MacroComponentProps } from "../types";
 import { MarkdownRenderer } from "../../components/MarkdownRenderer/MarkdownRenderer";

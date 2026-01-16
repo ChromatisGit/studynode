@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  margin-bottom: 1.2rem;
 }
 
 .codeShell {
@@ -71,7 +70,7 @@
 .diagnosticsTitle {
   font-weight: 700;
   margin-bottom: 0.35rem;
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 .diagnosticList {
@@ -79,7 +78,7 @@
   padding-left: 1rem;
   display: grid;
   gap: 0.25rem;
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 .result {

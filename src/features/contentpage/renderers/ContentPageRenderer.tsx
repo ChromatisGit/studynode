@@ -1,14 +1,18 @@
 "use client";
 
 import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRenderer/MarkdownRenderer";
+import { PageHeader } from "@components/PageHeader/PageHeader";
 import type { Macro } from "@domain/macroTypes";
 import type { Node, Page } from "@domain/page";
 import { getMarkdown } from "@features/contentpage/utils/textUtils";
 import { renderMacro } from "../macros/registry";
 import type { MacroRenderContext } from "../macros/types";
 import styles from "./ContentPageRenderer.module.css";
+import { WorksheetCards } from "@/features/coursepage/components/WorksheetCard/WorksheetCards";
+import { WorksheetRef } from "@/domain/courseContent";
 
 type ContentPageRendererProps = Page & {
+  worksheets?: WorksheetRef[]
   className?: string;
 };
 
@@ -72,16 +76,21 @@ function renderContentItem(item: Node, index: number) {
   );
 }
 
-export function ContentPageRenderer({ title, content, className }: ContentPageRendererProps) {
+export function ContentPageRenderer({ title, content, worksheets, className }: ContentPageRendererProps) {
   const hasContent = content && content.length > 0;
 
   return (
     <div className={`${styles.content} ${className ?? ""}`.trim()}>
-      {title && <h1 className={styles.title}>{title}</h1>}
+      {title && <PageHeader title={title} />}
       {hasContent && (
         <div className={styles.sections}>
+          {worksheets && (<section key="0">
+            <h2 className={styles.sectionTitle}>Aufgaben</h2>
+            <WorksheetCards worksheets={worksheets} />
+          </section>
+          )}
           {content.map((section, sectionIndex) => (
-            <section key={sectionIndex} className={styles.section}>
+            <section key={sectionIndex + 1} className={styles.section}>
               {section.header ? (
                 <h2 className={styles.sectionTitle}>{section.header}</h2>
               ) : null}

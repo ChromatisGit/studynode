@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { TextTaskMacro as TextTaskMacroType } from "@domain/macroTypes";
 import type { MacroComponentProps } from "../types";
 import { MarkdownRenderer } from "../../components/MarkdownRenderer/MarkdownRenderer";
+import { CollapsibleSection } from "../../components/CollapsibleSection/CollapsibleSection";
 import { getMarkdown } from "../../utils/textUtils";
 import { useWorksheetStorage } from "../../storage/WorksheetStorageContext";
 import { Stack } from "@components/Stack";
@@ -13,8 +14,20 @@ type Props = MacroComponentProps<TextTaskMacroType>;
 
 export function TextTaskMacro({ macro, context }: Props) {
   const storage = useWorksheetStorage();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [answer, setAnswer] = useState("");
   const [isChecked, setIsChecked] = useState(false);
+
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.max(100, textarea.scrollHeight)}px`;
+  }, []);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [answer, adjustHeight]);
 
   // Load persisted state
   useEffect(() => {
@@ -49,29 +62,27 @@ export function TextTaskMacro({ macro, context }: Props) {
       {instruction && <MarkdownRenderer markdown={instruction} />}
 
       <textarea
+        ref={textareaRef}
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
-        disabled={isChecked}
         className={styles.textarea}
         rows={4}
         placeholder="Enter your answer..."
       />
 
-      {isChecked && (hint || solution) && (
-        <div className={styles.meta}>
+      {(hint || (isChecked && solution)) && (
+        <Stack gap="sm">
           {hint && (
-            <details className={styles.details}>
-              <summary>Hint</summary>
-              <MarkdownRenderer markdown={hint} />
-            </details>
+            <CollapsibleSection type="hint" content={<MarkdownRenderer markdown={hint} />} />
           )}
-          {solution && (
-            <details className={styles.details}>
-              <summary>Solution</summary>
-              <MarkdownRenderer markdown={solution} />
-            </details>
+          {isChecked && solution && (
+            <CollapsibleSection
+              type="solution"
+              defaultOpen
+              content={<MarkdownRenderer markdown={solution} />}
+            />
           )}
-        </div>
+        </Stack>
       )}
     </Stack>
   );

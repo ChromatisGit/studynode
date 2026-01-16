@@ -16,18 +16,24 @@ const MAX_INLINE_COURSES = 2;
 
 export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinksProps) {
   const shouldUseDropdown = courses.length > MAX_INLINE_COURSES;
-  const hasActiveCourse = Boolean(activeCourseId);
+  const activeCourse = courses.find((c) => c.id === activeCourseId);
+  const otherCourses = courses.filter((c) => c.id !== activeCourseId);
 
   if (shouldUseDropdown) {
+    // When inside a course: show active course label with chevron, dropdown has other courses
+    // When not inside a course: show "Courses" with chevron, dropdown has all courses
+    const triggerLabel = activeCourse ? activeCourse.label : "Courses";
+    const dropdownCourses = activeCourse ? otherCourses : courses;
+
     return (
       <NavbarDropdown
         trigger={(isOpen) => (
           <button
             className={`${styles.link} ${styles.dropdownTrigger} ${
-              hasActiveCourse ? styles.linkActive : ""
+              activeCourse ? styles.linkActive : ""
             }`.trim()}
           >
-            Courses
+            {triggerLabel}
             <ChevronDown
               size={14}
               className={`${styles.dropdownIcon} ${
@@ -38,20 +44,15 @@ export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinks
         )}
         align="left"
       >
-        {courses.map((course) => {
-          const isActive = activeCourseId === course.id;
-          return (
-            <AppLink
-              key={course.id}
-              href={course.href}
-              className={`${styles.dropdownItem} ${
-                isActive ? styles.dropdownItemActive : ""
-              }`.trim()}
-            >
-              {course.label}
-            </AppLink>
-          );
-        })}
+        {dropdownCourses.map((course) => (
+          <AppLink
+            key={course.id}
+            href={course.href}
+            className={`${styles.dropdownItem} ${styles.courseDropdownItem}`.trim()}
+          >
+            {course.label}
+          </AppLink>
+        ))}
       </NavbarDropdown>
     );
   }

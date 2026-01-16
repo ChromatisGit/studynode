@@ -20,7 +20,7 @@
   color: var(--sn-purple-accent);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--sn-font-size-0-9);
   transition: all 0.2s ease;
 }
 
@@ -45,14 +45,14 @@
 .title {
   margin: 0 0 0.5rem 0;
   color: var(--sn-text);
-  font-size: 2rem;
+  font-size: var(--sn-font-size-2);
   font-weight: 700;
 }
 
 .subtitle {
   margin: 0;
   color: var(--sn-text-muted);
-  font-size: 1rem;
+  font-size: var(--sn-font-size-1);
 }
 
 .sections {
@@ -68,14 +68,14 @@
 .sectionTitle {
   margin: 0;
   color: var(--sn-text);
-  font-size: 1.4rem;
+  font-size: var(--sn-font-size-1-4);
   font-weight: 700;
 }
 
 .sectionDescription {
   margin: 0;
   color: var(--sn-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 .placeholder {
@@ -98,10 +98,10 @@
   }
 
   .title {
-    font-size: 1.6rem;
+    font-size: var(--sn-font-size-1-6);
   }
 
   .sectionTitle {
-    font-size: 1.2rem;
+    font-size: var(--sn-font-size-1-2);
   }
 }

@@ -31,6 +31,10 @@ function parser(node: RawMacro): McqMacro {
         shuffleOptions: boolean;
     };
 
+    if (!node.content) {
+        throw new Error("#mcq requires content.");
+    }
+
     const lines = node.content.rawText.split(NEWLINE_REGEX);
 
     const firstOptionIndex = lines.findIndex((line) => {

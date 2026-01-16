@@ -1,6 +1,7 @@
 import { getSession, assertCanAccessPage } from "@/server/auth/auth";
 import { getCourseId } from "@/server/data/courses";
 import { getTopicDTO } from "@/server/data/getTopicDTO";
+import { PageHeader } from "@components/PageHeader/PageHeader";
 import Link from "next/link";
 
 type PageParams = {
@@ -22,8 +23,7 @@ export default async function ChapterPage({ params }: PageParams) {
 
   return (
     <main>
-      <h1>{topic.label}</h1>
-      <h2>Kapitelübersicht</h2>
+      <PageHeader title={topic.label} subtitle="Kapitelübersicht" />
 
       {topic.chapters.length > 0 ? (
         <ul>

@@ -6,7 +6,6 @@ import type { Session } from "@/domain/session";
 import { isAdmin } from "@/domain/userTypes";
 import {
   authenticateUser,
-  findUserByPin,
   createUser,
   addCourseToUser,
   getUserById,
@@ -38,7 +37,7 @@ export type ContinueAccessInput = {
 };
 
 export type ContinueAccessResult =
-  | { ok: true; redirectTo: string; session: Session }
+  | { ok: true; redirectTo: string; session: Session; accessCode?: string }
   | { ok: false; error: string; redirectTo?: string };
 
 // -----------------------------
@@ -58,10 +57,11 @@ function hasCourseAccess(user: User, groupKey: string, courseId: string): boolea
 
 async function buildSuccessResult(
   user: User,
-  redirectTo: string
+  redirectTo: string,
+  accessCode?: string
 ): Promise<ContinueAccessResult> {
   await setSessionCookie(user.id);
-  return { ok: true, redirectTo, session: { user } };
+  return { ok: true, redirectTo, session: { user }, accessCode };
 }
 
 /**
@@ -83,21 +83,17 @@ async function enrollUserInCourse(
   return true;
 }
 
-/**
- * Find an existing user by PIN or create a new one.
- * Does NOT enroll the user into the course; that is handled by handleCourseJoin.
- */
-async function resolveOrCreateUserByPin(
-  pin: string,
-  groupKey: string
-): Promise<User> {
-  // Try to find existing user by PIN
-  const existingUser = await findUserByPin(pin);
-  if (existingUser) {
-    return existingUser;
-  }
+type CreateUserResult = {
+  user: User;
+  accessCode: string;
+};
 
-  // Create new user
+/**
+ * Create a new user with the given PIN.
+ * PIN is a password, not a unique identifier - multiple users can have the same PIN.
+ * Each user is identified by their unique access code.
+ */
+async function createNewUser(pin: string, groupKey: string): Promise<CreateUserResult> {
   const userId = `u${Date.now().toString(36)}`;
   const accessCode = generateAccessCode();
   const newUser: DefaultUser = {
@@ -109,7 +105,7 @@ async function resolveOrCreateUserByPin(
 
   await createUser(newUser, pin, accessCode);
 
-  return newUser;
+  return { user: newUser, accessCode };
 }
 
 // -----------------------------
@@ -156,9 +152,12 @@ export async function continueAccessAction(
   const courseRoute = ctx.courseRoute;
 
   // Helper to centralize course-join logic
-  const handleCourseJoin = async (user: User): Promise<ContinueAccessResult> => {
+  const handleCourseJoin = async (
+    user: User,
+    newAccessCode?: string
+  ): Promise<ContinueAccessResult> => {
     if (hasCourseAccess(user, groupKey, courseId)) {
-      return buildSuccessResult(user, courseRoute);
+      return buildSuccessResult(user, courseRoute, newAccessCode);
     }
 
     if (!ctx.isRegistrationOpen) {
@@ -188,7 +187,7 @@ export async function continueAccessAction(
       };
     }
 
-    return buildSuccessResult(updatedUser, courseRoute);
+    return buildSuccessResult(updatedUser, courseRoute, newAccessCode);
   };
 
   // Already logged in AND already has access → go straight to course
@@ -235,8 +234,8 @@ export async function continueAccessAction(
     };
   }
 
-  const pinUser = await resolveOrCreateUserByPin(pin, groupKey);
-  return handleCourseJoin(pinUser);
+  const { user: newUser, accessCode: newAccessCode } = await createNewUser(pin, groupKey);
+  return handleCourseJoin(newUser, newAccessCode);
 }
 
 export async function signOutAction(): Promise<void> {

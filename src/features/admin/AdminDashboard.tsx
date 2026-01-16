@@ -2,13 +2,14 @@
 
 import type { CourseDTO } from "@/domain/courseDTO";
 import { Box } from "@/components/Box";
-import { Card, type CardColor } from "@/components/Card";
+import { Card } from "@/components/Card";
 import { Container } from "@/components/Container";
 import { Grid } from "@/components/Grid";
 import { Stack } from "@/components/Stack";
 import { PageHeader } from "@/components/PageHeader";
 import type { IconName } from "@/components/ConfigableIcon/ConfigableIcon";
 import styles from "./AdminDashboard.module.css";
+import { AccentColor } from "@/domain/accentColors";
 
 type AdminDashboardProps = {
   courses: CourseDTO[];
@@ -61,7 +62,7 @@ export function AdminDashboard({ courses, totalUsers, accessibleCoursesCount }: 
                   tags={course.tags}
                   actionLabel="Manage"
                   href={`/admin/${course.id}`}
-                  color={course.color as CardColor}
+                  color={course.color as AccentColor}
                 />
               ))}
             </Grid>

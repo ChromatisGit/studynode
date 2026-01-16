@@ -2,7 +2,6 @@
   border: 1px solid var(--sn-border);
   border-radius: var(--sn-radius-sm);
   overflow: hidden;
-  background: var(--sn-surface-raised);
   --collapsible-accent: var(--sn-purple-accent);
 }
 
@@ -15,20 +14,21 @@
 }
 
 .collapsibleHeader {
+  background: var(--sn-surface);
   width: 100%;
   display: flex;
   align-items: center;
   gap: 0.55rem;
   padding: 0.75rem 0.9rem;
-  background: var(--sn-surface);
   border: 0;
-  cursor: pointer;
   color: var(--sn-text);
+  cursor: pointer;
   transition: background 120ms ease;
 }
 
 .collapsibleHeader:hover {
   background: var(--sn-surface-raised);
+  cursor: pointer;
 }
 
 .collapsibleCaret {

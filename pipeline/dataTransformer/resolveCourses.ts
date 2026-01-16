@@ -1,4 +1,4 @@
-import { NestedRecord, ensurePath } from "../../../src/server/lib/nestedRecord";
+import { NestedRecord, ensurePath } from "../../src/server/lib/nestedRecord";
 import { Course, Topic } from "@schema/course";
 import { TopicPath } from "../configParser/buildPagePaths";
 import { CoursePlan } from "../configParser/schema/coursePlan";
@@ -6,12 +6,17 @@ import { parsePage } from "../pageParser/parsePage";
 import { PageSummaries } from "./buildChapterContent";
 import { ContentIssueCollector } from "../errorHandling";
 
+type WorksheetSummary = { worksheetId: string; label: string };
+type ChapterSummary = { label: string; worksheets: WorksheetSummary[] };
+
 export function resolveCourses(coursePlans: CoursePlan[], pageSummaries: PageSummaries, topicLabels: TopicLabelMap): Course[] {
     return coursePlans.map((course) => {
         const { topics, slug, subject, worksheetFormat } = course;
-        const resolvedTopics: Topic[] = Object.entries(topics).map(([topicId, chapterIds]) => {
-            const topicSummary = pageSummaries[subject.id][topicId];
-            return {
+        const resolvedTopics: Topic[] = Object.entries(topics).flatMap(([topicId, chapterIds]) => {
+            if (!chapterIds) return [];
+
+            const topicSummary = pageSummaries[subject.id][topicId] as Record<string, ChapterSummary>;
+            return [{
                 topicId,
                 label: topicLabels[subject.id][topicId],
                 href: `${slug}/${topicId}`,
@@ -31,7 +36,7 @@ export function resolveCourses(coursePlans: CoursePlan[], pageSummaries: PageSum
                         })
                     }
                 })
-            }
+            }]
         })
 
         return {
@@ -48,7 +53,7 @@ type Label = string;
 type TopicLabelMap = NestedRecord<[SubjectId, TopicId], Label>;
 
 export async function getTopicLabels(pagePaths: TopicPath[]): Promise<TopicLabelMap> {
-    const topicLabels: TopicLabelMap = {} as any;
+    const topicLabels: TopicLabelMap = {} as TopicLabelMap;
     const collector = new ContentIssueCollector();
 
     for (const { subjectId, topicId, chapters } of pagePaths) {

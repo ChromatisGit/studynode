@@ -9,7 +9,7 @@
   font-weight: var(--sn-font-semibold);
   color: var(--sn-purple-accent);
   margin-bottom: var(--sn-space-xs);
-  font-size: 0.85rem;
+  font-size: var(--sn-font-size-0-85);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

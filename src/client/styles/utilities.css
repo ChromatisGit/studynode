@@ -61,8 +61,8 @@
   padding: var(--sn-space-xs);
   overflow-x: auto;
   font-family: var(--sn-font-mono);
-  font-size: 0.95rem;
-  margin: 1rem 0 var(--sn-space-xs);
+  font-size: var(--sn-font-size-0-95);
+  margin: var(--sn-space-xs) 0;
   line-height: 1.6;
   color: var(--sn-code-text);
 }

@@ -8,6 +8,9 @@ groups:
   bs:
     name: Berufsschule
     color: orange
+  public:
+    name: Offener Lernbereich
+    color: purple
 
 subjects:
   math:
@@ -16,6 +19,9 @@ subjects:
   info:
     name: Informatik
     icon: code
+  example:
+    name: Studynode Beispiele
+    icon: library-big
 
 variants:
   gk:

@@ -28,11 +28,11 @@
 }
 
 .infoBadgeSymbol {
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 .infoHeading {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: var(--sn-font-size-1-05);
   color: var(--sn-text);
 }

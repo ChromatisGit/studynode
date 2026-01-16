@@ -31,7 +31,7 @@ export async function readTypFile(filePath: string): Promise<string> {
   }
 }
 
-export function writeJSONFile(path: string, content: any) {
+export function writeJSONFile(path: string, content: unknown) {
   const filePath = path.toLowerCase().endsWith(".json") ? path : `${path}.json`;
   const fullPath = `${EXPORT_PATH}/${filePath}`;
   void Bun.write(fullPath, JSON.stringify(content), { createPath: true });

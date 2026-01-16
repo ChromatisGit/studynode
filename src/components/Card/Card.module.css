@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sn-space-sm);
+  height: 100%;
   padding: var(--sn-space-md);
   border: 1px solid var(--sn-border);
   border-radius: var(--sn-radius-md);
@@ -25,8 +26,12 @@
 
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--sn-space-sm);
+}
+
+.header:has(.subtitle) {
+  align-items: flex-start;
 }
 
 .iconContainer {
@@ -38,6 +43,7 @@
   flex-shrink: 0;
   border-radius: var(--sn-radius-sm);
   background: var(--card-accent-bg);
+  border: 1px solid var(--card-accent-border);
   color: var(--card-accent);
 }
 
@@ -55,7 +61,7 @@
 
 .title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--sn-font-size-1-1);
   font-weight: var(--sn-font-semibold);
   color: var(--sn-text);
   line-height: 1.3;
@@ -63,7 +69,7 @@
 
 .subtitle {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--sn-font-size-0-9);
   color: var(--sn-text-muted);
   line-height: 1.4;
 }
@@ -82,7 +88,7 @@
   border-radius: var(--sn-radius-xs);
   background: var(--card-accent-bg);
   color: var(--card-accent);
-  font-size: 0.85rem;
+  font-size: var(--sn-font-size-0-85);
   font-weight: var(--sn-font-semibold);
 }
 
@@ -95,7 +101,7 @@
   margin-top: auto;
   color: var(--card-accent);
   font-weight: var(--sn-font-bold);
-  font-size: 0.95rem;
+  font-size: var(--sn-font-size-0-95);
 }
 
 /* === Color Variants === */

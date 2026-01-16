@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { ImageMacro as ImageMacroType } from "@domain/macroTypes";
 import type { MacroComponentProps } from "../types";
 import styles from "./ImageMacro.module.css";

@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import type { CodeTaskMacro as CodeTaskMacroType } from "@domain/macroTypes";
 import type { MacroComponentProps } from "../types";
 import { MarkdownRenderer } from "../../components/MarkdownRenderer/MarkdownRenderer";
+import { CollapsibleSection } from "../../components/CollapsibleSection/CollapsibleSection";
 import { getMarkdown } from "../../utils/textUtils";
 import { useWorksheetStorage } from "../../storage/WorksheetStorageContext";
 import { CodeRunner } from "../../components/CodeRunner/CodeRunner";
 import { useTsRunner } from "../../components/CodeRunner/useTsRunner";
 import { Stack } from "@components/Stack";
-import styles from "./CodeTaskMacro.module.css";
 
 type Props = MacroComponentProps<CodeTaskMacroType>;
 
@@ -48,6 +48,7 @@ export function CodeTaskMacro({ macro, context }: Props) {
         runCode({ code, validate: false });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context.checkTrigger]);
 
   const handleRun = () => {
@@ -67,7 +68,6 @@ export function CodeTaskMacro({ macro, context }: Props) {
         onChange={setCode}
         onRun={handleRun}
         rows={Math.max(3, code.split("\n").length)}
-        readOnly={isChecked}
         isLoading={isLoading}
         diagnostics={diagnostics}
         runtimeError={runtimeError}
@@ -75,21 +75,19 @@ export function CodeTaskMacro({ macro, context }: Props) {
         hadRuntime={hadRuntime}
       />
 
-      {isChecked && (hint || solution) && (
-        <div className={styles.meta}>
+      {(hint || (isChecked && solution)) && (
+        <Stack gap="sm">
           {hint && (
-            <details className={styles.details}>
-              <summary>Hint</summary>
-              <MarkdownRenderer markdown={hint} />
-            </details>
+            <CollapsibleSection type="hint" content={<MarkdownRenderer markdown={hint} />} />
           )}
-          {solution && (
-            <details className={styles.details}>
-              <summary>Solution</summary>
-              <MarkdownRenderer markdown={solution} />
-            </details>
+          {isChecked && solution && (
+            <CollapsibleSection
+              type="solution"
+              defaultOpen={!macro.validation}
+              content={<MarkdownRenderer markdown={solution} />}
+            />
           )}
-        </div>
+        </Stack>
       )}
     </Stack>
   );

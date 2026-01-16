@@ -31,10 +31,13 @@ export function Providers({ children, initialSession }: ProvidersProps) {
         <AuthenticatedRouteProvider>
           {children}
           <Toaster
-            position="top-right"
+            position="top-center"
             richColors
             offset={toasterOffset}
             mobileOffset={toasterOffset}
+            toastOptions={{
+              style: { zIndex: 900 },
+            }}
           />
         </AuthenticatedRouteProvider>
       </MockAuthProvider>

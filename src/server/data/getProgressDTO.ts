@@ -64,12 +64,12 @@ function getChapterStatus(
     currentChapterIndex: number
 ): ProgressStatus {
     if (topicStatus === "finished") return "finished";
-    if (topicStatus === "planned") return "planned";
+    if (topicStatus === "planned") return "locked";
 
     // only "current" topics reach this point
     if (chapterIndex < currentChapterIndex) return "finished";
     if (chapterIndex === currentChapterIndex) return "current";
-    return "planned";
+    return "locked";
 }
 
 type ProgressCursor = {

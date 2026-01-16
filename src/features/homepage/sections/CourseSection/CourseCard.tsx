@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, type CardColor } from "@/components/Card";
+import { Card } from "@/components/Card";
 import type { IconName } from "@/components/ConfigableIcon/ConfigableIcon";
+import { AccentColor } from "@/domain/accentColors";
 import type { CourseDTO } from "@/domain/courseDTO";
 import HOMEPAGE_TEXT from "@homepage/homepage.de.json";
 
@@ -26,7 +27,7 @@ export function CourseCard({ course, href, actionLabel }: CourseCardProps) {
       tags={tags}
       actionLabel={actionLabel ?? coursesText.openActionLabel}
       href={targetHref}
-      color={color as CardColor}
+      color={color as AccentColor}
     />
   );
 }

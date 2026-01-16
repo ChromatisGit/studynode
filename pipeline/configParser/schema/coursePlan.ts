@@ -6,7 +6,7 @@ import {
 } from "./yamlCoursePlan";
 import { Course, WorksheetFormat } from "@schema/course";
 import { resolveLucideIcon } from "../validateLucideIcons";
-import { makeGroupKey, makeCourseId, makeCourseSlug, makeSubjectKey } from "../../../lib/makeIds";
+import { makeGroupKey, makeCourseId, makeCourseSlug, makeSubjectKey } from "../../../src/server/lib/makeIds";
 
 export type CoursePlan = Omit<Course, "topics"> & {
   worksheetFormat: WorksheetFormat;

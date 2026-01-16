@@ -5,8 +5,10 @@
   border-radius: var(--sn-radius-md);
   background: var(--sn-surface);
   font-family: inherit;
-  font-size: 0.95rem;
-  resize: vertical;
+  font-size: var(--sn-font-size-0-95);
+  line-height: 1.5;
+  resize: none;
+  overflow: hidden;
   min-height: 100px;
 }
 

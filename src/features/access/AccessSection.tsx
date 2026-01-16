@@ -12,6 +12,7 @@ import { IconBox } from "@components/IconBox";
 import styles from "./AccessSection.module.css";
 import { useMockAuth } from "@/client/contexts/MockAuthContext";
 import { continueAccessAction } from "@/server/auth/accessAction";
+import { AccessCodeModal } from "./AccessCodeModal";
 
 type AccessSectionProps = {
   isCourseJoin: boolean;
@@ -36,6 +37,8 @@ export default function AccessSection({
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [newAccessCode, setNewAccessCode] = useState<string | null>(null);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   const router = useRouter();
   const auth = useMockAuth();
@@ -69,9 +72,24 @@ export default function AccessSection({
       }
 
       auth.setSession(result.session);
-      router.refresh();
-      router.push(result.redirectTo);
+
+      // If this is a new registration, show the access code modal before redirecting
+      if (result.accessCode) {
+        setNewAccessCode(result.accessCode);
+        setPendingRedirect(result.redirectTo);
+      } else {
+        // Hard navigation to ensure fresh server data (session cookie changed)
+        window.location.href = result.redirectTo;
+      }
     });
+  };
+
+  const handleModalConfirm = () => {
+    setNewAccessCode(null);
+    if (pendingRedirect) {
+      // Hard navigation to ensure fresh server data (session cookie changed)
+      window.location.href = pendingRedirect;
+    }
   };
 
   return (
@@ -138,6 +156,12 @@ export default function AccessSection({
 
         <p className={styles.footer}>Need help? Contact your instructor.</p>
       </div>
+
+      <AccessCodeModal
+        accessCode={newAccessCode ?? ""}
+        isOpen={!!newAccessCode}
+        onConfirm={handleModalConfirm}
+      />
     </div>
   );
 }
