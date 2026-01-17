@@ -53,7 +53,7 @@ export function createCoursePlanSchema(definitions: GroupDefinitions, principles
       if (!resolvedIcon) {
         addIssue(ctx, ["course", "icon"], `Unknown icon "${rawIcon}".`);
       } else {
-        v.course.icon = resolvedIcon;
+        v.course.icon = resolvedIcon.kebabCase;
       }
     }
 
