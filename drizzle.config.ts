@@ -1,13 +1,14 @@
 import type { Config } from "drizzle-kit";
+import { config as dotenvConfig } from "dotenv";
 
 if (!process.env.VERCEL) {
-  const { config } = await import("dotenv");
-  config({ path: ".env.local" });
+  dotenvConfig({ path: ".env.local" });
 }
 
 const url =
   process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_PRISMA_URL;
 
 if (!url) {
   throw new Error(
@@ -19,5 +20,7 @@ export default {
   schema: "./src/server/db/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
-  dbCredentials: { url },
+  dbCredentials: {
+    url,
+  },
 } satisfies Config;
