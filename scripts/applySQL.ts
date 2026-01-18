@@ -1,6 +1,6 @@
 import { readFile } from "@pipeline/io";
 
-const file = ".generated/courses.sql";
+const file = ".generatedScripts/courses.sql";
 
 const isVercel = Boolean(process.env.VERCEL);
 

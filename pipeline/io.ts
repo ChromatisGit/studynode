@@ -75,7 +75,7 @@ export function writeJSONFile(path: string, content: unknown) {
 
 export function writeSQLFile(path: string, content: string) {
   const filePath = path.toLowerCase().endsWith(".sql") ? path : `${path}.sql`;
-  const fullPath = joinPath(EXPORT_PATH, filePath);
+  const fullPath = joinPath(".generatedScripts", filePath);
   void Bun.write(fullPath, content, { createPath: true });
 }
 
