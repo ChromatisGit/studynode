@@ -1,12 +1,23 @@
 import type { Config } from "drizzle-kit";
-import { config } from "dotenv";
-config({ path: ".env.local" });
+
+if (!process.env.VERCEL) {
+  const { config } = await import("dotenv");
+  config({ path: ".env.local" });
+}
+
+const url =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL
+
+if (!url) {
+  throw new Error(
+    "Missing DB connection env var (DATABASE_URL / POSTGRES_URL / POSTGRES_PRISMA_URL)"
+  );
+}
 
 export default {
   schema: "./src/server/db/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-  },
+  dbCredentials: { url },
 } satisfies Config;
