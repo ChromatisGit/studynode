@@ -1,8 +1,8 @@
 import "server-only";
 
-import type { SidebarCourseDTO } from "@/domain/sidebarDTO";
-import { type User } from "@/domain/userTypes";
-import { getCoursesByAccess } from "./courses";
+import type { SidebarCourseDTO } from "@schema/sidebarDTO";
+import { type User } from "@schema/userTypes";
+import { getCoursesByAccess } from "./courseService";
 import { getCourseDTO } from "./getCourseDTO";
 
 export function getNavbarCourses(user: User): SidebarCourseDTO[] {
@@ -24,4 +24,5 @@ export function getPublicNavbarCourses(): SidebarCourseDTO[] {
 }
 
 export type NavbarCourses = SidebarCourseDTO[];
+
 

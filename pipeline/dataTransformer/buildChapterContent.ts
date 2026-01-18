@@ -1,10 +1,10 @@
-import { TopicPath } from "../configParser/buildPagePaths";
-import { getFileNames, getFolderNames, writeJSONFile } from "../io";
-import { ContentIssueCollector, issueCatalog, type ContentIssue } from "../errorHandling";
-import { parsePage } from "../pageParser/parsePage";
+import { TopicPath } from "@pipeline/configParser/buildPagePaths";
+import { getFileNames, getFolderNames, writeJSONFile } from "@pipeline/io";
+import { ContentIssueCollector, issueCatalog, type ContentIssue } from "@pipeline/errorHandling";
+import { parsePage } from "@pipeline/pageParser/parsePage";
 import { WorksheetFormat } from "@schema/course";
 import { NestedRecord, ensurePath } from "./nestedRecord";
-import { fileNameToId } from "../pageParser/utils/fileNameToId";
+import { fileNameToId } from "@pipeline/pageParser/utils/fileNameToId";
 
 type WorksheetSummary = { worksheetId: string; label: string };
 

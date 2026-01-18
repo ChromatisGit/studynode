@@ -4,7 +4,7 @@ import { Info, Flag, Target, Zap } from 'lucide-react';
 import { InfoBlock } from '@features/contentpage/components/InfoBlock/InfoBlock';
 import { TaskSetComponent } from '@features/contentpage/components/Group/TaskSetComponent';
 import { MarkdownRenderer } from '@features/contentpage/components/MarkdownRenderer/MarkdownRenderer';
-import type { Markdown } from '@domain/page';
+import type { Markdown } from '@schema/page';
 
 import styles from './CategorySection.module.css';
 import CONTENTPAGE_TEXT from '@features/contentpage/contentpage.de.json';

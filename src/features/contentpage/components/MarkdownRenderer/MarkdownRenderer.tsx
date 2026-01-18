@@ -1,4 +1,4 @@
-import type { Markdown } from "@domain/page";
+import type { Markdown } from "@schema/page";
 import type { ReactNode } from "react";
 import { unified } from "unified";
 import remarkParse from "remark-parse";

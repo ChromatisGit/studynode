@@ -11,7 +11,7 @@ import {
   LockKeyholeOpen,
 } from "lucide-react";
 
-import type { ProgressStatus, ProgressTopicDTO, ProgressChapterDTO } from "@domain/progressDTO";
+import type { ProgressStatus, ProgressTopicDTO, ProgressChapterDTO } from "@schema/progressDTO";
 import styles from "./Roadmap.module.css";
 
 type RoadmapProps = {

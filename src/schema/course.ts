@@ -1,4 +1,4 @@
-import { worksheetFormatEnum, type Topic, type WorksheetFormat } from "@/domain/courseContent";
+import { worksheetFormatEnum, type Topic, type WorksheetFormat } from "@schema/courseContent";
 
 export type Courses = Course[];
 

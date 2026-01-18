@@ -1,12 +1,13 @@
 import "server-only";
 
-import { ProgressChapterDTO, ProgressDTO, ProgressStatus, ProgressTopicDTO } from "@/domain/progressDTO";
-import { CourseId, resolveCourse } from "./courses";
+import { ProgressChapterDTO, ProgressDTO, ProgressStatus, ProgressTopicDTO } from "@schema/progressDTO";
+import { CourseId, resolveCourse } from "./courseService";
+import { getCourseProgress } from "./courseStateService";
 
 export async function getProgressDTO(courseId: CourseId): Promise<ProgressDTO> {
   const { topics } = resolveCourse(courseId);
 
-  const { currentTopicId, currentChapterId } = await getCurrentTopicAndChapter(courseId);
+  const { currentTopicId, currentChapterId } = await getCourseProgress(courseId);
 
   const currentTopicIndex = topics.findIndex((topic) => topic.topicId === currentTopicId);
 
@@ -72,45 +73,4 @@ function getChapterStatus(
     return "locked";
 }
 
-type ProgressCursor = {
-  currentTopicId: string;
-  currentChapterId: string;
-};
-
-async function getCurrentTopicAndChapter(courseId: string): Promise<ProgressCursor> {
-  const { getProgressStore } = await import("../database/progressStore");
-  const store = await getProgressStore();
-  const cached = store.get(courseId);
-
-  // If we have a complete cached cursor, use it
-  if (cached) {
-    return cached;
-  }
-
-  // Otherwise, default to first topic and chapter
-  const course = resolveCourse(courseId);
-  const firstTopic = course.topics[0];
-  const firstChapter = firstTopic?.chapters[0];
-
-  const cursor: ProgressCursor = {
-    currentTopicId: firstTopic?.topicId ?? "",
-    currentChapterId: firstChapter?.chapterId ?? "",
-  };
-
-  store.set(courseId, cursor);
-  return cursor;
-}
-
-/**
- * Update the current progress cursor for a course.
- * This is an admin-only function to advance chapters for all students.
- */
-export async function setProgressCursor(
-  courseId: CourseId,
-  topicId: string,
-  chapterId: string
-): Promise<void> {
-  const { setProgressInStore } = await import("../database/progressStore");
-  await setProgressInStore(courseId, topicId, chapterId);
-}
 

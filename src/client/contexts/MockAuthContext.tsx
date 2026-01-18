@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
-import type { Session } from "@/domain/session";
-import type { User } from "@/domain/userTypes";
+import type { Session } from "@schema/session";
+import type { User } from "@schema/userTypes";
 
 type AuthContextValue = {
   session: Session | null;

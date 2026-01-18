@@ -1,10 +1,10 @@
-import { getSession } from "@/server/auth/auth";
+import { getSession } from "@server-lib/auth";
 import HOMEPAGE_TEXT from "@homepage/homepage.de.json";
 import { HomeSection } from "@homepage/Homepage";
-import { getCoursesByAccess } from "@/server/data/courses";
-import { getCourseDTO } from "@/server/data/getCourseDTO";
-import type { CourseDTO } from "@/domain/courseDTO";
-import { isAdmin } from "@/domain/userTypes";
+import { getCoursesByAccess } from "@services/courseService";
+import { getCourseDTO } from "@services/getCourseDTO";
+import type { CourseDTO } from "@schema/courseDTO";
+import { isAdmin } from "@schema/userTypes";
 import { Stack } from "@components/Stack";
 import { CourseGroup } from "./CourseGroup";
 
@@ -67,3 +67,4 @@ export async function CourseSection() {
     </HomeSection>
   );
 }
+

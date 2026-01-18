@@ -1,10 +1,10 @@
 import { NestedRecord, ensurePath } from "./nestedRecord";
 import { Course, Topic } from "@schema/course";
-import { TopicPath } from "../configParser/buildPagePaths";
-import { CoursePlan } from "../configParser/schema/coursePlan";
-import { parsePage } from "../pageParser/parsePage";
+import { TopicPath } from "@pipeline/configParser/buildPagePaths";
+import { CoursePlan } from "@pipeline/configParser/schema/coursePlan";
+import { parsePage } from "@pipeline/pageParser/parsePage";
 import { PageSummaries } from "./buildChapterContent";
-import { ContentIssueCollector } from "../errorHandling";
+import { ContentIssueCollector } from "@pipeline/errorHandling";
 
 type WorksheetSummary = { worksheetId: string; label: string };
 type ChapterSummary = { label: string; worksheets: WorksheetSummary[] };

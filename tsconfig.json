@@ -23,9 +23,6 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
       "@pipeline/*": [
         "./pipeline/*"
       ],
@@ -41,27 +38,26 @@
       "@features/*": [
         "./src/features/*"
       ],
-      "@lib/*": [
-        "./src/client/lib/*"
-      ],
       "@styles/*": [
         "./src/client/styles/*"
       ],
-      "@domain/*": [
-        "./src/domain/*"
-      ],
       "@schema/*": [
-        "./src/domain/*",
-        "./src/server/schema/*"
+        "./src/schema/*"
       ],
-      "@auth/*": [
-        "./src/server/auth/*"
+      "@actions/*": [
+        "./src/server/actions/*"
       ],
-      "@builder/*": [
-        "./src/server/builder/*"
+      "@db/*": [
+        "./src/server/db/*"
       ],
-      "@data/*": [
-        "./src/server/data/*"
+      "@providers/*": [
+        "./src/server/providers/*"
+      ],
+      "@services/*": [
+        "./src/server/services/*"
+      ],
+      "@server-lib/*": [
+        "./src/server/lib/*"
       ],
       "@generated/*": [
         "./.generated/*"
@@ -77,9 +73,6 @@
       ],
       "@access/*": [
         "./src/features/access/*"
-      ],
-      "@worksheet/*": [
-        "./src/features/worksheet/*"
       ]
     }
   },

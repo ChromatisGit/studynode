@@ -3,9 +3,9 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ConfigableIcon, type IconName } from "@/components/ConfigableIcon/ConfigableIcon";
+import { ConfigableIcon, type IconName } from "@components/ConfigableIcon/ConfigableIcon";
 import styles from "./Card.module.css";
-import { AccentColor } from "@/domain/accentColors";
+import { AccentColor } from "@schema/accentColors";
 
 export type CardProps = {
   title: string;

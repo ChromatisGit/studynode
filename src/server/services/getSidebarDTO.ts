@@ -1,11 +1,11 @@
 import "server-only";
 
-import type { SidebarDTO } from "@/domain/sidebarDTO";
-import { isAdmin, type User } from "@/domain/userTypes";
-import type { CourseId } from "./courses";
+import type { SidebarDTO } from "@schema/sidebarDTO";
+import { isAdmin, type User } from "@schema/userTypes";
+import type { CourseId } from "./courseService";
 import { getNavbarCourses, getPublicNavbarCourses } from "./getNavbarCourses";
 import { getProgressDTO } from "./getProgressDTO";
-import { getUserAccessCode } from "../auth/auth";
+import { getUserAccessCode } from "./userService";
 
 const EMPTY_PROGRESS = { currentTopicId: "", currentChapterId: "", topics: [] };
 
@@ -38,3 +38,4 @@ export async function getSidebarDTO({
     accessCode,
   };
 }
+

@@ -1,14 +1,14 @@
 import { Layout } from "@components/Layout/Layout";
-import { getSession } from "@/server/auth/auth";
-import { getSidebarDTO } from "@/server/data/getSidebarDTO";
-import { isAdmin } from "@/domain/userTypes";
-import { signOutAction } from "@/server/auth/accessAction";
+import { getSession } from "@server-lib/auth";
+import { getSidebarDTO } from "@services/getSidebarDTO";
+import { isAdmin } from "@schema/userTypes";
+import { signOutAction } from "@actions/accessActions";
 
-import { About } from "@/features/homepage/sections/About/About";
-import { NodeNetwork } from "@/features/homepage/sections/Background/NodeNetwork";
-import { CourseSection } from "@/features/homepage/sections/CourseSection/CourseSection";
-import { Footer } from "@/features/homepage/sections/Footer/Footer";
-import { Hero } from "@/features/homepage/sections/Hero/Hero";
+import { About } from "@features/homepage/sections/About/About";
+import { NodeNetwork } from "@features/homepage/sections/Background/NodeNetwork";
+import { CourseSection } from "@features/homepage/sections/CourseSection/CourseSection";
+import { Footer } from "@features/homepage/sections/Footer/Footer";
+import { Hero } from "@features/homepage/sections/Hero/Hero";
 import styles from "@features/homepage/Homepage.module.css";
 
 async function logoutAction() {

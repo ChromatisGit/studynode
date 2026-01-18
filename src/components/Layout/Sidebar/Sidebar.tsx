@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouteContext } from "@/client/contexts/RouteContext";
-import { useIsMobile } from "@/client/lib/useMediaQuery";
-import type { SidebarDTO } from "@domain/sidebarDTO";
+import { useRouteContext } from "@client/contexts/RouteContext";
+import { useIsMobile } from "@client/lib/useMediaQuery";
+import type { SidebarDTO } from "@schema/sidebarDTO";
 
 import { SidebarMainNav } from "./SidebarMainNav";
 import { SidebarTopicNav } from "./SidebarTopicNav";

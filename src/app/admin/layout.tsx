@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { getSession } from "@/server/auth/auth";
-import { isAdmin } from "@/domain/userTypes";
+import { getSession } from "@server-lib/auth";
+import { isAdmin } from "@schema/userTypes";
 import { notFound } from "next/navigation";
 import { Layout } from "@components/Layout/Layout";
-import { getSidebarDTO } from "@/server/data/getSidebarDTO";
-import { signOutAction } from "@/server/auth/accessAction";
+import { getSidebarDTO } from "@services/getSidebarDTO";
+import { signOutAction } from "@actions/accessActions";
 
 type AdminLayoutProps = {
   children: ReactNode;

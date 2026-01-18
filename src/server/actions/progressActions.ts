@@ -1,11 +1,10 @@
 "use server";
 
-import { getSession } from "@/server/auth/auth";
-import { isAdmin } from "@/domain/userTypes";
-import { setProgressCursor } from "@/server/data/getProgressDTO";
-import { clearProgressCache } from "@/server/database/progressStore";
-import { getCourseGroupAndSubjectKey, type CourseId } from "@/server/data/courses";
+import { getSession } from "@server-lib/auth";
+import { isAdmin } from "@schema/userTypes";
+import { getCourseGroupAndSubjectKey, type CourseId } from "@services/courseService";
 import { revalidatePath } from "next/cache";
+import { updateCourseProgress } from "@db/courseRepo";
 
 export type SetProgressResult =
   | { ok: true }
@@ -27,10 +26,7 @@ export async function setProgressAction(
   }
 
   try {
-    await setProgressCursor(courseId, topicId, chapterId);
-
-    // Clear the progress cache to force reload from file
-    clearProgressCache();
+    await updateCourseProgress(courseId, topicId, chapterId);
 
     // Revalidate all pages that depend on progress
     revalidatePath("/", "layout");
@@ -47,3 +43,4 @@ export async function setProgressAction(
     };
   }
 }
+

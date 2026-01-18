@@ -1,8 +1,8 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import type { ProgressTopicDTO } from "@/domain/progressDTO";
-import type { CourseId } from "./courses";
+import type { ProgressTopicDTO } from "@schema/progressDTO";
+import type { CourseId } from "./courseService";
 import { getProgressDTO } from "./getProgressDTO";
 
 /**
@@ -25,3 +25,4 @@ export async function getTopicDTO({
 
   return topic;
 }
+

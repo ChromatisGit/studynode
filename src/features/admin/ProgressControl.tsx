@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ProgressTopicDTO } from "@/domain/progressDTO";
-import type { CourseId } from "@/server/data/courses";
-import { setProgressAction } from "@/server/admin/progressActions";
+import type { ProgressTopicDTO } from "@schema/progressDTO";
+import type { CourseId } from "@services/courseService";
+import { setProgressAction } from "@actions/progressActions";
 import { Button } from "@components/Button";
-import Roadmap from "@/features/coursepage/components/Roadmap/Roadmap";
+import Roadmap from "@features/coursepage/components/Roadmap/Roadmap";
 import styles from "./ProgressControl.module.css";
 
 type ProgressControlProps = {
@@ -92,3 +92,4 @@ export function ProgressControl({
     </form>
   );
 }
+

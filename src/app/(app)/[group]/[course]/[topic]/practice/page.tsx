@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { getCourseId } from "@data/courses";
-import { getPracticeTasks } from "@data/practice";
-import { getProgressDTO } from "@data/getProgressDTO";
+import { getCourseId } from "@services/courseService";
+import { getPracticeTasks } from "@services/practiceService";
+import { getProgressDTO } from "@services/getProgressDTO";
 import { Practise } from "@features/practise/Practise";
 
 type PageParams = {
@@ -25,3 +25,4 @@ export default async function PracticePage({ params }: PageParams) {
 
   return <Practise courseId={courseId} topicTitle={topic.label} tasks={tasks} />;
 }
+

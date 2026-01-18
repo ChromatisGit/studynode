@@ -1,7 +1,7 @@
 "use client";
 
 import { AppLink } from "@components/AppLink";
-import type { ProgressTopicDTO } from "@domain/progressDTO";
+import type { ProgressTopicDTO } from "@schema/progressDTO";
 import styles from "./Sidebar.module.css";
 
 type SidebarTopicNavProps = {

@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { AppLink } from "@components/AppLink";
-import { useMockAuth } from "@/client/contexts/MockAuthContext";
-import { useRouteContext } from "@/client/contexts/RouteContext";
-import { useTheme } from "@/client/contexts/ThemeContext";
-import type { SidebarDTO } from "@domain/sidebarDTO";
+import { useMockAuth } from "@client/contexts/MockAuthContext";
+import { useRouteContext } from "@client/contexts/RouteContext";
+import { useTheme } from "@client/contexts/ThemeContext";
+import type { SidebarDTO } from "@schema/sidebarDTO";
 
 import { NavbarDesktopLinks } from "./NavbarDesktopLinks";
 import { NavbarProfileDropdown } from "./NavbarProfileDropdown";
 import styles from "./Navbar.module.css";
-import { useIsMobile } from "@/client/lib/useMediaQuery";
+import { useIsMobile } from "@client/lib/useMediaQuery";
 
 type NavbarProps = {
   onSidebarToggle: () => void;

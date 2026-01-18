@@ -1,6 +1,6 @@
 import { SectionShell } from "@components/SectionShell";
 import { PageHeader } from "@components/PageHeader/PageHeader";
-import type { ProgressTopicDTO, ProgressChapterDTO } from "@domain/progressDTO";
+import type { ProgressTopicDTO, ProgressChapterDTO } from "@schema/progressDTO";
 import Roadmap from "./components/Roadmap/Roadmap";
 import { WorksheetCards } from "./components/WorksheetCard/WorksheetCards";
 import styles from "./CoursepageLayout.module.css";

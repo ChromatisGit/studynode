@@ -3,7 +3,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import type { SidebarCourseDTO } from "@domain/sidebarDTO";
+import type { SidebarCourseDTO } from "@schema/sidebarDTO";
 import { NavbarDropdown } from "./NavbarDropdown";
 import styles from "./Navbar.module.css";
 

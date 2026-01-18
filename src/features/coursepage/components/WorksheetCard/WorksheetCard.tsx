@@ -1,5 +1,5 @@
-import { Card } from "@/components/Card";
-import type { WorksheetRef } from "@domain/courseContent";
+import { Card } from "@components/Card";
+import type { WorksheetRef } from "@schema/courseContent";
 
 export const WORKSHEET_ACTIONS = {
   web: {

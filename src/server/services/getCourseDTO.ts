@@ -1,7 +1,7 @@
 import "server-only";
 
-import { CourseDTO } from "@/domain/courseDTO";
-import { CourseId, resolveCourse } from "./courses";
+import { CourseDTO } from "@schema/courseDTO";
+import { CourseId, resolveCourse } from "./courseService";
 
 export function getCourseDTO(courseId: CourseId): CourseDTO {
     const course = resolveCourse(courseId);
@@ -27,3 +27,4 @@ export function getCourseDTO(courseId: CourseId): CourseDTO {
         tags
     };
 }
+

@@ -1,5 +1,5 @@
 import WorksheetCard from "./WorksheetCard";
-import type { WorksheetRef } from "@domain/courseContent";
+import type { WorksheetRef } from "@schema/courseContent";
 import styles from "./WorksheetCards.module.css";
 
 type WorksheetCardsProps = {

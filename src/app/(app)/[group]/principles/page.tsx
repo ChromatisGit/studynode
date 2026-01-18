@@ -1,8 +1,8 @@
 import { Layout } from "@components/Layout/Layout";
-import { getSession } from "@/server/auth/auth";
-import { getSidebarDTO } from "@/server/data/getSidebarDTO";
-import { isAdmin } from "@/domain/userTypes";
-import { signOutAction } from "@/server/auth/accessAction";
+import { getSession } from "@server-lib/auth";
+import { getSidebarDTO } from "@services/getSidebarDTO";
+import { isAdmin } from "@schema/userTypes";
+import { signOutAction } from "@actions/accessActions";
 
 type PageParams = {
   params: Promise<{

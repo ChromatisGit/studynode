@@ -1,6 +1,6 @@
-import { getSession, assertCanAccessPage } from "@/server/auth/auth";
-import { getCourseId } from "@/server/data/courses";
-import { getTopicDTO } from "@/server/data/getTopicDTO";
+import { getSession, assertCanAccessPage } from "@server-lib/auth";
+import { getCourseId } from "@services/courseService";
+import { getTopicDTO } from "@services/getTopicDTO";
 import { PageHeader } from "@components/PageHeader/PageHeader";
 import Link from "next/link";
 
@@ -43,3 +43,4 @@ export default async function ChapterPage({ params }: PageParams) {
     </main>
   );
 }
+

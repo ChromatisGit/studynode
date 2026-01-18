@@ -1,5 +1,5 @@
 import { RawText, Subheader, Markdown } from "@schema/page";
-import { ProtectedBlock, restoreCodeBlocks } from "../codeBlockGuard";
+import { ProtectedBlock, restoreCodeBlocks } from "@pipeline/pageParser/codeBlockGuard";
 
 const SUBHEADER_REGEX = /^==\s+(.+)$/gm;
 

@@ -10,8 +10,8 @@ import { Input } from "@components/Input";
 import { Stack } from "@components/Stack";
 import { IconBox } from "@components/IconBox";
 import styles from "./AccessSection.module.css";
-import { useMockAuth } from "@/client/contexts/MockAuthContext";
-import { continueAccessAction } from "@/server/auth/accessAction";
+import { useMockAuth } from "@client/contexts/MockAuthContext";
+import { continueAccessAction } from "@actions/accessActions";
 import { AccessCodeModal } from "./AccessCodeModal";
 
 type AccessSectionProps = {

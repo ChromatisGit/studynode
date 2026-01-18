@@ -1,15 +1,15 @@
 "use client";
 
-import type { CourseDTO } from "@/domain/courseDTO";
-import { Box } from "@/components/Box";
-import { Card } from "@/components/Card";
-import { Container } from "@/components/Container";
-import { Grid } from "@/components/Grid";
-import { Stack } from "@/components/Stack";
-import { PageHeader } from "@/components/PageHeader";
-import type { IconName } from "@/components/ConfigableIcon/ConfigableIcon";
+import type { CourseDTO } from "@schema/courseDTO";
+import { Box } from "@components/Box";
+import { Card } from "@components/Card";
+import { Container } from "@components/Container";
+import { Grid } from "@components/Grid";
+import { Stack } from "@components/Stack";
+import { PageHeader } from "@components/PageHeader";
+import type { IconName } from "@components/ConfigableIcon/ConfigableIcon";
 import styles from "./AdminDashboard.module.css";
-import { AccentColor } from "@/domain/accentColors";
+import { AccentColor } from "@schema/accentColors";
 
 type AdminDashboardProps = {
   courses: CourseDTO[];

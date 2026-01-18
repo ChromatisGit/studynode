@@ -1,4 +1,4 @@
-import type { PracticeTask } from "@data/practice";
+import type { PracticeTask } from "@services/practiceService";
 import styles from "./Practise.module.css";
 
 interface PractiseProps {

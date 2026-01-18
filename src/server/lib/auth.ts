@@ -1,19 +1,15 @@
 import "server-only";
 
-import type { Session } from "@/domain/session";
-import { User, isAdmin } from "@/domain/userTypes";
+import type { Session } from "@schema/session";
+import { User, isAdmin } from "@schema/userTypes";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { coursePublic } from "../data/courses";
-import {
-  getUserById,
-  getUserAccessCode as getUserAccessCodeFromStore,
-  getAllUsers,
-} from "../database/userStore";
+import { coursePublic } from "@services/courseService";
+import { getUserById } from "@services/userService";
 
 const SESSION_COOKIE_NAME = "sn-session";
 
-export type { Session } from "@/domain/session";
+export type { Session } from "@schema/session";
 
 
 export async function setSessionCookie(userId: string) {
@@ -94,17 +90,3 @@ export function canUserAccessPage(
   return true;
 }
 
-/**
- * Get the access code for a user by their ID.
- * Returns null if user not found or has no credentials.
- */
-export async function getUserAccessCode(userId: string): Promise<string | null> {
-  return getUserAccessCodeFromStore(userId);
-}
-
-/**
- * Get all users (for admin dashboard statistics)
- */
-export async function getAllUsersForStats(): Promise<User[]> {
-  return getAllUsers();
-}

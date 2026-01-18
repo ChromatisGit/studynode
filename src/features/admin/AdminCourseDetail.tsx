@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { ChevronRight, Shield } from "lucide-react";
-import type { CourseDTO } from "@/domain/courseDTO";
-import type { ProgressDTO } from "@/domain/progressDTO";
-import type { CourseId } from "@/server/data/courses";
+import type { CourseDTO } from "@schema/courseDTO";
+import type { ProgressDTO } from "@schema/progressDTO";
+import type { CourseId } from "@services/courseService";
 import { ProgressControl } from "./ProgressControl";
 import { RegistrationControl } from "./RegistrationControl";
 import styles from "./AdminCourseDetail.module.css";
@@ -84,3 +84,4 @@ export function AdminCourseDetail({ course, progress, courseId }: AdminCourseDet
     </div>
   );
 }
+

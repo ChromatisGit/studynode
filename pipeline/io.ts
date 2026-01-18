@@ -73,6 +73,13 @@ export function writeJSONFile(path: string, content: unknown) {
   void Bun.write(fullPath, JSON.stringify(content), { createPath: true });
 }
 
+export function writeSQLFile(path: string, content: string) {
+  const filePath = path.toLowerCase().endsWith(".sql") ? path : `${path}.sql`;
+  const fullPath = joinPath(EXPORT_PATH, filePath);
+  void Bun.write(fullPath, content, { createPath: true });
+}
+
+
 export async function deleteGenerated() {
    return rm(EXPORT_PATH, { recursive: true, force: true });
 }
@@ -87,16 +94,7 @@ export async function parseYamlAndValidate<T>(
 
   const fullPath = joinPath(SOURCE_PATH, relativePath);
 
-  let text: string;
-  try {
-    text = await Bun.file(fullPath).text();
-  } catch (err) {
-    throw new ContentIssueError({
-      ...issueCatalog.fileReadFailed(),
-      filePath: fullPath,
-      cause: err,
-    });
-  }
+  const text = await readFile(fullPath);
 
   let raw: unknown;
   try {
@@ -117,6 +115,18 @@ export async function parseYamlAndValidate<T>(
   }
 
   return parsed.data;
+}
+
+export function readFile(fullPath: string) {
+  try {
+    return Bun.file(fullPath).text();
+  } catch (err) {
+    throw new ContentIssueError({
+      ...issueCatalog.fileReadFailed(),
+      filePath: fullPath,
+      cause: err,
+    });
+  }
 }
 
 

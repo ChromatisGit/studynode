@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 
 import { Layout } from "@components/Layout/Layout";
 import { CourseProviders } from "./CourseProviders";
-import { getSession } from "@/server/auth/auth";
-import { getCourseId } from "@/server/data/courses";
-import { getCourseDTO } from "@/server/data/getCourseDTO";
-import { getSidebarDTO } from "@/server/data/getSidebarDTO";
-import { isAdmin } from "@/domain/userTypes";
-import { signOutAction } from "@/server/auth/accessAction";
+import { getSession } from "@server-lib/auth";
+import { getCourseId } from "@services/courseService";
+import { getCourseDTO } from "@services/getCourseDTO";
+import { getSidebarDTO } from "@services/getSidebarDTO";
+import { isAdmin } from "@schema/userTypes";
+import { signOutAction } from "@actions/accessActions";
 
 type CourseLayoutProps = {
   children: ReactNode;
@@ -47,3 +47,4 @@ export default async function CourseLayout({ children, params }: CourseLayoutPro
     </Layout>
   );
 }
+

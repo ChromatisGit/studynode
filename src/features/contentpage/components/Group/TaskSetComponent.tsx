@@ -8,8 +8,8 @@ import type { MacroRenderContext } from '@features/contentpage/macros/types';
 import CONTENTPAGE_TEXT from '@features/contentpage/contentpage.de.json';
 import sharedStyles from '@features/contentpage/styles/shared.module.css';
 import styles from './TaskSetComponent.module.css';
-import type { Macro } from '@domain/macroTypes';
-import type { Markdown } from '@domain/page';
+import type { Macro } from '@schema/macroTypes';
+import type { Markdown } from '@schema/page';
 import { getMarkdown } from '@features/contentpage/utils/textUtils';
 
 export interface TaskSet {

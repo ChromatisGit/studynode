@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import type { SidebarCourseDTO } from "@domain/sidebarDTO";
+import type { SidebarCourseDTO } from "@schema/sidebarDTO";
 import styles from "./Sidebar.module.css";
 
 type SidebarMainNavProps = {

@@ -3,12 +3,12 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { CourseId } from "@/server/data/courses";
+import type { CourseId } from "@services/courseService";
 import {
-  openRegistrationAction,
   closeRegistrationAction,
   getRegistrationStatusAction,
-} from "@/server/admin/registrationActions";
+  openRegistrationAction,
+} from "@actions/registrationActions";
 import { Button } from "@components/Button";
 import { Grid } from "@components/Grid";
 import styles from "./RegistrationControl.module.css";
@@ -31,6 +31,8 @@ export function RegistrationControl({ courseId }: RegistrationControlProps) {
       if (result.ok) {
         setIsOpen(result.isOpen);
         setOpenUntil(result.openUntil);
+      } else {
+        toast.error(result.error);
       }
     });
   }, [courseId]);
@@ -74,7 +76,7 @@ export function RegistrationControl({ courseId }: RegistrationControlProps) {
       }
 
       setIsOpen(true);
-      setOpenUntil(new Date(Date.now() + 15 * 60 * 1000).toISOString());
+      setOpenUntil(result.openUntil);
       toast.success("Registration window opened (15 minutes)");
       router.refresh();
     });
@@ -147,3 +149,4 @@ export function RegistrationControl({ courseId }: RegistrationControlProps) {
     </div>
   );
 }
+

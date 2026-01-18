@@ -1,7 +1,8 @@
-import { getSession, getAllUsersForStats } from "@/server/auth/auth";
-import { getCoursesByAccess } from "@/server/data/courses";
-import { getCourseDTO } from "@/server/data/getCourseDTO";
-import { AdminDashboard } from "@/features/admin/AdminDashboard";
+import { getSession } from "@server-lib/auth";
+import { getCoursesByAccess } from "@services/courseService";
+import { getCourseDTO } from "@services/getCourseDTO";
+import { AdminDashboard } from "@features/admin/AdminDashboard";
+import { getUserCount } from "@services/userService";
 
 export default async function AdminDashboardPage() {
   const session = await getSession();
@@ -18,9 +19,8 @@ export default async function AdminDashboardPage() {
 
   const courses = allCourseIds.map((id) => getCourseDTO(id));
 
-  // Count total users (excluding admins)
-  const allUsers = await getAllUsersForStats();
-  const totalUsers = allUsers.filter((u) => u.role === "user").length;
+  // Count total users
+  const totalUsers = await getUserCount();
 
   return (
     <AdminDashboard
@@ -29,3 +29,4 @@ export default async function AdminDashboardPage() {
     />
   );
 }
+
