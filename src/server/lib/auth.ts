@@ -4,12 +4,18 @@ import type { Session } from "@schema/session";
 import { User, isAdmin } from "@schema/userTypes";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { coursePublic } from "@services/courseService";
+import { getCourseById } from "@providers/courseProvider";
 import { getUserById } from "@services/userService";
 
 const SESSION_COOKIE_NAME = "sn-session";
 
 export type { Session } from "@schema/session";
+
+function coursePublic(courseId: string): boolean {
+  const course = getCourseById(courseId);
+  if (!course) notFound();
+  return course.isPublic;
+}
 
 
 export async function setSessionCookie(userId: string) {
