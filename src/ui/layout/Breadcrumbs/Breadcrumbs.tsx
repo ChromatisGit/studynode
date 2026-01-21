@@ -3,7 +3,7 @@
 import { ChevronRight, House } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import { useRouteContext } from "@client/contexts/RouteContext";
+import { useRouteContext } from "../../contexts/RouteContext";
 import type { SidebarDTO } from "@schema/sidebarDTO";
 import styles from "./Breadcrumbs.module.css";
 
