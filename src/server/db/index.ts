@@ -8,6 +8,6 @@ export const db = isVercel
   ? drizzleVercel(vercelSql)
   : drizzleNode(
       new (await import("pg")).Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: process.env.POSTGRES_URL,
       })
     );

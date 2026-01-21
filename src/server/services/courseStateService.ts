@@ -1,7 +1,7 @@
 import "server-only";
 
-import { updateCourseProgress, getCourse, setRegistrationOpenUntil } from "@db/courseRepo";
-import { insertAuditLog } from "@db/auditRepo";
+import { updateCourseProgress, getCourse, setRegistrationOpenUntil } from "@repo/courseRepo";
+import { insertAuditLog } from "@repo/auditRepo";
 import type { CourseId } from "./courseService";
 
 export async function setCourseProgress(courseId: CourseId, topicId: string, chapterId: string): Promise<void> {

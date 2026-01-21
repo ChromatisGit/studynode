@@ -1,6 +1,6 @@
 import "server-only";
-import { insertAuditLog } from "@db/auditRepo";
-import * as db from "@db/userRepo";
+import { insertAuditLog } from "@repo/auditRepo";
+import * as db from "@repo/userRepo";
 import { DefaultUser, User } from "@schema/userTypes";
 import { hashPin } from "@server-lib//argon2";
 import { generateUniqueAccessCode } from "@server-lib//generateAccessCode";

@@ -5,14 +5,11 @@ if (!process.env.VERCEL) {
   dotenvConfig({ path: ".env.local" });
 }
 
-const url =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.POSTGRES_PRISMA_URL;
+const url = process.env.POSTGRES_URL
 
 if (!url) {
   throw new Error(
-    "Missing DB connection env var (DATABASE_URL / POSTGRES_URL / POSTGRES_PRISMA_URL)"
+    "Missing DB connection env var (POSTGRES_URL)"
   );
 }
 

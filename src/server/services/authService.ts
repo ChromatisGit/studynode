@@ -1,6 +1,6 @@
 import { User } from "@schema/userTypes";
-import { getBucket, upsertBucket, type BucketState } from "@db/authRepo";
-import { getUserByAccessCode } from "@db/userRepo";
+import { getBucket, upsertBucket, type BucketState } from "@repo/authRepo";
+import { getUserByAccessCode } from "@repo/userRepo";
 import { verifyPin } from "@server-lib//argon2";
 
 /**

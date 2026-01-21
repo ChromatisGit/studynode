@@ -30,7 +30,7 @@
         "./src/app/*"
       ],
       "@client/*": [
-        "./src/client/*"
+        "src/ui/*"
       ],
       "@components/*": [
         "./src/components/*"
@@ -39,7 +39,7 @@
         "./src/features/*"
       ],
       "@styles/*": [
-        "./src/client/styles/*"
+        "src/ui/styles/*"
       ],
       "@schema/*": [
         "./src/schema/*"
@@ -49,6 +49,12 @@
       ],
       "@db/*": [
         "./src/server/db/*"
+      ],
+      "@repo/*": [
+        "./src/server/repo/*"
+      ],
+      "@dev/*": [
+        "./src/server/dev/*"
       ],
       "@providers/*": [
         "./src/server/providers/*"
