@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { assertCanAccessPage, getSession } from "@services/authService";
 import { getCourseId } from "@services/courseService";
 import { getPracticeTasks } from "@services/practiceService";
 import { getProgressDTO } from "@services/getProgressDTO";
@@ -15,7 +16,11 @@ type PageParams = {
 
 export default async function PracticePage({ params }: PageParams) {
   const { group: groupKey, course: subjectKey, topic: topicId } = await params;
+
+  const session = await getSession();
   const courseId = getCourseId(groupKey, subjectKey);
+  assertCanAccessPage(session, groupKey, courseId);
+
   const progress = await getProgressDTO(courseId);
 
   const topic = progress.topics.find((item) => item.topicId === topicId);

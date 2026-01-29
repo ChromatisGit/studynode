@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import styles from "./Navbar.module.css";
@@ -69,7 +70,7 @@ export function NavbarDropdown({
 
   return (
     <div
-      className={`${styles.dropdown} ${className}`.trim()}
+      className={clsx(styles.dropdown, className)}
       ref={dropdownRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -78,11 +79,7 @@ export function NavbarDropdown({
         {renderedTrigger}
       </div>
       {isOpen ? (
-        <div
-          className={`${styles.dropdownMenu} ${
-            align === "right" ? styles.dropdownMenuRight : ""
-          }`.trim()}
-        >
+        <div className={clsx(styles.dropdownMenu, align === "right" && styles.dropdownMenuRight)}>
           {children}
         </div>
       ) : null}

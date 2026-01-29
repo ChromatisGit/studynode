@@ -1,14 +1,14 @@
 "use server";
 
 import type { CourseId } from "@services/courseService";
-import { getSession } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import { isAdmin } from "@schema/userTypes";
 import {
   closeRegistration,
   getRegistrationWindow,
   openRegistration,
 } from "@services/courseStateService";
-import { getClientIp } from "@server-lib//getClientIp";
+import { getClientIp } from "@server-lib/getClientIp";
 
 export type RegistrationStatusResult =
   | { ok: true; isOpen: boolean; openUntil: string | null }

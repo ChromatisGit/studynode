@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { Check, X } from "lucide-react";
 import type { McqMacro as McqMacroType } from "@schema/macroTypes";
@@ -105,9 +106,9 @@ export function McqMacro({ macro, context }: Props) {
               type="button"
               onClick={() => handleSelect(optionText)}
               disabled={isChecked}
-              className={`${styles.option} ${styles[`option--${state}`]}`}
+              className={clsx(styles.option, styles[`option--${state}`])}
             >
-              <span className={`${styles.indicator} ${styles[`indicator--${indicatorState}`]} ${isSingleChoice ? styles.indicatorRadio : ""}`}>
+              <span className={clsx(styles.indicator, styles[`indicator--${indicatorState}`], isSingleChoice && styles.indicatorRadio)}>
                 {showIndicatorContent && (
                   isSingleChoice
                     ? <span className={styles.radioDot} />

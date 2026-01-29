@@ -1,11 +1,13 @@
 "use client";
 
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
 import type { SidebarCourseDTO } from "@schema/sidebarDTO";
 import styles from "./Sidebar.module.css";
+import LAYOUT_TEXT from "../layout.de.json";
 
 type SidebarMainNavProps = {
   isAuthenticated: boolean;
@@ -41,7 +43,7 @@ export function SidebarMainNav({
       <div className={styles.mainNav}>
         {!isHome ? (
           <AppLink href="/" className={styles.topicLink} onClick={onLinkClick}>
-            Homepage
+            {LAYOUT_TEXT.sidebar.homepage}
           </AppLink>
         ) : null}
       </div>
@@ -55,7 +57,7 @@ export function SidebarMainNav({
     <div className={styles.mainNav}>
       {!isHome ? (
         <AppLink href="/" className={styles.topicLink} onClick={onLinkClick}>
-          Homepage
+          {LAYOUT_TEXT.sidebar.homepage}
         </AppLink>
       ) : null}
 
@@ -66,19 +68,13 @@ export function SidebarMainNav({
             onClick={() => setIsCoursesExpanded((prev) => !prev)}
             aria-expanded={isCoursesExpanded}
           >
-            <span>Courses</span>
+            <span>{LAYOUT_TEXT.sidebar.courses}</span>
             <ChevronRight
               size={20}
-              className={`${styles.topicChevron} ${
-                isCoursesExpanded ? styles.topicChevronExpanded : ""
-              }`.trim()}
+              className={clsx(styles.topicChevron, isCoursesExpanded && styles.topicChevronExpanded)}
             />
           </button>
-          <div
-            className={`${styles.coursesContent} ${
-              isCoursesExpanded ? styles.coursesContentExpanded : ""
-            }`.trim()}
-          >
+          <div className={clsx(styles.coursesContent, isCoursesExpanded && styles.coursesContentExpanded)}>
             <ul className={styles.chapterList}>
               {inactiveCourses.map((course) => (
                 <li key={course.id} className={styles.chapterItem}>
@@ -113,7 +109,7 @@ export function SidebarMainNav({
           className={styles.mainNavLink}
           onClick={onLinkClick}
         >
-          Principles
+          {LAYOUT_TEXT.sidebar.principles}
         </AppLink>
       ) : null}
     </div>

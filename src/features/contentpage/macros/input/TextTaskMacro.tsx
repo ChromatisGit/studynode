@@ -9,6 +9,7 @@ import { getMarkdown } from "@features/contentpage/utils/textUtils";
 import { useWorksheetStorage } from "@features/contentpage/storage/WorksheetStorageContext";
 import { Stack } from "@components/Stack";
 import styles from "./TextTaskMacro.module.css";
+import CONTENTPAGE_TEXT from "../../contentpage.de.json";
 
 type Props = MacroComponentProps<TextTaskMacroType>;
 
@@ -67,7 +68,7 @@ export function TextTaskMacro({ macro, context }: Props) {
         onChange={(e) => setAnswer(e.target.value)}
         className={styles.textarea}
         rows={4}
-        placeholder="Enter your answer..."
+        placeholder={CONTENTPAGE_TEXT.freeResponseTask.placeholder}
       />
 
       {(hint || (isChecked && solution)) && (

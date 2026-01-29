@@ -1,8 +1,8 @@
 "use client";
 
 import clsx from "clsx";
-import Link from "next/link";
 import type { ReactNode, ButtonHTMLAttributes } from "react";
+import { AppLink } from "@components/AppLink";
 import styles from "./Button.module.css";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -56,9 +56,9 @@ export function Button({
       );
     }
     return (
-      <Link href={href} className={buttonClass}>
+      <AppLink href={href} className={buttonClass}>
         {children}
-      </Link>
+      </AppLink>
     );
   }
 

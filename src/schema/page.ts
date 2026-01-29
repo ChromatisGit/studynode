@@ -23,10 +23,15 @@ export type Subheader = {
     header: Markdown
 }
 
-export type RawText = {
-    rawText: string
-}
+/** Branded type for markdown content */
+declare const MarkdownBrand: unique symbol;
 
 export type Markdown = {
-    markdown: string
+    markdown: string;
+    readonly [MarkdownBrand]: never;
+}
+
+/** Create a Markdown branded type from a plain string */
+export function createMarkdown(markdown: string): Markdown {
+    return { markdown } as Markdown;
 }

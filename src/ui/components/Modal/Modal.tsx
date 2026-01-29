@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 import styles from "./Modal.module.css";
 
-type ModalProps = {
+export type ModalProps = {
   children: ReactNode;
   isOpen: boolean;
 };

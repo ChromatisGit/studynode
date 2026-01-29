@@ -1,4 +1,5 @@
-import { Markdown, RawText } from "@schema/page";
+import { Markdown } from "@schema/page";
+import { RawText } from "@pipeline/types";
 import { ProtectedBlock } from "@pipeline/pageParser/codeBlockGuard";
 import { Macro, parseMacroType } from "./macroRegistry";
 import { Params, parseParams } from "./parseParams";

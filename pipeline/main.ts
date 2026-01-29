@@ -4,6 +4,7 @@ import { buildChapterContent } from "./dataTransformer/buildChapterContent";
 import { generateCourseSQLScript } from "./dataTransformer/generateCourseSQLScript";
 import { getTopicLabels, resolveCourses } from "./dataTransformer/resolveCourses";
 import { deleteGenerated, writeJSONFile } from "./io";
+import { ensureDevAdminUser } from "./devAdminUser";
 
 export async function runPipeline() {
     await deleteGenerated();
@@ -12,7 +13,8 @@ export async function runPipeline() {
     const { pageSummaries } = await buildChapterContent(pagePaths)
     const topicLabels = await getTopicLabels(pagePaths)
     const courses = resolveCourses(coursePlans, pageSummaries, topicLabels)
-    writeJSONFile("config/courses.json", courses)
-    generateCourseSQLScript("courses.sql", courses)
+    await writeJSONFile("config/courses.json", courses)
+    await generateCourseSQLScript("courses.sql", courses)
+    await ensureDevAdminUser();
     console.log("[builder] SUCCESS")
 }

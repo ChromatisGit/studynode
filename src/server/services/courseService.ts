@@ -1,6 +1,6 @@
 import "server-only";
 
-import { canUserAccessPage } from "@server-lib/auth";
+import { canUserAccessPage } from "./authService";
 import { Chapter, Topic } from "@schema/courseContent";
 import { isAdmin, User } from "@schema/userTypes";
 import { Course } from "@schema/course";

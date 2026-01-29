@@ -20,7 +20,7 @@ export type InsertUserInput = {
 /**
  * Course Repository Types
  */
-export type Course = {
+export type CourseState = {
   courseId: string;
   currentTopicId: string;
   currentChapterId: string;

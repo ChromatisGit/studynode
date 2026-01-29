@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useRouteContext } from "../contexts/RouteContext";
+import { useRouteContext } from "@ui/contexts/RouteContext";
 import type { SidebarDTO } from "@schema/sidebarDTO";
 
 import styles from "./Layout.module.css";
-import { useIsMobile } from "../lib/useMediaQuery";
+import { useIsMobile } from "@ui/lib/useMediaQuery";
 import { Breadcrumbs } from "./Breadcrumbs/Breadcrumbs";
 import { Navbar } from "./Navbar/Navbar";
 import { Sidebar } from "./Sidebar/Sidebar";

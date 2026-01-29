@@ -1,1 +1,1 @@
-export { FancyGrid } from "./FancyGrid";
+export { FancyGrid, type FancyGridProps } from "./FancyGrid";

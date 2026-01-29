@@ -1,5 +1,6 @@
 'use client';
 
+import clsx from 'clsx';
 import { Info, Flag, Target, Zap } from 'lucide-react';
 import { InfoBlock } from '@features/contentpage/components/InfoBlock/InfoBlock';
 import { TaskSetComponent } from '@features/contentpage/components/Group/TaskSetComponent';
@@ -61,7 +62,7 @@ export function CategorySection({ block, categoryIndex, taskNumbers }: CategoryS
           : styles.categoryChallenge;
 
   return (
-    <section className={`${styles.category} ${variantClass}`}>
+    <section className={clsx(styles.category, variantClass)}>
       <div className={styles.categoryStripe} aria-hidden />
 
       <div className={styles.categoryBanner}>

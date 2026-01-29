@@ -5,6 +5,7 @@ import type { SidebarCourseDTO } from "@schema/sidebarDTO";
 
 import { NavbarCourseLinks } from "./NavbarCourseLinks";
 import styles from "./Navbar.module.css";
+import LAYOUT_TEXT from "../layout.de.json";
 
 type NavbarDesktopLinksProps = {
   courses: SidebarCourseDTO[];
@@ -32,7 +33,7 @@ export function NavbarDesktopLinks({
           active={isPrinciples}
           activeClassName={styles.linkActive}
         >
-          Principles
+          {LAYOUT_TEXT.navbar.principles}
         </AppLink>
       ) : null}
     </>

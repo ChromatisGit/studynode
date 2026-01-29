@@ -5,6 +5,7 @@ import { parsePage } from "@pipeline/pageParser/parsePage";
 import { WorksheetFormat } from "@schema/course";
 import { NestedRecord, ensurePath } from "./nestedRecord";
 import { fileNameToId } from "@pipeline/pageParser/utils/fileNameToId";
+import { collectCourseIds } from "@pipeline/types";
 
 type WorksheetSummary = { worksheetId: string; label: string };
 
@@ -118,7 +119,7 @@ async function processChapter(
             collector.addIssue(issueCatalog.emptyOverviewContent(), { ...ctx, filePath: overviewPath });
             overviewPage = null;
         } else {
-            writeJSONFile(`${subjectId}/${topicId}/${chapterId}`, overviewPage);
+            await writeJSONFile(`${subjectId}/${topicId}/${chapterId}`, overviewPage);
         }
     } catch (err) {
         collector.add(err, { ...ctx, filePath: overviewPath });
@@ -204,7 +205,7 @@ async function processWorksheets(
                 collector.addIssue(issueCatalog.emptyOverviewContent(), { ...ctx, filePath: sourcePath });
             }
             else {
-                writeJSONFile(targetPath, worksheetPage);
+                await writeJSONFile(targetPath, worksheetPage);
             }
 
         }
@@ -223,16 +224,6 @@ async function processWorksheets(
 }
 
 type FolderName = string;
-
-function collectCourseIds(chapters: Record<ChapterId, { courseIds: string[] }>): string[] {
-    const ids = new Set<string>();
-    for (const chapter of Object.values(chapters)) {
-        for (const courseId of chapter.courseIds) {
-            ids.add(courseId);
-        }
-    }
-    return [...ids];
-}
 
 function mapChapterToFolders(
     chapterIds: ChapterId[],

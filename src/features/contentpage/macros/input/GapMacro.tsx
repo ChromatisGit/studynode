@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
@@ -9,6 +10,7 @@ import type { GapMacro as GapMacroType, GapField as GapFieldType } from "@schema
 import type { MacroComponentProps } from "@features/contentpage/macros/types";
 import { useWorksheetStorage } from "@features/contentpage/storage/WorksheetStorageContext";
 import styles from "./GapMacro.module.css";
+import CONTENTPAGE_TEXT from "../../contentpage.de.json";
 
 type Props = MacroComponentProps<GapMacroType>;
 
@@ -236,7 +238,7 @@ function GapField({ gap, value, onChange, isInCodeBlock = false, isChecked = fal
   if (gap.mode === "text") {
     return (
       <span
-        className={`${styles.gapField} ${isInCodeBlock ? styles.gapInCode : ""} ${stateClass}`}
+        className={clsx(styles.gapField, isInCodeBlock && styles.gapInCode, stateClass)}
         style={widthStyle}
       >
         <input
@@ -244,7 +246,7 @@ function GapField({ gap, value, onChange, isInCodeBlock = false, isChecked = fal
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={styles.gapControl}
-          placeholder="..."
+          placeholder={CONTENTPAGE_TEXT.gapTask.textPlaceholder}
         />
       </span>
     );
@@ -253,13 +255,13 @@ function GapField({ gap, value, onChange, isInCodeBlock = false, isChecked = fal
   // MCQ mode - dropdown
   return (
     <span
-      className={`${styles.gapField} ${isInCodeBlock ? styles.gapInCode : ""} ${stateClass}`}
+      className={clsx(styles.gapField, isInCodeBlock && styles.gapInCode, stateClass)}
       style={widthStyle}
     >
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`${styles.gapControl} ${styles.gapSelect}`}
+        className={clsx(styles.gapControl, styles.gapSelect)}
       >
         <option value="" disabled hidden />
         {options.map((option, index) => (

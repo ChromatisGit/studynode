@@ -1,4 +1,4 @@
-import { RawText } from "@schema/page";
+import { RawText } from "@pipeline/types";
 import { removeIndent } from "@pipeline/pageParser/utils/removeIndent";
 
 export type RawMacroBlock = {

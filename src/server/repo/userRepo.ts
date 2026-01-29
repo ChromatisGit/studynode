@@ -3,7 +3,15 @@ import "server-only";
 import type { User } from "@schema/userTypes";
 import type { StoredUser, InsertUserInput } from "./types";
 
-// NODE_ENV check allows bundler to dead-code eliminate the unused branch
+/**
+ * User repository facade.
+ *
+ * Provides a stable API for user data access. In development, uses an in-memory
+ * implementation (`dev/userRepo`) with seeded test data for fast iteration without
+ * a database. In production, delegates to the real database (`db/userRepo`).
+ *
+ * The NODE_ENV check allows the bundler to dead-code eliminate the unused branch.
+ */
 const impl =
   process.env.NODE_ENV === "production"
     ? await import("../db/userRepo")

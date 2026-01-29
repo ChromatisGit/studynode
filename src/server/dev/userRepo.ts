@@ -1,3 +1,4 @@
+import "server-only";
 import type { User } from "@schema/userTypes";
 import type { StoredUser, InsertUserInput } from "../repo/types";
 import { readJsonFile, writeJsonFile } from "./storage";

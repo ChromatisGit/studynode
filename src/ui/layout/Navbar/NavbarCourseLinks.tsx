@@ -1,11 +1,13 @@
 "use client";
 
+import clsx from "clsx";
 import { ChevronDown } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
 import type { SidebarCourseDTO } from "@schema/sidebarDTO";
 import { NavbarDropdown } from "./NavbarDropdown";
 import styles from "./Navbar.module.css";
+import LAYOUT_TEXT from "../layout.de.json";
 
 type NavbarCourseLinksProps = {
   courses: SidebarCourseDTO[];
@@ -22,23 +24,17 @@ export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinks
   if (shouldUseDropdown) {
     // When inside a course: show active course label with chevron, dropdown has other courses
     // When not inside a course: show "Courses" with chevron, dropdown has all courses
-    const triggerLabel = activeCourse ? activeCourse.label : "Courses";
+    const triggerLabel = activeCourse ? activeCourse.label : LAYOUT_TEXT.navbar.courses;
     const dropdownCourses = activeCourse ? otherCourses : courses;
 
     return (
       <NavbarDropdown
         trigger={(isOpen) => (
-          <button
-            className={`${styles.link} ${styles.dropdownTrigger} ${
-              activeCourse ? styles.linkActive : ""
-            }`.trim()}
-          >
+          <button className={clsx(styles.link, styles.dropdownTrigger, activeCourse && styles.linkActive)}>
             {triggerLabel}
             <ChevronDown
               size={14}
-              className={`${styles.dropdownIcon} ${
-                isOpen ? styles.dropdownIconOpen : ""
-              }`.trim()}
+              className={clsx(styles.dropdownIcon, isOpen && styles.dropdownIconOpen)}
             />
           </button>
         )}
@@ -48,7 +44,7 @@ export function NavbarCourseLinks({ courses, activeCourseId }: NavbarCourseLinks
           <AppLink
             key={course.id}
             href={course.href}
-            className={`${styles.dropdownItem} ${styles.courseDropdownItem}`.trim()}
+            className={clsx(styles.dropdownItem, styles.courseDropdownItem)}
           >
             {course.label}
           </AppLink>

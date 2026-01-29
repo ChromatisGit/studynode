@@ -1,11 +1,13 @@
 "use client";
 
+import clsx from "clsx";
 import { ChevronRight, House } from "lucide-react";
 
 import { AppLink } from "@components/AppLink";
-import { useRouteContext } from "../../contexts/RouteContext";
+import { useRouteContext } from "@ui/contexts/RouteContext";
 import type { SidebarDTO } from "@schema/sidebarDTO";
 import styles from "./Breadcrumbs.module.css";
+import LAYOUT_TEXT from "../layout.de.json";
 
 type BreadcrumbsProps = {
   data: SidebarDTO;
@@ -85,10 +87,10 @@ export function Breadcrumbs({ data }: BreadcrumbsProps) {
   }
 
   return (
-    <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
+    <nav className={styles.breadcrumbs} aria-label={LAYOUT_TEXT.breadcrumbs.ariaLabel}>
       <ol className={styles.list}>
         <li className={styles.item}>
-          <AppLink href={homeUrl} className={`${styles.link} ${styles.home}`.trim()}>
+          <AppLink href={homeUrl} className={clsx(styles.link, styles.home)}>
             <House size={16} />
           </AppLink>
         </li>

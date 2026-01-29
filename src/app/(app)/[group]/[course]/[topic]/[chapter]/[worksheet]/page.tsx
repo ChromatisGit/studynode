@@ -1,6 +1,6 @@
 import { WorksheetRenderer } from "@features/contentpage/renderers/WorksheetRenderer";
 import { getPage } from "@services/pageService";
-import { getSession, assertCanAccessPage } from "@server-lib/auth";
+import { getSession, assertCanAccessPage } from "@services/authService";
 import { getCourseId, getSubject } from "@services/courseService";
 
 type PageParams = {

@@ -1,19 +1,14 @@
 import type { ReactNode } from "react";
-import { getSession } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import { isAdmin } from "@schema/userTypes";
 import { notFound } from "next/navigation";
-import { Layout } from "@components/Layout/Layout";
+import { Layout } from "@ui/layout/Layout";
 import { getSidebarDTO } from "@services/getSidebarDTO";
-import { signOutAction } from "@actions/accessActions";
+import { logoutAction } from "@actions/logoutAction";
 
 type AdminLayoutProps = {
   children: ReactNode;
 };
-
-async function logoutAction() {
-  "use server";
-  await signOutAction();
-}
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   const session = await getSession();

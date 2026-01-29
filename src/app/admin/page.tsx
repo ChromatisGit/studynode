@@ -1,4 +1,6 @@
-import { getSession } from "@server-lib/auth";
+import { notFound } from "next/navigation";
+import { getSession } from "@services/authService";
+import { isAdmin } from "@schema/userTypes";
 import { getCoursesByAccess } from "@services/courseService";
 import { getCourseDTO } from "@services/getCourseDTO";
 import { AdminDashboard } from "@features/admin/AdminDashboard";
@@ -6,8 +8,13 @@ import { getUserCount } from "@services/userService";
 
 export default async function AdminDashboardPage() {
   const session = await getSession();
-  // Layout already checks for admin auth, so we know session!.user exists and is admin
-  const user = session!.user;
+
+  // Explicit check even though layout also checks - defense in depth
+  if (!session || !isAdmin(session.user)) {
+    notFound();
+  }
+
+  const user = session.user;
 
   const courseAccess = getCoursesByAccess(user);
   const allCourseIds = [

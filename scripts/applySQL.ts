@@ -1,4 +1,5 @@
 import { readFile } from "@pipeline/io";
+import postgres from "postgres";
 
 const file = ".generatedScripts/courses.sql";
 
@@ -18,16 +19,14 @@ async function main() {
     return;
   }
 
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("Missing DATABASE_URL for local applySQL");
+  const url = process.env.POSTGRES_URL;
+  if (!url) throw new Error("Missing POSTGRES_URL for local applySQL");
 
-  const pg = await import("pg");
-  const client = new pg.Client({ connectionString: url });
-  await client.connect();
-  await client.query(content);
-  await client.end();
+  const sql = postgres(url);
+  await sql.unsafe(content);
+  await sql.end();
 
-  console.log(`[applySQL] Applied ${file} via pg (local)`);
+  console.log(`[applySQL] Applied ${file} via postgres (local)`);
 }
 
 main().catch((err) => {

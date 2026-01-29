@@ -1,21 +1,8 @@
 import "server-only";
 
-import { authAttempts } from "@db/schema";
-import { and, eq, isNull, or } from "drizzle-orm";
-import { db } from ".";
-
-export type BucketType = "ip" | "access_code_ip";
-
-export type BucketState = {
-  id: string;
-  type: BucketType;
-  ip: string;
-  accessCode: string | null;
-  windowStartedAt: Date;
-  attemptCount: number;
-  lockedUntil: Date | null;
-  lastAttemptAt: Date;
-};
+import { query } from ".";
+import type { AuthAttemptRow } from "./types";
+import type { BucketState, BucketType } from "@repo/types";
 
 const EMPTY_ACCESS_CODE = "";
 
@@ -23,40 +10,42 @@ function normalizeAccessCode(accessCode: string | null): string {
   return accessCode ?? EMPTY_ACCESS_CODE;
 }
 
-function toBucketState(row: typeof authAttempts.$inferSelect): BucketState {
-  const accessCode = row.accessCode === EMPTY_ACCESS_CODE ? null : row.accessCode;
+function toBucketState(row: AuthAttemptRow): BucketState {
+  const accessCode = row.access_code === EMPTY_ACCESS_CODE ? null : row.access_code;
   return {
-    id: `${row.bucketType}:${row.ip}:${accessCode ?? ""}`,
-    type: row.bucketType,
+    id: `${row.bucket_type}:${row.ip}:${accessCode ?? ""}`,
+    type: row.bucket_type,
     ip: row.ip,
     accessCode,
-    windowStartedAt: row.windowStart,
-    attemptCount: row.attemptCount,
-    lockedUntil: row.lockedUntil,
-    lastAttemptAt: row.lastAttemptAt,
+    windowStartedAt: row.window_start,
+    attemptCount: row.attempt_count,
+    lockedUntil: row.locked_until,
+    lastAttemptAt: row.last_attempt_at,
   };
 }
 
 export async function getBucket(type: BucketType, ip: string, accessCode: string | null): Promise<BucketState | null> {
   const accessCodeValue = normalizeAccessCode(accessCode);
-  const accessCodePredicate =
-    accessCode === null
-      ? or(
-          eq(authAttempts.accessCode, accessCodeValue),
-          isNull(authAttempts.accessCode)
-        )
-      : eq(authAttempts.accessCode, accessCodeValue);
-  const rows = await db
-    .select()
-    .from(authAttempts)
-    .where(
-      and(
-        eq(authAttempts.bucketType, type),
-        eq(authAttempts.ip, ip),
-        accessCodePredicate
-      )
-    )
-    .limit(1);
+
+  // For null accessCode, we need to check both empty string and NULL
+  const rows = accessCode === null
+    ? await query<AuthAttemptRow>`
+        SELECT bucket_type, ip, access_code, window_start, last_attempt_at, attempt_count, locked_until, updated_at
+        FROM auth_attempts
+        WHERE bucket_type = ${type}
+          AND ip = ${ip}
+          AND (access_code = ${accessCodeValue} OR access_code IS NULL)
+        LIMIT 1
+      `
+    : await query<AuthAttemptRow>`
+        SELECT bucket_type, ip, access_code, window_start, last_attempt_at, attempt_count, locked_until, updated_at
+        FROM auth_attempts
+        WHERE bucket_type = ${type}
+          AND ip = ${ip}
+          AND access_code = ${accessCodeValue}
+        LIMIT 1
+      `;
+
   const row = rows[0];
   return row ? toBucketState(row) : null;
 }
@@ -69,32 +58,16 @@ export async function upsertBucket(state: Partial<BucketState> & { type: BucketT
   const attemptCount = state.attemptCount ?? 0;
   const lockedUntil = state.lockedUntil ?? null;
 
-  await db
-    .insert(authAttempts)
-    .values({
-      bucketType: state.type,
-      ip: state.ip,
-      accessCode: accessCodeValue,
-      windowStart: windowStartedAt,
-      lastAttemptAt,
-      attemptCount,
-      lockedUntil,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: [
-        authAttempts.bucketType,
-        authAttempts.ip,
-        authAttempts.accessCode,
-      ],
-      set: {
-        windowStart: windowStartedAt,
-        lastAttemptAt,
-        attemptCount,
-        lockedUntil,
-        updatedAt: now,
-      },
-    });
+  await query`
+    INSERT INTO auth_attempts (bucket_type, ip, access_code, window_start, last_attempt_at, attempt_count, locked_until, updated_at)
+    VALUES (${state.type}, ${state.ip}, ${accessCodeValue}, ${windowStartedAt}, ${lastAttemptAt}, ${attemptCount}, ${lockedUntil}, ${now})
+    ON CONFLICT (bucket_type, ip, access_code) DO UPDATE SET
+      window_start = ${windowStartedAt},
+      last_attempt_at = ${lastAttemptAt},
+      attempt_count = ${attemptCount},
+      locked_until = ${lockedUntil},
+      updated_at = ${now}
+  `;
 
   return {
     id: `${state.type}:${state.ip}:${accessCodeValue}`,
@@ -130,14 +103,12 @@ export async function recordAttempt(type: BucketType, ip: string, accessCode: st
 export async function setBucketLock(type: BucketType, ip: string, accessCode: string | null, lockedUntil: Date | null): Promise<void> {
   const accessCodeValue = normalizeAccessCode(accessCode);
   const now = new Date();
-  await db
-    .update(authAttempts)
-    .set({ lockedUntil, updatedAt: now })
-    .where(
-      and(
-        eq(authAttempts.bucketType, type),
-        eq(authAttempts.ip, ip),
-        eq(authAttempts.accessCode, accessCodeValue)
-      )
-    );
+
+  await query`
+    UPDATE auth_attempts
+    SET locked_until = ${lockedUntil}, updated_at = ${now}
+    WHERE bucket_type = ${type}
+      AND ip = ${ip}
+      AND access_code = ${accessCodeValue}
+  `;
 }

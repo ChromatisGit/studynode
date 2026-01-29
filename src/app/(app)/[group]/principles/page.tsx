@@ -1,19 +1,14 @@
-import { Layout } from "@components/Layout/Layout";
-import { getSession } from "@server-lib/auth";
+import { Layout } from "@ui/layout/Layout";
+import { getSession } from "@services/authService";
 import { getSidebarDTO } from "@services/getSidebarDTO";
 import { isAdmin } from "@schema/userTypes";
-import { signOutAction } from "@actions/accessActions";
+import { logoutAction } from "@actions/logoutAction";
 
 type PageParams = {
   params: Promise<{
     group: string;
   }>;
 };
-
-async function logoutAction() {
-  "use server";
-  await signOutAction();
-}
 
 export default async function GroupPrinciplesPage({ params }: PageParams) {
   const { group } = await params;

@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { AppLink } from "@components/AppLink";
 import type { ProgressTopicDTO } from "@schema/progressDTO";
 import styles from "./Sidebar.module.css";
@@ -42,7 +43,7 @@ export function SidebarTopicNav({
         <div className={styles.topicHeader}>
           <AppLink
             href={topic.href}
-            className={`${styles.topicLink} ${isActiveTopic ? styles.topicLinkActive : ""}`.trim()}
+            className={clsx(styles.topicLink, isActiveTopic && styles.topicLinkActive)}
             onClick={onLinkClick}
           >
             <h4>{topic.label}</h4>
@@ -61,9 +62,11 @@ export function SidebarTopicNav({
                 <li key={chapter.chapterId} className={styles.chapterItem}>
                   <AppLink
                     href={chapter.href}
-                    className={`${styles.chapterLink} ${
-                      isChapterActive ? styles.chapterLinkActive : ""
-                    } ${isRoadmapCurrent ? styles.chapterLinkRoadmapCurrent : ""}`.trim()}
+                    className={clsx(
+                      styles.chapterLink,
+                      isChapterActive && styles.chapterLinkActive,
+                      isRoadmapCurrent && styles.chapterLinkRoadmapCurrent
+                    )}
                     onClick={onLinkClick}
                   >
                     {isRoadmapCurrent ? (

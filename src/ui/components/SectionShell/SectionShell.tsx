@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
-import styles from "@styles/sectionShell.module.css";
+import styles from "./SectionShell.module.css";
 
 export type SectionShellProps = {
   id?: string;

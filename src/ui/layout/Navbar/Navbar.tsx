@@ -5,15 +5,16 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { AppLink } from "@components/AppLink";
-import { useMockAuth } from "../../contexts/MockAuthContext";
-import { useRouteContext } from "../../contexts/RouteContext";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useMockAuth } from "@ui/contexts/MockAuthContext";
+import { useRouteContext } from "@ui/contexts/RouteContext";
+import { useTheme } from "@ui/contexts/ThemeContext";
 import type { SidebarDTO } from "@schema/sidebarDTO";
 
 import { NavbarDesktopLinks } from "./NavbarDesktopLinks";
 import { NavbarProfileDropdown } from "./NavbarProfileDropdown";
 import styles from "./Navbar.module.css";
-import { useIsMobile } from "../../lib/useMediaQuery";
+import { useIsMobile } from "@ui/lib/useMediaQuery";
+import LAYOUT_TEXT from "../layout.de.json";
 
 type NavbarProps = {
   onSidebarToggle: () => void;
@@ -35,7 +36,7 @@ function getCurrentRouteName({
   activeCourseLabel?: string | null;
 }): string | null {
   if (isHome) return null;
-  if (isPrinciples) return "Principles";
+  if (isPrinciples) return LAYOUT_TEXT.navbar.principles;
   if (activeCourseLabel) return activeCourseLabel;
   return null;
 }
@@ -91,7 +92,7 @@ export function Navbar({
               <button
                 className={styles.hamburger}
                 onClick={onSidebarToggle}
-                aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                aria-label={isSidebarOpen ? LAYOUT_TEXT.navbar.closeSidebar : LAYOUT_TEXT.navbar.openSidebar}
               >
                 {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -102,7 +103,7 @@ export function Navbar({
             <AppLink href="/" className={styles.brand}>
               <BookOpen size={20} />
               {(routeContext.isHome || !isMobile) && (
-                <span className={styles.brandText}>StudyNode</span>
+                <span className={styles.brandText}>{LAYOUT_TEXT.navbar.brand}</span>
               )}
             </AppLink>
 
@@ -130,7 +131,7 @@ export function Navbar({
           <button
             className={styles.iconButton}
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            aria-label={theme === "light" ? LAYOUT_TEXT.navbar.switchToDark : LAYOUT_TEXT.navbar.switchToLight}
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
@@ -146,7 +147,7 @@ export function Navbar({
           ) : (
             <button className={styles.authButton} onClick={() => router.push("/access")}>
               <LogIn size={18} />
-              {!isMobile && <span>Login</span>}
+              {!isMobile && <span>{LAYOUT_TEXT.navbar.login}</span>}
             </button>
           )}
         </div>

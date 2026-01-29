@@ -7,8 +7,9 @@ import type { ProgressTopicDTO } from "@schema/progressDTO";
 import type { CourseId } from "@services/courseService";
 import { setProgressAction } from "@actions/progressActions";
 import { Button } from "@components/Button";
-import Roadmap from "@features/coursepage/components/Roadmap/Roadmap";
+import { Roadmap } from "@components/Roadmap";
 import styles from "./ProgressControl.module.css";
+import ADMIN_TEXT from "./admin.de.json";
 
 type ProgressControlProps = {
   courseId: CourseId;
@@ -40,7 +41,7 @@ export function ProgressControl({
     event.preventDefault();
 
     if (!selectedTopicId || !selectedChapterId) {
-      toast.error("Please select a chapter");
+      toast.error(ADMIN_TEXT.courseDetail.progressControl.selectChapter);
       return;
     }
 
@@ -52,7 +53,7 @@ export function ProgressControl({
         return;
       }
 
-      toast.success("Progress updated successfully");
+      toast.success(ADMIN_TEXT.courseDetail.progressControl.successMessage);
       router.refresh();
     });
   };
@@ -86,7 +87,7 @@ export function ProgressControl({
           disabled={isPending || !hasChanges}
           variant="primary"
         >
-          {isPending ? "Updating..." : "Update Progress"}
+          {isPending ? ADMIN_TEXT.courseDetail.progressControl.updating : ADMIN_TEXT.courseDetail.progressControl.updateButton}
         </Button>
       </div>
     </form>

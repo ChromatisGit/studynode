@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouteContext } from "../../contexts/RouteContext";
-import { useIsMobile } from "../../lib/useMediaQuery";
+import clsx from "clsx";
+import { useRouteContext } from "@ui/contexts/RouteContext";
+import { useIsMobile } from "@ui/lib/useMediaQuery";
 import type { SidebarDTO } from "@schema/sidebarDTO";
 
 import { SidebarMainNav } from "./SidebarMainNav";
@@ -44,7 +45,7 @@ export function Sidebar({ isOpen, onClose, data }: SidebarProps) {
         <div className={styles.overlay} onClick={onClose} aria-hidden="true" />
       ) : null}
 
-      <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`.trim()}>
+      <aside className={clsx(styles.sidebar, isOpen && styles.sidebarOpen)}>
         {showMainNav ? (
           <SidebarMainNav
             isAuthenticated={data.isAuthenticated}

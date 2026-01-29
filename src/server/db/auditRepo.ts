@@ -1,21 +1,11 @@
 import "server-only";
-import { auditLog } from "@db/schema";
-import { db } from ".";
 
-export type AuditAction = "openRegistration" | "createUser" | "addCourseToUser";
-
-export type AuditEntry = {
-  ip: string;
-  userId: string | null;
-  action: AuditAction;
-  courseId?: string | null;
-};
+import { query } from ".";
+import type { AuditEntry } from "@repo/types";
 
 export async function insertAuditLog(entry: AuditEntry): Promise<void> {
-  await db.insert(auditLog).values({
-    ip: entry.ip,
-    userId: entry.userId,
-    action: entry.action,
-    courseId: entry.courseId ?? null,
-  });
+  await query`
+    INSERT INTO audit_log (ip, user_id, action, course_id)
+    VALUES (${entry.ip}, ${entry.userId}, ${entry.action}, ${entry.courseId ?? null})
+  `;
 }

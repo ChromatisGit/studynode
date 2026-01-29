@@ -2,10 +2,10 @@
 
 import { useMemo, type ReactNode } from "react";
 
-import { chunkBySizes, fancyRows } from "../../ui/lib/fancyGrid";
-import { useResponsiveCols } from "../../ui/lib/useResponsiveCols";
+import { chunkBySizes, fancyRows } from "@ui/lib/fancyGrid";
+import { useResponsiveCols } from "@ui/lib/useResponsiveCols";
 
-type FancyGridProps<T> = {
+export type FancyGridProps<T> = {
   items: readonly T[];
   renderItem: (item: T, index: number) => ReactNode;
   minItemWidth: number;

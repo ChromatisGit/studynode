@@ -2,8 +2,23 @@ import "server-only";
 import { insertAuditLog } from "@repo/auditRepo";
 import * as db from "@repo/userRepo";
 import { DefaultUser, User } from "@schema/userTypes";
-import { hashPin } from "@server-lib//argon2";
-import { generateUniqueAccessCode } from "@server-lib//generateAccessCode";
+import { hashPin } from "@server-lib/argon2";
+
+// Access code generation (moved from lib for proper layering)
+function generateAccessCode(): string {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+async function generateUniqueAccessCode(): Promise<string> {
+    let attempts = 30;
+    while (attempts--) {
+        const accessCode = generateAccessCode();
+        if (!(await accessCodeExists(accessCode))) {
+            return accessCode;
+        }
+    }
+    throw new Error("Couldn't generate unique AccessCode");
+}
 
 export async function createUser(pin: string, groupKey: string, ip: string): Promise<{user: User, accessCode: string}> {
     const userId = `u${Date.now().toString(36)}`;

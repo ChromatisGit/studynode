@@ -29,17 +29,17 @@
       "@app/*": [
         "./src/app/*"
       ],
-      "@client/*": [
-        "src/ui/*"
+      "@ui/*": [
+        "./src/ui/*"
       ],
       "@components/*": [
-        "./src/components/*"
+        "./src/ui/components/*"
       ],
       "@features/*": [
         "./src/features/*"
       ],
       "@styles/*": [
-        "src/ui/styles/*"
+        "./src/ui/styles/*"
       ],
       "@schema/*": [
         "./src/schema/*"
@@ -64,6 +64,9 @@
       ],
       "@server-lib/*": [
         "./src/server/lib/*"
+      ],
+      "@server/config/*": [
+        "./src/server/config/*"
       ],
       "@generated/*": [
         "./.generated/*"

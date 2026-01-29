@@ -1,7 +1,7 @@
 import AccessSectionClient from "@features/access/AccessSection";
 import { getCourseId } from "@services/courseService";
 import { getCourseDTO } from "@services/getCourseDTO";
-import { getSession } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import { isRegistrationOpen } from "@services/courseStateService";
 import { getUserAccessCode } from "@services/userService";
 

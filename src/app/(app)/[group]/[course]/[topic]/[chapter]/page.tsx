@@ -1,5 +1,5 @@
 import { ContentPageRenderer } from "@features/contentpage/renderers/ContentPageRenderer";
-import { assertCanAccessPage, getSession } from "@server-lib/auth";
+import { assertCanAccessPage, getSession } from "@services/authService";
 import { getCourseId, getSubject, getWorksheetRefs } from "@services/courseService";
 import { getPage } from "@services/pageService";
 import { getProgressDTO } from "@services/getProgressDTO";

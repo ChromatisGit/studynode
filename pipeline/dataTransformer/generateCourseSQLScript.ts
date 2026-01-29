@@ -1,7 +1,7 @@
 import { Course } from "@schema/course";
 import { writeSQLFile } from "@pipeline/io";
 
-export function generateCourseSQLScript(path: string, courses: Course[]) {
+export async function generateCourseSQLScript(path: string, courses: Course[]): Promise<void> {
     const values = courses.map((c) => {
         const currentTopic = c.topics[0].topicId
         const currentChapter = c.topics[0].chapters[0].chapterId
@@ -17,5 +17,5 @@ export function generateCourseSQLScript(path: string, courses: Course[]) {
         "",
     ].join("\n");
 
-    writeSQLFile(path, sql);
+    await writeSQLFile(path, sql);
 }

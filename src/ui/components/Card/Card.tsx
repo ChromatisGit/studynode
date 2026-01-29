@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ConfigableIcon, type IconName } from "@components/ConfigableIcon/ConfigableIcon";
+import { AppLink } from "@components/AppLink";
+import { ConfigableIcon, type IconName } from "@components/ConfigableIcon";
 import styles from "./Card.module.css";
 import { AccentColor } from "@schema/accentColors";
 
@@ -31,7 +31,7 @@ export function Card({
   const colorClass = styles[`color-${color}`];
 
   return (
-    <Link
+    <AppLink
       href={href}
       className={clsx(styles.card, colorClass, className)}
       aria-label={actionLabel ? `${actionLabel}: ${title}` : title}
@@ -64,6 +64,6 @@ export function Card({
           <ArrowRight size={16} aria-hidden />
         </div>
       ) : null}
-    </Link>
+    </AppLink>
   );
 }

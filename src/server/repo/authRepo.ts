@@ -1,7 +1,17 @@
 import "server-only";
 
 import type { BucketType, BucketState } from "./types";
-const impl = await import("../db/authRepo");
+
+/**
+ * Auth repository facade for rate-limiting buckets.
+ *
+ * In development, uses an in-memory implementation for fast iteration without
+ * a database. In production, delegates to the real database implementation.
+ */
+const impl =
+  process.env.NODE_ENV === "production"
+    ? await import("../db/authRepo")
+    : await import("../dev/authRepo");
 
 export async function getBucket(
   type: BucketType,

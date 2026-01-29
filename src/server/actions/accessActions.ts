@@ -1,13 +1,14 @@
 "use server";
 
-import { clearSessionCookie, getSession, setSessionCookie } from "@server-lib/auth";
+import { clearSessionCookie, setSessionCookie } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import type { User } from "@schema/userTypes";
 import type { Session } from "@schema/session";
 import { isAdmin } from "@schema/userTypes";
 import { addCourseToUser, createUser, getUserById } from "@services/userService";
 import { getAuthenticatedUser } from "@services/authService";
 import { isRegistrationOpen } from "@services/courseStateService";
-import { getClientIp } from "@server-lib//getClientIp";
+import { getClientIp } from "@server-lib/getClientIp";
 
 export type AccessContext = {
   isCourseJoin: boolean;

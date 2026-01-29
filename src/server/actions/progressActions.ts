@@ -1,10 +1,10 @@
 "use server";
 
-import { getSession } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import { isAdmin } from "@schema/userTypes";
 import { getCourseGroupAndSubjectKey, type CourseId } from "@services/courseService";
+import { setCourseProgress } from "@services/courseStateService";
 import { revalidatePath } from "next/cache";
-import { updateCourseProgress } from "@repo/courseRepo";
 
 export type SetProgressResult =
   | { ok: true }
@@ -26,7 +26,7 @@ export async function setProgressAction(
   }
 
   try {
-    await updateCourseProgress(courseId, topicId, chapterId);
+    await setCourseProgress(courseId, topicId, chapterId);
 
     // Revalidate all pages that depend on progress
     revalidatePath("/", "layout");

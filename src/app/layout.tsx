@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@styles/globals.css";
-import { getSession } from "@server-lib/auth";
+import { getSession } from "@services/authService";
 import { Providers } from "./providers";
 
 const themeInitScript = `

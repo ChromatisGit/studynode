@@ -1,5 +1,10 @@
-import type { Course } from "../repo/types";
+import "server-only";
+import type { CourseState } from "../repo/types";
+import type { Course } from "@schema/course";
+import coursesJson from "@generated/config/courses.json";
 import { readJsonFile, writeJsonFile } from "./storage";
+
+const coursesConfig = coursesJson as Course[];
 
 type CourseRecord = {
   courseId: string;
@@ -18,7 +23,7 @@ function saveCourses(courses: CourseRecord[]): void {
   writeJsonFile(COURSES_FILE, courses);
 }
 
-function toCourse(record: CourseRecord): Course {
+function toCourse(record: CourseRecord): CourseState {
   return {
     courseId: record.courseId,
     currentTopicId: record.currentTopicId,
@@ -29,10 +34,26 @@ function toCourse(record: CourseRecord): Course {
   };
 }
 
-export async function getCourse(courseId: string): Promise<Course | null> {
+export async function getCourse(courseId: string): Promise<CourseState | null> {
   const courses = getCourses();
-  const record = courses.find((c) => c.courseId === courseId);
-  return record ? toCourse(record) : null;
+  const existing = courses.find((c) => c.courseId === courseId);
+  if (existing) return toCourse(existing);
+
+  // Auto-create from generated config on first read (dev convenience)
+  const config = coursesConfig.find((c) => c.id === courseId);
+  if (!config || config.topics.length === 0 || config.topics[0].chapters.length === 0) {
+    return null;
+  }
+
+  const record: CourseRecord = {
+    courseId,
+    currentTopicId: config.topics[0].topicId,
+    currentChapterId: config.topics[0].chapters[0].chapterId,
+    registrationOpenUntil: null,
+  };
+  courses.push(record);
+  saveCourses(courses);
+  return toCourse(record);
 }
 
 export async function updateCourseProgress(
