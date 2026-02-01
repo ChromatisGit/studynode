@@ -2,6 +2,13 @@
 
 The `.typ` format is a custom markup language used for educational content pages.
 It is processed by the pipeline to produce JSON that the web app renders.
+The same files are also used to generate PDFs via Typst (`website/typst/worksheet-style.typ`).
+
+This document describes:
+- The `.typ` syntax (for the parser).
+- The worksheet rendering model (web vs PDF).
+- The visual spec for the PDF output.
+- Macro-by-macro behavior and implementation notes.
 
 ## File Structure
 
@@ -37,7 +44,7 @@ Macros follow the pattern:
 
 1. **Name**: `#` followed by identifier (e.g., `#note`, `#mcq`)
 2. **Parameters**: Optional, in parentheses with `key: value` pairs separated by commas
-   - Strings: `"quoted"` or `'quoted'`
+   - Strings: `"quoted"`
    - Booleans: `true` or `false`
    - Numbers: unquoted numeric literals
 3. **Content**: Optional, in square brackets `[...]`
@@ -79,9 +86,9 @@ Highlighted content with an icon.
 
 #### `#image`
 Displays an image.
-- **Parameters**: `source: "path/to/image.png"` (required)
+- **Parameters**: `source: "path/to/image.png"` (required, source must be omitted)
 ```typ
-#image(source: "diagram.png")
+#image("diagram.png")
 ```
 
 #### `#table`
@@ -154,15 +161,15 @@ Content includes the question text followed by a checklist:
 ```
 
 #### `#gap`
-Fill-in-the-blank exercise. Gaps are marked with `{{ answer | alternative }}`.
-- **Parameters**: `empty: boolean` (default: `true`)
-  - `true`: Text input mode (user types answer)
-  - `false`: MCQ mode (user selects from shuffled options)
+Fill-in-the-blank exercise. Gaps are marked with `(( answer | alternative ))`.
+- **Parameters**: `mode: "text" | "mcq"` (default: `"text"`)
+  - `text`: Text input mode (user types answer)
+  - `mcq`: MCQ mode (user selects from shuffled options)
 
 ```typ
 #gap[
-  The capital of France is {{ Paris }}.
-  Water boils at {{ 100 | one hundred }} degrees Celsius.
+  The capital of France is (( Paris )).
+  Water boils at (( 100 | one hundred )) degrees Celsius.
 ]
 ```
 
@@ -211,7 +218,7 @@ Coding exercise with starter code, hint, solution, and optional validation.
   - `#validation[...]` (optional) - Validation code (fenced code block)
 - Supported languages: `ts`, `python`
 
-```typ
+````typ
 #codeTask[
   Write a function that doubles a number.
 
@@ -228,36 +235,20 @@ Coding exercise with starter code, hint, solution, and optional validation.
   ]
 
   #solution[
-    Return `n * 2`.
+    ```ts
+    function double(n: number): number {
+      return 2*n
+    }
+    ```
   ]
 
   #validation[
     ```ts
-    assert(double(5) === 10);
+    double(5) === 10;
     ```
   ]
 ]
-```
-
-## Content Directory Structure
-
-Content is organized as:
-
-```
-content/
-  base/
-    <subjectId>/
-      <topicId>/
-        chapters.typ          # Topic title page
-        <chapterFolder>/
-          overview.typ        # Chapter overview
-          worksheets/
-            worksheet1.typ
-            worksheet2.typ
-```
-
-Chapter folders can be prefixed with numbers for ordering (e.g., `01-intro`, `02-basics`).
-The chapter ID is extracted by removing the numeric prefix.
+````
 
 ## Markdown Support
 
@@ -269,3 +260,210 @@ Within content blocks, standard Markdown is supported:
 - **Lists**: `-` or `1.`
 
 The parser converts Markdown content to the `Markdown` type for rendering.
+
+---
+
+## Worksheet Rendering Model (Web vs PDF)
+
+The same `.typ` content is rendered in two places:
+- Web: parsed to JSON and rendered by `WorksheetRenderer`.
+- PDF: compiled by Typst using `worksheet-style.typ`.
+
+### Section -> Category Mapping (Web)
+
+Section headers are matched case-insensitively. The matching logic is in
+`website/src/features/contentpage/config/categoryConfig.ts`.
+
+- `Checkpoint` => checkpoint category
+- `Aufgaben` or `Tasks` => core category
+- `Challenges` or `Challenge` => challenge category
+- Anything else => info category
+
+### Category Layout (Web)
+
+`WorksheetRenderer` converts sections into category blocks and items
+(`website/src/features/contentpage/renderers/WorksheetRenderer.tsx`).
+
+- Markdown paragraphs become info items.
+- `#group[...]` becomes a task set with intro + tasks.
+- Task macros (`#textTask`, `#mathTask`, `#codeTask`, `#mcq`, `#gap`) become task sets.
+- Display macros (`#note`, `#highlight`, `#codeRunner`, `#table`, `#image`) are rendered inline.
+- `== Subheader` becomes a subheader item.
+
+### Task Numbering (Web)
+
+Task numbering is handled by `TaskSetComponent`.
+
+- `checkpoint` category has no numbering.
+- `core` and `challenge` categories are numbered 1..N.
+- A task set with multiple tasks shows a) b) c) labels.
+- A single task shows a numbered badge.
+
+---
+
+## Macro Specifications (Web vs PDF)
+
+Each macro below lists syntax, parameters, and how it is implemented in
+the web renderer and in Typst.
+
+### `#note`
+
+- Syntax:
+  ```typ
+  #note[ ... ]
+  ```
+- Web: `NoteMacro` (`website/src/features/contentpage/macros/display/NoteMacro.tsx`)
+  - Card with info icon, label, and text.
+- PDF: Not implemented in `worksheet-style.typ` yet. (TODO)
+
+### `#highlight`
+
+- Syntax:
+  ```typ
+  #highlight(icon: "info" | "warning")[ ... ]
+  ```
+- Web: `HighlightMacro` (`website/src/features/contentpage/macros/display/HighlightMacro.tsx`)
+  - Yellow (hint) or orange (warning) soft background.
+- PDF: Not implemented in `worksheet-style.typ` yet. (TODO)
+
+### `#image`
+
+- Syntax:
+  ```typ
+  #image("path/to/image.png")
+  ```
+- Web: `ImageMacro` (`website/src/features/contentpage/macros/display/ImageMacro.tsx`)
+- PDF: Uses Typst `#image` directly (built-in).
+
+### `#table`
+
+- Syntax:
+  ```typ
+  #table[
+    Header 1, Header 2
+    Row 1 Col 1, Row 1 Col 2
+  ]
+  ```
+- Web: `TableMacro` (`website/src/features/contentpage/macros/display/TableMacro.tsx`)
+  - Standard grid table with header styling.
+- PDF: Uses Typst table function `worksheet-style.typ` yet. (TODO)
+
+### `#codeRunner`
+
+- Syntax:
+  ````typ
+  #codeRunner[
+    ```ts
+    console.log("Hello");
+    ```
+  ]
+  ````
+- Web: `CodeRunnerMacro` (`website/src/features/contentpage/macros/display/CodeRunnerMacro.tsx`)
+  - Read-only code editor with run output.
+- PDF: Not implemented in `worksheet-style.typ` yet. (TODO)
+  - Code blocks should be styled by the raw block style.
+
+### `#group`
+
+- Syntax:
+  ```typ
+  #group[
+    Intro text...
+    #textTask[...]
+    #mcq[...]
+  ]
+  ```
+- Web: Becomes a `taskSet` with intro + tasks.
+- PDF: Becomes a boxed card with similar styling.
+
+### `#textTask`
+
+- Syntax:
+  ```typ
+  #textTask[
+    Instruction text...
+    #hint[ ... ]
+    #solution[ ... ]
+  ]
+  ```
+- Web: `TextTaskMacro` (`website/src/features/contentpage/macros/input/TextTaskMacro.tsx`)
+  - Free-text area + collapsible hint/solution.
+- PDF: Should render the instruction text and print empty lines that takes as much space as the solution (a bit bigger so that students can write more) TODO.
+
+### `#mathTask`
+
+- Syntax:
+  ```typ
+  #mathTask[
+    Instruction text...
+    #hint[ ... ]
+    #solution[ ... ]
+  ]
+  ```
+- Web: `MathTaskMacro` (`website/src/features/contentpage/macros/input/MathTaskMacro.tsx`)
+- PDF: Not part of this release.
+
+### `#codeTask`
+
+- Syntax:
+  ```typ
+  #codeTask[
+    Instruction text...
+    #starter[ ... ]
+    #hint[ ... ]
+    #solution[ ... ]
+    #validation[ ... ]
+  ]
+  ```
+- Web: `CodeTaskMacro` (`website/src/features/contentpage/macros/input/CodeTaskMacro.tsx`)
+  - Code editor + run/check UI, hint/solution.
+- PDF: Should render the instruction text and print empty lines that takes as much space as the solution (a bit bigger so that students can write more) TODO.
+
+
+### `#mcq`
+
+- Syntax:
+  ```typ
+  #mcq(single: true, wideLayout: false, shuffleOptions: true)[
+    Question
+    - [x] Correct
+    - [ ] Wrong
+  ]
+  ```
+- Web: `McqMacro` (`website/src/features/contentpage/macros/input/McqMacro.tsx`)
+  - Options grid, checkbox/radio indicators, validation states.
+- PDF: Currently rendered as a generic task block via `#task`
+
+### `#gap`
+
+- Syntax:
+  ```typ
+  #gap(mode: "text")[
+    The capital is {{ Paris }}.
+  ]
+  ```
+- Web: `GapMacro` (`website/src/features/contentpage/macros/input/GapMacro.tsx`)
+  - Inline inputs or dropdowns with validation states.
+- PDF: Implemented in `worksheet-style.typ`.
+  - `mode: "text"` renders underscores as placeholders.
+  - `mode: "mcq"` renders a list of possible answers.
+
+### Inline macros
+
+#### `#hint`
+- Web: Part of an colapseable section
+- PDF: Not rendered at all until a good solution is found
+
+#### `#solution`
+- Web: Part of an colapseable section
+- PDF: Will be rendered in a separate "solution" pdf version. Not part of this release
+
+#### `#starter`
+
+- Web:
+- PDF:
+
+#### `#validation`
+
+- Web: Used to validate solution of `#codeTask`
+- PDF: Not required at all, should therefore be hidden

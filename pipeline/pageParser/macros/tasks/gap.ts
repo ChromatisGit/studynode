@@ -38,7 +38,7 @@ function parser(node: RawMacro): GapMacro {
 
     const gaps: GapField[] = [];
 
-    // Replace {{ ... }} gap placeholders with Unicode sentinels and collect gap field data
+    // Replace (( ... )) gap placeholders with Unicode sentinels and collect gap field data
     const withSentinels = content.replace(GAP_PLACEHOLDER_REGEX, (_match, inner: string) => {
         const index = gaps.length;
 
@@ -78,4 +78,4 @@ function parser(node: RawMacro): GapMacro {
     };
 }
 
-const GAP_PLACEHOLDER_REGEX = /\{\{\s*([^}]+?)\s*\}\}/g;
+const GAP_PLACEHOLDER_REGEX = /\(\(\s*([^)]+?)\s*\)\)/g;
