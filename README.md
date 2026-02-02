@@ -78,6 +78,11 @@ Inhaltlicher Umfang:
 
 Mögliche Inhalte:
 
+* Aufgabenmacros erweitern (Erklärungen für weitere Aufgabentypen, Bilder in Aufgaben, weitere Aufgabentypen)
+
+* Vollwertige Mathematik-Module
+  * Möglichkeit Arbeitsblätter im PDF Format anzubieten
+
 * Practice Notes (Wiederholung mit zeitlicher Verteilung)
 
 * Klausuren erstellen
@@ -87,9 +92,6 @@ Mögliche Inhalte:
   * Einschätzung des eigenen Kenntnisstands
   * Identifikation von Schwierigkeiten
   * Definition persönlicher Übungsziele
-
-* Vollwertige Mathematik-Module
-  * Möglichkeit Arbeitsblätter im PDF Format anzubieten
 
 * StudyNode Mailserver einrichten
 
