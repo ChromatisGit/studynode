@@ -29,6 +29,9 @@
 9. **Plan is idempotent**
    Schema + seed scripts must be safe to run multiple times.
 
+10. **Big refactors are permitted when improving maintainability** 
+   The software is still in alpha and not in use: Therefore no data migration is needed and big breaking changes are acceptable
+
 ---
 
 ## Goals
