@@ -78,7 +78,7 @@ Inhaltlicher Umfang:
 
 Ziele:
 
-* Plattform von eigener Instanz splitten, sodass andere Lehrer eigene Instanz hosten können 
+* Plattform von eigener Instanz splitten, sodass andere Lehrer eigene Instanz hosten können
 
 Inhaltlicher Umfang:
 
@@ -90,14 +90,14 @@ Inhaltlicher Umfang:
 
 ## Meilenstein 7+
 
-M?gliche Inhalte:
+Mögliche Inhalte:
 
-* Aufgabenmacros erweitern (Erkl?rungen f?r weitere Aufgabentypen, Bilder in Aufgaben, weitere Aufgabentypen)
+* Aufgabenmacros erweitern (Erklärungen für weitere Aufgabentypen, Bilder in Aufgaben, weitere Aufgabentypen)
 
 * Vollwertige Mathematik-Module
-  * Freie Antwortfelder f?r Tablet unterst?tzen (#inkTask)
+  * Freie Antwortfelder für Tablet unterstützen (#inkTask)
   * Mathe Felder um Ergebnis zu vergleichen
-  * M?glichkeit Arbeitsbl?tter im PDF Format anzubieten
+  * Möglichkeit Arbeitsblätter im PDF Format anzubieten
 
 * Practice Nodes (Wiederholung mit zeitlicher Verteilung)
 
@@ -105,9 +105,9 @@ M?gliche Inhalte:
 
 * Selbstevaluation der Lernenden:
 
-  * Einsch?tzung des eigenen Kenntnisstands
+  * Einschätzung des eigenen Kenntnisstands
   * Identifikation von Schwierigkeiten
-  * Definition pers?nlicher ?bungsziele
+  * Definition persönlicher Übungsziele
 
 * StudyNode Mailserver einrichten
 
@@ -116,8 +116,8 @@ M?gliche Inhalte:
   * Unit Tests und weitere Tests erstellen
   * Performance Check
 
-* Einmalige von Base abweichende Kursinhalte hinzuf?gen (PDF mit besonderen Infos, AB von Vertretungsstunde)
+* Einmalige von Base abweichende Kursinhalte hinzufügen (PDF mit besonderen Infos, AB von Vertretungsstunde)
 
 * Eingebautes Kahoot
 
-* Weboberfl?che zum Designen von ABs (generiert Typst Syntax)
+* Weboberfläche zum Designen von ABs (generiert Typst Syntax)

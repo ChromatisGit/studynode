@@ -105,7 +105,7 @@ Use `\,` to escape commas within cells.
 #### `#codeRunner`
 Interactive code editor that can execute code.
 Content must be a fenced code block with language specified.
-- Supported languages: `ts`, `python`
+- Supported languages: `ts`
 ````typ
 #codeRunner[
   ```ts
@@ -216,7 +216,7 @@ Coding exercise with starter code, hint, solution, and optional validation.
   - `#hint[...]` (required) - Hint text
   - `#solution[...]` (required) - Solution text
   - `#validation[...]` (optional) - Validation code (fenced code block)
-- Supported languages: `ts`, `python`
+- Supported languages: `ts`
 
 ````typ
 #codeTask[

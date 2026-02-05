@@ -12,7 +12,7 @@
 
 5. **No merge conflicts on update.** Instance-specific data never lives inside `website/`. Pulling a new platform version (`git submodule update`) produces zero conflicts.
 
-6. **Big refactors are permitted when improving maintainability** 
+6. **Big refactors are permitted when improving maintainability**
    The software is still in alpha and not in use: Therefore no data migration is needed and big breaking changes are acceptable
 
 ---
@@ -303,7 +303,7 @@ The homepage route passes standard props via a `HomepageProps` type (defined in 
 - `courseGroups` -- courses grouped by access level
 - `isAdmin` -- whether current user is admin
 - `sidebarData` -- sidebar navigation data
-- `logoutAction` -- server action for logout
+- `signOutAction` -- server action for logout
 
 ---
 
