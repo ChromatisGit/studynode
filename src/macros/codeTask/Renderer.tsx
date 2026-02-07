@@ -6,7 +6,7 @@ import type { MacroComponentProps } from "@macros/componentTypes";
 import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRenderer/MarkdownRenderer";
 import { CollapsibleSection } from "@features/contentpage/components/CollapsibleSection/CollapsibleSection";
 import { getMarkdown } from "@macros/markdownParser";
-import { useWorksheetStorage } from "@features/contentpage/storage/WorksheetStorageContext";
+import { useMacroValue } from "@macros/state/useMacroValue";
 import { CodeRunner, type CodeRunnerResult } from "@features/contentpage/components/CodeRunner/CodeRunner";
 import { useTsRunner } from "@features/contentpage/components/CodeRunner/useTsRunner";
 import { Stack } from "@components/Stack";
@@ -30,8 +30,7 @@ function getTestResult(
 }
 
 export default function CodeTaskRenderer({ macro, context }: Props) {
-  const storage = useWorksheetStorage();
-  const [code, setCode] = useState(macro.starter || "");
+  const [code, setCode] = useMacroValue<string>(context.storageKey, macro.starter || "");
   const [isChecked, setIsChecked] = useState(false);
 
   const { isLoading, diagnostics, consoleOutput, runtimeError, hadRuntime, lastPassed, runCode } =
@@ -39,23 +38,6 @@ export default function CodeTaskRenderer({ macro, context }: Props) {
 
   // Track if task was attempted (code modified from starter)
   const wasAttempted = code !== (macro.starter || "");
-
-  // Load persisted state
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage) {
-      const saved = storage.readResponse(context.storageKey);
-      if (saved) {
-        setCode(saved);
-      }
-    }
-  }, [context.persistState, context.storageKey, storage]);
-
-  // Save state when it changes
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage && code !== macro.starter) {
-      storage.saveResponse(context.storageKey, code);
-    }
-  }, [context.persistState, context.storageKey, storage, code, macro.starter]);
 
   // Respond to check trigger - only if task was attempted
   useEffect(() => {

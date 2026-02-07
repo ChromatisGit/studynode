@@ -276,7 +276,7 @@ Macros like `#codeRunner` and `#mcq` work in slides:
 
 | File | Change |
 |------|--------|
-| `pipeline/pageParser/macros/macroRegistry.ts` | Register `pn` macro |
+|  | Register `pn` macro |
 | `pipeline/dataTransformer/buildChapterContent.ts` | Add `processSlides()` |
 | `src/schema/macroTypes.ts` | Add `PresenterNoteMacro` type |
 | `src/schema/slideTypes.ts` | New file: `Slide`, `SlideDeck`, `SlideState`, `SlideMessage` |

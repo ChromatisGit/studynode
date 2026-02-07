@@ -123,7 +123,6 @@ function TaskRenderer({ task, triggerCheck, taskKey, taskNumber }: {
   taskNumber?: number;
 }) {
   const context: MacroRenderContext = {
-    persistState: true,
     storageKey: taskKey,
     taskNumber,
     checkTrigger: triggerCheck,

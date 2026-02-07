@@ -2,14 +2,8 @@ import type { ReactNode } from "react";
 
 export type MacroRenderContext = {
   /**
-   * For input macros: enables state persistence when true.
-   * When false, macro is still interactive but state is ephemeral.
-   */
-  persistState: boolean;
-
-  /**
    * Unique key for storage (e.g., "worksheet-123-task-5").
-   * Only used when persistState is true.
+   * Used by useMacroValue() to identify this macro's state.
    */
   storageKey?: string;
 
@@ -24,6 +18,12 @@ export type MacroRenderContext = {
    * Used to coordinate "Check Solution" buttons across tasks.
    */
   checkTrigger?: number;
+
+  /**
+   * Whether interactive macros (e.g. codeRunner) are read-only.
+   * Defaults to true. Set to false in slides presenter to allow editing.
+   */
+  readOnly?: boolean;
 };
 
 export type MacroComponentProps<TMacro> = {

@@ -6,7 +6,7 @@ import type { MacroComponentProps } from "@macros/componentTypes";
 import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRenderer/MarkdownRenderer";
 import { CollapsibleSection } from "@features/contentpage/components/CollapsibleSection/CollapsibleSection";
 import { getMarkdown } from "@macros/markdownParser";
-import { useWorksheetStorage } from "@features/contentpage/storage/WorksheetStorageContext";
+import { useMacroValue } from "@macros/state/useMacroValue";
 import { Stack } from "@components/Stack";
 import styles from "./styles.module.css";
 import MACROS_TEXT from "@macros/macros.de.json";
@@ -14,9 +14,8 @@ import MACROS_TEXT from "@macros/macros.de.json";
 type Props = MacroComponentProps<TextTaskMacro>;
 
 export default function TextTaskRenderer({ macro, context }: Props) {
-  const storage = useWorksheetStorage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useMacroValue<string>(context.storageKey, "");
   const [isChecked, setIsChecked] = useState(false);
 
   const adjustHeight = useCallback(() => {
@@ -29,23 +28,6 @@ export default function TextTaskRenderer({ macro, context }: Props) {
   useEffect(() => {
     adjustHeight();
   }, [answer, adjustHeight]);
-
-  // Load persisted state
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage) {
-      const saved = storage.readResponse(context.storageKey);
-      if (saved) {
-        setAnswer(saved);
-      }
-    }
-  }, [context.persistState, context.storageKey, storage]);
-
-  // Save state when it changes
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage && answer) {
-      storage.saveResponse(context.storageKey, answer);
-    }
-  }, [context.persistState, context.storageKey, storage, answer]);
 
   // Respond to check trigger - only if task was attempted (answer not empty)
   useEffect(() => {

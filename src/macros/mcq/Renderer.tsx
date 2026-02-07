@@ -8,37 +8,15 @@ import type { McqMacro } from "./types";
 import type { MacroComponentProps } from "@macros/componentTypes";
 import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRenderer/MarkdownRenderer";
 import { getMarkdown } from "@macros/markdownParser";
-import { useWorksheetStorage } from "@features/contentpage/storage/WorksheetStorageContext";
+import { useMacroValue } from "@macros/state/useMacroValue";
 import styles from "./styles.module.css";
 
 type Props = MacroComponentProps<McqMacro>;
 type OptionState = "default" | "active" | "correct" | "wrong" | "missed";
 
 export default function McqRenderer({ macro, context }: Props) {
-  const storage = useWorksheetStorage();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useMacroValue<string[]>(context.storageKey, []);
   const [isChecked, setIsChecked] = useState(false);
-
-  // Load persisted state
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage) {
-      const saved = storage.readResponse(context.storageKey);
-      if (saved) {
-        try {
-          setSelected(JSON.parse(saved));
-        } catch {
-          // Invalid saved data
-        }
-      }
-    }
-  }, [context.persistState, context.storageKey, storage]);
-
-  // Save state when it changes
-  useEffect(() => {
-    if (context.persistState && context.storageKey && storage && selected.length > 0) {
-      storage.saveResponse(context.storageKey, JSON.stringify(selected));
-    }
-  }, [context.persistState, context.storageKey, storage, selected]);
 
   // Respond to check trigger - only if task was attempted (at least one option selected)
   useEffect(() => {

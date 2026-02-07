@@ -93,7 +93,7 @@ export function CategorySection({ block, categoryIndex, taskNumbers }: CategoryS
               );
             }
             if (item.kind === 'displayMacro') {
-              return renderMacro(item.macro, { persistState: false }, index);
+              return renderMacro(item.macro, {}, index);
             }
             if (item.kind === 'subheader') {
               return (
@@ -124,7 +124,7 @@ export function CategorySection({ block, categoryIndex, taskNumbers }: CategoryS
               );
             }
             if (item.kind === 'displayMacro') {
-              return renderMacro(item.macro, { persistState: false }, index);
+              return renderMacro(item.macro, {}, index);
             }
             if (item.kind === 'subheader') {
               return (

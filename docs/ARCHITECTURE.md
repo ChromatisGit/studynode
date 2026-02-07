@@ -273,7 +273,7 @@ const parserMap: Map<string, ParserDef> = new Map([
 | `display` | Stateless rendering | note, highlight, codeRunner, table, image |
 | `input` | Persist user responses | gap, mcq, codeTask, textTask, mathTask |
 
-Input macros receive `MacroRenderContext` with `persistState`, `storageKey`, `taskNumber`, and `checkTrigger` for worksheet integration.
+Input macros receive `MacroRenderContext` with `storageKey`, `taskNumber`, `checkTrigger`, and `readOnly` for worksheet/slide integration.
 
 ---
 

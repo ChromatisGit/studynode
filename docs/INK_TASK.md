@@ -198,7 +198,7 @@ case "ink":
   return `ink-${normalize(getMarkdown(task.instruction) ?? "") || index}`;
 ```
 
-**Invariant:** `context.persistState === true` uses `WorksheetStorage` under the hood.
+**Invariant:** State persistence is driven by `MacroStateProvider` context — macros use `useMacroValue()` which auto-syncs with the active adapter (e.g. `WorksheetStorage`).
 
 ---
 
