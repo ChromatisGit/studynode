@@ -1,4 +1,4 @@
-= GFS Informatik / Wirtschaftsinformatik
+# GFS Informatik / Wirtschaftsinformatik
 
 Die GFS besteht aus einem praktischen Projekt und einem individuellen Fachgespräch mit der Lehrkraft.
 Im Projekt wird z. B. eine kleine Anwendung zu einem Thema entwickelt. Umfang und Thema sollen überschaubar sein und werden in Absprache mit der Lehrkraft vorab festgelegt.

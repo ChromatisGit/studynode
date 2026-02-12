@@ -223,7 +223,7 @@ Wenn Text eckige Klammern enthält, müssen diese escaped werden: `\[` und `\]`.
 
 **Beispiel (mit Code im Fragetext):**
 
-```
+````
 #mcq(wideLayout: true, shuffleOptions: false)[
   ```ts
   const hausnummer: number = "17a";
@@ -233,7 +233,7 @@ Wenn Text eckige Klammern enthält, müssen diese escaped werden: `\[` und `\]`.
   - [ ] Weist der Variable einen Wert zu
   - [x] Der Code gibt eine Fehlermeldung
 ]
-```
+````
 
 ---
 
@@ -262,14 +262,14 @@ Lernende füllen Lücken in Text oder Code aus.
 
 **Beispiel (Lücken im Code, text-Modus):**
 
-```
+````
 #gap(mode: "text")[
   ```ts
   ((let)) nachricht: ((string)) = "Hallo Welt";
   console.log(((nachricht)));
   ```
 ]
-```
+````
 
 **Beispiel (Lücken in Prosa, mcq-Modus):**
 
@@ -393,28 +393,25 @@ Zeilen sind durch Zeilenumbrüche getrennt, Zellen innerhalb einer Zeile durch K
 
 In allen Inhaltsblöcken wird Markdown unterstützt:
 
-| Syntax | Ergebnis |
-|---|---|
-| `*fett*` oder `**fett**` | **fett** |
-| `_kursiv_` | _kursiv_ |
-| `` `code` `` | `code` |
-| ` ``` ts ... ``` ` | Code-Block mit Syntax-Highlighting |
-| `- Element` | Aufzählung |
+
+| `*fett*` NICHT `**fett**`
+| `_kursiv_`
+| `` `code` ``
+| ` ``` ts ... ``` `
+| `- Element`
 
 ---
 
 ## Regeln für die Aufgabenerstellung
 
-1. **Aufbau:** Beginne mit `= Checkpoint` (schnelle Vorwissensprüfung), dann `= Aufgaben` (Kernteil), dann `= Challenges` (Vertiefung).
-2. **Steigende Schwierigkeit:** Innerhalb von `= Aufgaben` sollen die Aufgaben zunehmend schwieriger werden.
-3. **Aufgabentypen mischen:** Verwende nicht mehrere gleiche Typen hintereinander. Wechsle zwischen `#mcq`, `#gap`, `#textTask` und `#codeTask`.
-4. **Gruppieren:** Verwende `#group`, wenn mehrere Aufgaben auf demselben Kontext aufbauen oder zusammengehören.
-5. **Hinweise und Lösungen:** Jede `#textTask` und `#codeTask` muss `#hint` und `#solution` enthalten.
-6. **Validierung:** Füge bei `#codeTask` nach Möglichkeit `#validation` hinzu, um automatische Korrektur zu ermöglichen.
-7. **Praxisnähe:** Verwende realistische Szenarien als Rahmenhandlung (z.B. Schul-App, Inventarsystem, Spiel).
-8. **Challenges:** Diese Aufgaben sollen Transfer, Fehlersuche oder offene Aufgabenstellungen beinhalten.
-9. **Sprache:** Alle Aufgabentexte auf Deutsch. Code-Kommentare auf Deutsch. Variablennamen in camelCase, können deutsch sein.
-10. **Keine Importe erfinden:** Verwende NUR die oben beschriebenen Macros. Keine anderen `#`-Befehle.
+**Aufbau:** Beginne mit `= Checkpoint` (schnelle Vorwissensprüfung), dann `= Aufgaben` (Kernteil), dann `= Challenges` (Vertiefung).
+**Gruppieren:** Verwende `#group`, wenn mehrere Aufgaben auf demselben Kontext aufbauen oder zusammengehören.
+**Hinweise und Lösungen:** Jede `#textTask` und `#codeTask` muss `#hint` und `#solution` enthalten.
+**Validierung:** Füge bei `#codeTask` nach Möglichkeit `#validation` hinzu, um automatische Korrektur zu ermöglichen.
+**Praxisnähe:** Verwende realistische Szenarien als Rahmenhandlung (z.B. Schul-App, Spiel, etc).
+**Challenges:** Diese Aufgaben sollen Transfer, Fehlersuche oder offene Aufgabenstellungen beinhalten.
+**Sprache:** Alle Aufgabentexte auf Deutsch. Code-Kommentare auf Deutsch. Variablennamen in camelCase, können deutsch sein.
+**Keine Importe erfinden:** Verwende NUR die oben beschriebenen Macros. Keine anderen `#`-Befehle.
 
 ---
 
