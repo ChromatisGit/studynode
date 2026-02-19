@@ -2,10 +2,12 @@
 
 import clsx from "clsx";
 import type { Page } from "@schema/page";
+import type { ProgressStatus } from "@schema/progressDTO";
 import { type Macro, DISPLAY_MACRO_TYPES } from "@macros/registry";
-import { CategorySection, type Category, type CategoryItem } from "@features/contentpage/components/CategorySection/CategorySection";
+import { type Category, type CategoryItem } from "@features/contentpage/components/CategorySection/CategorySection";
 import { getCategoryType } from "@features/contentpage/components/CategorySection/categoryConfig";
 import { WorksheetStorageProvider } from "@features/contentpage/storage/WorksheetStorageContext";
+import { WorksheetNavigator } from "@features/contentpage/components/WorksheetNavigator/WorksheetNavigator";
 import { PageHeader } from "@components/PageHeader/PageHeader";
 import styles from "./WorksheetRenderer.module.css";
 
@@ -15,6 +17,7 @@ interface WorksheetRendererProps {
   page: Page;
   className?: string;
   worksheetSlug?: string;
+  chapterStatus?: ProgressStatus;
 }
 
 /**
@@ -53,7 +56,8 @@ function convertPageToCategories(page: Page): Category[] {
 }
 
 /**
- * Computes task numbers for each category item
+ * Computes task numbers for each category item across all sections.
+ * Keys use the format `${categoryIndex}-${itemIndex}` to match CategorySection expectations.
  */
 function computeTaskNumbers(categories: Category[]): Record<string, number> {
   const taskNumbers: Record<string, number> = {};
@@ -74,7 +78,7 @@ function computeTaskNumbers(categories: Category[]): Record<string, number> {
 }
 
 /**
- * WorksheetRenderer - renders content pages with interactive worksheet categories.
+ * WorksheetRenderer - renders worksheets one section at a time with Prev / Next navigation.
  * Automatically converts Page structure to Category structure based on section headers.
  *
  * Header matching (case-insensitive):
@@ -82,8 +86,11 @@ function computeTaskNumbers(categories: Category[]): Record<string, number> {
  * - "Aufgaben" / "Tasks" → core category (numbered)
  * - "Challenges" / "Challenge" → challenge category (numbered)
  * - Anything else → info category (informational only)
+ *
+ * When chapterStatus is 'current': forward navigation is gated on task/checkpoint completion.
+ * Otherwise (default 'finished'): free navigation with no restrictions.
  */
-export function WorksheetRenderer({ page, className, worksheetSlug }: WorksheetRendererProps) {
+export function WorksheetRenderer({ page, className, worksheetSlug, chapterStatus = 'finished' }: WorksheetRendererProps) {
   const categories = convertPageToCategories(page);
   const taskNumbers = computeTaskNumbers(categories);
 
@@ -91,16 +98,11 @@ export function WorksheetRenderer({ page, className, worksheetSlug }: WorksheetR
     <WorksheetStorageProvider worksheetSlug={worksheetSlug} pageContent={page.content}>
       <div className={clsx(styles.worksheet, className)}>
         {page.title && <PageHeader title={page.title} />}
-        <div className={styles.categoryList}>
-          {categories.map((category, index) => (
-            <CategorySection
-              key={index}
-              block={category}
-              categoryIndex={index}
-              taskNumbers={taskNumbers}
-            />
-          ))}
-        </div>
+        <WorksheetNavigator
+          categories={categories}
+          chapterStatus={chapterStatus}
+          taskNumbers={taskNumbers}
+        />
       </div>
     </WorksheetStorageProvider>
   );

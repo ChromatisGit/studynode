@@ -16,7 +16,6 @@ import { parser as gapParser } from "@macros/gap/parser";
 import { parser as mcqParser } from "@macros/mcq/parser";
 import { parser as codeTaskParser } from "@macros/codeTask/parser";
 import { parser as textTaskParser } from "@macros/textTask/parser";
-import { parser as mathTaskParser } from "@macros/mathTask/parser";
 import { parser as pnParser } from "@macros/pn/parser";
 
 // Import Macro type from registry (types only, no runtime deps)
@@ -41,7 +40,6 @@ const parserMap: Map<string, ParserDef> = new Map([
   ["mcq", mcqParser],
   ["codeTask", codeTaskParser],
   ["textTask", textTaskParser],
-  ["mathTask", mathTaskParser],
   ["pn", pnParser],
 ] as [string, ParserDef][]);
 

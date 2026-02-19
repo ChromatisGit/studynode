@@ -7,6 +7,7 @@ import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRende
 import { CollapsibleSection } from "@features/contentpage/components/CollapsibleSection/CollapsibleSection";
 import { getMarkdown } from "@macros/markdownParser";
 import { useMacroValue } from "@macros/state/useMacroValue";
+import { useMacroCheck } from "@macros/state/useMacroCheck";
 import { Stack } from "@components/Stack";
 import styles from "./styles.module.css";
 import MACROS_TEXT from "@macros/macros.de.json";
@@ -29,12 +30,8 @@ export default function TextTaskRenderer({ macro, context }: Props) {
     adjustHeight();
   }, [answer, adjustHeight]);
 
-  // Respond to check trigger - only if task was attempted (answer not empty)
-  useEffect(() => {
-    if (context.checkTrigger && context.checkTrigger > 0 && answer.trim().length > 0) {
-      setIsChecked(true);
-    }
-  }, [context.checkTrigger, answer]);
+  const isAttempted = answer.trim().length > 0;
+  useMacroCheck(context, isAttempted, () => setIsChecked(true));
 
   const instruction = getMarkdown(macro.instruction);
   const hint = getMarkdown(macro.hint);

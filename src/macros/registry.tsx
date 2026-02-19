@@ -25,7 +25,6 @@ import type { GapMacro } from "./gap/types";
 import type { McqMacro } from "./mcq/types";
 import type { CodeTaskMacro } from "./codeTask/types";
 import type { TextTaskMacro } from "./textTask/types";
-import type { MathTaskMacro } from "./mathTask/types";
 import type { PresenterNoteMacro } from "./pn/types";
 
 // ============================================================================
@@ -41,7 +40,6 @@ import GapRenderer from "./gap/Renderer";
 import McqRenderer from "./mcq/Renderer";
 import CodeTaskRenderer from "./codeTask/Renderer";
 import TextTaskRenderer from "./textTask/Renderer";
-import MathTaskRenderer from "./mathTask/Renderer";
 
 // ============================================================================
 // MACRO TYPE (union of all macro types)
@@ -57,7 +55,6 @@ export type Macro =
   | McqMacro
   | CodeTaskMacro
   | TextTaskMacro
-  | MathTaskMacro
   | PresenterNoteMacro;
 
 export type MacroType = Macro["type"];
@@ -76,7 +73,6 @@ const macros = {
   mcq: { Component: McqRenderer, category: "input" as const, state: "interactive" as const },
   codeTask: { Component: CodeTaskRenderer, category: "input" as const, state: "interactive" as const },
   textTask: { Component: TextTaskRenderer, category: "input" as const, state: "interactive" as const },
-  mathTask: { Component: MathTaskRenderer, category: "input" as const, state: "interactive" as const },
 };
 
 type MacroName = keyof typeof macros;

@@ -24,6 +24,19 @@ export type MacroRenderContext = {
    * Defaults to true. Set to false in slides presenter to allow editing.
    */
   readOnly?: boolean;
+
+  /**
+   * Called when the macro's "attempted" state changes (i.e. whether the user
+   * has entered any content). Used by TaskSetComponent to track section completion.
+   */
+  onAttemptedChange?: (taskKey: string, attempted: boolean) => void;
+
+  /**
+   * When true, show detailed per-option feedback after checking (correct/wrong/missed
+   * highlighted per option). Used by PractiseRenderer.
+   * When false (default), only indicate that something is wrong without revealing which options.
+   */
+  detailedFeedback?: boolean;
 };
 
 export type MacroComponentProps<TMacro> = {

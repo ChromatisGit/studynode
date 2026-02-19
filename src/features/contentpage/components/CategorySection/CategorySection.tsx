@@ -40,6 +40,7 @@ interface CategorySectionProps {
   block: Category;
   categoryIndex: number;
   taskNumbers: Record<string, number>;
+  onTaskSetCompleted?: (itemIndex: number) => void;
 }
 
 const categoryConfig = {
@@ -61,7 +62,7 @@ const categoryConfig = {
   },
 } satisfies Record<Category["kind"], { label: string; icon: typeof Info }>;
 
-export function CategorySection({ block, categoryIndex, taskNumbers }: CategorySectionProps) {
+export function CategorySection({ block, categoryIndex, taskNumbers, onTaskSetCompleted }: CategorySectionProps) {
   const config = categoryConfig[block.kind];
   const Icon = config.icon;
   const variantClass =
@@ -120,6 +121,7 @@ export function CategorySection({ block, categoryIndex, taskNumbers }: CategoryS
                   taskSet={item}
                   categoryType={block.kind}
                   taskNumber={taskNumbers[`${categoryIndex}-${index}`]}
+                  onTaskSetCompleted={onTaskSetCompleted ? () => onTaskSetCompleted(index) : undefined}
                 />
               );
             }
