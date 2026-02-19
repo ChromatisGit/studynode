@@ -20,11 +20,12 @@ import { parser as pnParser } from "@macros/pn/parser";
 
 // Import Macro type from registry (types only, no runtime deps)
 import type { Macro } from "@macros/registry";
+import type { MacroGroup } from "@schema/page";
 import type { Params } from "./parseParams";
 import type { ContentType } from "./parserUtils";
 
 type ParserDef = {
-  parser: (node: RawMacro) => Macro;
+  parser: (node: RawMacro) => Macro | MacroGroup;
   params?: Params;
   allowedIn?: ContentType[];
 };
@@ -43,7 +44,7 @@ const parserMap: Map<string, ParserDef> = new Map([
   ["pn", pnParser],
 ] as [string, ParserDef][]);
 
-export function parseMacroType(node: RawMacro, contentType?: ContentType): Macro {
+export function parseMacroType(node: RawMacro, contentType?: ContentType): Macro | MacroGroup {
   const parserDef = parserMap.get(node.type);
   if (!parserDef) throw new Error(`Unknown macro: ${node.type}`);
 
