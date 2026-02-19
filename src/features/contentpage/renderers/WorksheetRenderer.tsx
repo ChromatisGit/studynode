@@ -45,33 +45,27 @@ function convertPageToCategories(page: Page): Category[] {
       }
     }
 
-    if (categoryType === 'info') {
-      categories.push({ kind: 'info', title: section.header, items });
-    } else {
-      categories.push({ kind: categoryType, items });
-    }
+    categories.push({ kind: categoryType, items });
   }
 
   return categories;
 }
 
 /**
- * Computes task numbers for each category item across all sections.
+ * Computes task numbers for each category item, resetting to 1 at the start of each section.
  * Keys use the format `${categoryIndex}-${itemIndex}` to match CategorySection expectations.
  */
 function computeTaskNumbers(categories: Category[]): Record<string, number> {
   const taskNumbers: Record<string, number> = {};
-  let currentNumber = 1;
 
   categories.forEach((category, categoryIndex) => {
-    if (category.kind !== 'info' && category.kind !== 'checkpoint') {
-      category.items.forEach((item, itemIndex) => {
-        if (item.kind === 'taskSet') {
-          taskNumbers[`${categoryIndex}-${itemIndex}`] = currentNumber;
-          currentNumber++;
-        }
-      });
-    }
+    let currentNumber = 1;
+    category.items.forEach((item, itemIndex) => {
+      if (item.kind === 'taskSet') {
+        taskNumbers[`${categoryIndex}-${itemIndex}`] = currentNumber;
+        currentNumber++;
+      }
+    });
   });
 
   return taskNumbers;
@@ -82,11 +76,11 @@ function computeTaskNumbers(categories: Category[]): Record<string, number> {
  * Automatically converts Page structure to Category structure based on section headers.
  *
  * Header matching (case-insensitive):
- * - "Checkpoint" → checkpoint category (no numbering)
- * - "Aufgaben" / "Tasks" → core category (numbered)
- * - "Challenges" / "Challenge" → challenge category (numbered)
- * - Anything else → info category (informational only)
+ * - "Checkpoint" → checkpoint category
+ * - "Challenges" / "Challenge" → challenge category
+ * - Anything else (incl. "Aufgaben" / "Tasks") → core category
  *
+ * All sections are numbered independently starting at 1.
  * When chapterStatus is 'current': forward navigation is gated on task/checkpoint completion.
  * Otherwise (default 'finished'): free navigation with no restrictions.
  */

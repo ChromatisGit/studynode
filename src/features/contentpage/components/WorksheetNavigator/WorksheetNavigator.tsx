@@ -21,7 +21,9 @@ export function WorksheetNavigator({ categories, chapterStatus, taskNumbers }: W
   const [completedSections, setCompletedSections] = useState<ReadonlySet<number>>(() => {
     const initial = new Set<number>();
     categories.forEach((cat, i) => {
-      if (cat.kind === 'info') initial.add(i);
+      if (cat.kind !== 'checkpoint' && !cat.items.some(item => item.kind === 'taskSet')) {
+        initial.add(i);
+      }
     });
     return initial;
   });
