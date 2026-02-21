@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import type { ProgressStatus } from '@schema/progressDTO';
+import type { ProgressStatus } from '@schema/courseTypes';
 import { CategorySection, type Category } from '@features/contentpage/components/CategorySection/CategorySection';
 import { CheckpointOverlay } from '@features/contentpage/components/CheckpointOverlay/CheckpointOverlay';
 import { PageNavBar } from '@features/contentpage/components/PageNavBar/PageNavBar';

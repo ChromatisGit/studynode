@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { AppLink } from "@components/AppLink";
 import { useRouteContext } from "@ui/contexts/RouteContext";
 import { useTheme } from "@ui/contexts/ThemeContext";
-import type { SidebarDTO } from "@schema/sidebarDTO";
+import type { SidebarDTO } from "@schema/courseTypes";
 
 import { NavbarDesktopLinks } from "./NavbarDesktopLinks";
 import { NavbarProfileDropdown } from "./NavbarProfileDropdown";

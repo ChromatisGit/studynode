@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { useRouteContext } from "@ui/contexts/RouteContext";
 import { useIsMobile } from "@ui/lib/useMediaQuery";
-import type { SidebarDTO } from "@schema/sidebarDTO";
+import type { SidebarDTO } from "@schema/courseTypes";
 
 import { SidebarMainNav } from "./SidebarMainNav";
 import { SidebarTopicNav } from "./SidebarTopicNav";

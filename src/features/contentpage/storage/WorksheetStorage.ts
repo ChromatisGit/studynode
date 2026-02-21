@@ -50,6 +50,11 @@ export class WorksheetStorage {
   private slug: string;
   private signature: string;
 
+  /** Called after each task response is saved to localStorage. Fire-and-forget DB sync. */
+  onSave?: (taskKey: string, value: string) => void;
+  /** Called after each checkpoint response is saved to localStorage. Fire-and-forget DB sync. */
+  onCheckpointSave?: (sectionIndex: number, response: CheckpointResponse) => void;
+
   private constructor(slug: string, signature: string) {
     this.slug = slug;
     this.signature = signature;
@@ -102,6 +107,7 @@ export class WorksheetStorage {
     }
 
     WorksheetStorage.persist(state);
+    this.onSave?.(taskKey, value);
   }
 
   readCheckpoint(sectionIndex: number): CheckpointResponse | null {
@@ -115,6 +121,30 @@ export class WorksheetStorage {
     if (!WorksheetStorage.isAvailable()) return;
     const { state, record } = this.ensureRecord();
     record.checkpoints[sectionIndex] = response;
+    WorksheetStorage.persist(state);
+    this.onCheckpointSave?.(sectionIndex, response);
+  }
+
+  /**
+   * Merges data loaded from the DB into localStorage.
+   * DB values take precedence over existing localStorage values for matching keys.
+   * Keys not present in DB are left unchanged (may be pending local saves).
+   * Does NOT trigger onSave / onCheckpointSave callbacks.
+   */
+  mergeDbData(responses: Record<string, string>, checkpoints: Record<number, CheckpointResponse>): void {
+    if (!WorksheetStorage.isAvailable()) return;
+    const { state, record } = this.ensureRecord();
+
+    for (const [taskKey, value] of Object.entries(responses)) {
+      if (value) {
+        record.responses[taskKey] = { value, updatedAt: Date.now() };
+      }
+    }
+
+    for (const [idx, response] of Object.entries(checkpoints)) {
+      record.checkpoints[Number(idx)] = response;
+    }
+
     WorksheetStorage.persist(state);
   }
 

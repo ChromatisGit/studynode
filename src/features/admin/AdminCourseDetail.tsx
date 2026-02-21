@@ -2,9 +2,7 @@
 
 import { ChevronRight, Shield } from "lucide-react";
 import { AppLink } from "@components/AppLink";
-import type { CourseDTO } from "@schema/courseDTO";
-import type { ProgressDTO } from "@schema/progressDTO";
-import type { CourseId } from "@services/courseService";
+import type { CourseDTO, ProgressDTO, CourseId } from "@schema/courseTypes";
 import { ProgressControl } from "./ProgressControl";
 import { RegistrationControl } from "./RegistrationControl";
 import styles from "./AdminCourseDetail.module.css";
