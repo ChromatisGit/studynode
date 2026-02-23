@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS checkpoint_responses CASCADE;
 DROP TABLE IF EXISTS courses            CASCADE;
 DROP TABLE IF EXISTS auth_attempts      CASCADE;
 DROP TABLE IF EXISTS log_audit          CASCADE;
+DROP TABLE IF EXISTS slide_sessions     CASCADE;
 
 -- ============================================================
 -- 1) Lookup tables
@@ -195,7 +196,19 @@ CREATE SEQUENCE IF NOT EXISTS access_code_counter
   NO CYCLE;
 
 -- ============================================================
--- 8) Write-only log tables (no RLS, log_ prefix convention)
+-- 8) Slide sessions (live cross-device presentation relay)
+-- No RLS — admin-only access enforced at application level.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS slide_sessions (
+  channel_name    TEXT         PRIMARY KEY,
+  state           JSONB        NOT NULL,
+  updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+  last_heartbeat  TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- ============================================================
+-- 9) Write-only log tables (no RLS, log_ prefix convention)
 -- ============================================================
 
 CREATE TABLE log_audit (
@@ -209,7 +222,7 @@ CREATE TABLE log_audit (
 );
 
 -- ============================================================
--- 9) Indexes
+-- 10) Indexes
 -- ============================================================
 
 CREATE INDEX IF NOT EXISTS idx_courses_group    ON courses(group_id);
@@ -258,7 +271,7 @@ CREATE INDEX IF NOT EXISTS idx_log_audit_event     ON log_audit(event_type);
 CREATE INDEX IF NOT EXISTS idx_log_audit_timestamp ON log_audit(created_at);
 
 -- ============================================================
--- 10) Row Level Security
+-- 11) Row Level Security
 -- ============================================================
 
 -- Domain tables
@@ -281,7 +294,7 @@ ALTER TABLE worksheet_presence ENABLE ROW LEVEL SECURITY;
 -- No RLS on: auth_attempts, log_audit (technical/write-only tables)
 
 -- ============================================================
--- 11) RLS Policies
+-- 12) RLS Policies
 -- Fail-safe: NULL context → empty result (not all rows)
 -- current_setting(..., true) returns NULL when not set
 -- user_id = NULL evaluates to NULL → row filtered out
