@@ -74,7 +74,6 @@ export function Navbar({
         toast.error("Unable to log out right now.");
         return;
       }
-      router.refresh(); // Force server to clear session state
       router.push("/");
       toast.success("Logged out successfully");
     })();

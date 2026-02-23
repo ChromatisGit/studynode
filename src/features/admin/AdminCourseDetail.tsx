@@ -3,8 +3,10 @@
 import { ChevronRight, Shield } from "lucide-react";
 import { AppLink } from "@components/AppLink";
 import type { CourseDTO, ProgressDTO, CourseId } from "@schema/courseTypes";
+import type { AdminWorksheetRef } from "@services/courseService";
 import { ProgressControl } from "./ProgressControl";
 import { RegistrationControl } from "./RegistrationControl";
+import { WorksheetManagement } from "./WorksheetManagement";
 import styles from "./AdminCourseDetail.module.css";
 import ADMIN_TEXT from "./admin.de.json";
 import { SlideSelection } from "@features/slides/SlideSelection";
@@ -14,10 +16,11 @@ type AdminCourseDetailProps = {
   progress: ProgressDTO;
   courseId: CourseId;
   slideIds: string[];
+  worksheets: AdminWorksheetRef[];
 };
 
-export function AdminCourseDetail({ course, progress, courseId, slideIds }: AdminCourseDetailProps) {
-  const courseUrl = `/${course.groupKey}/${course.subjectKey}`;
+export function AdminCourseDetail({ course, progress, courseId, slideIds, worksheets }: AdminCourseDetailProps) {
+  const courseUrl = course.slug;
 
   return (
     <div className={styles.container}>
@@ -86,6 +89,19 @@ export function AdminCourseDetail({ course, progress, courseId, slideIds }: Admi
             {ADMIN_TEXT.courseDetail.registration.description}
           </p>
           <RegistrationControl courseId={courseId} />
+        </section>
+
+        {/* Worksheet Management Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>{ADMIN_TEXT.courseDetail.worksheetManagement.title}</h2>
+          <p className={styles.sectionDescription}>
+            {ADMIN_TEXT.courseDetail.worksheetManagement.description}
+          </p>
+          <WorksheetManagement
+            courseId={courseId}
+            worksheets={worksheets}
+            topics={progress.topics}
+          />
         </section>
 
         {/* Enrolled Students Section */}

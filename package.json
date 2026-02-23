@@ -2,14 +2,6 @@
   "name": "studynode",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "generate": "bun scripts/pipeline.ts",
-    "db:seed": "bun scripts/seed.ts",
-    "dev": "bun --bun next dev --turbo",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start",
-    "lint": "bun eslint . && bun tsc --noEmit"
-  },
   "dependencies": {
     "argon2": "^0.44.0",
     "clsx": "^2.1.1",

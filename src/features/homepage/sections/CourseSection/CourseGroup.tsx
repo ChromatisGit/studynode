@@ -27,7 +27,8 @@ export function CourseGroup({ title, courses, accessable, actionLabel }: CourseG
                 gap={16}
                 maxCols={4}
                 renderItem={(course) => {
-                    const accessHref = `/access?groupKey=${course.groupKey}&subjectKey=${course.subjectKey}`
+                    const [, urlGroup, urlSubject] = course.slug.split('/');
+                    const accessHref = `/access?groupKey=${urlGroup}&subjectKey=${urlSubject}`
                     const courseHref = course.slug;
 
                     return (

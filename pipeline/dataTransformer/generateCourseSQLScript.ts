@@ -31,15 +31,15 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
   // -------------------------------------------------------------------------
 
   const groups = new Map<string, { label: string; key: string }>();
-  const subjects = new Map<string, { label: string; key: string }>();
+  const subjects = new Map<string, { label: string }>();
   const variants = new Map<string, { label: string; short: string }>();
   const topicsMap = new Map<string, { label: string; hrefSlug: string }>();
   const chaptersMap = new Map<string, { label: string; hrefSlug: string }>();
-  const worksheetsMap = new Map<string, { label: string; hrefSlug: string; worksheetFormat: string }>();
+  const worksheetsMap = new Map<string, { label: string; hrefSlug: string; worksheetFormat: string; sourceFilename: string }>();
 
   for (const course of courses) {
     groups.set(course.group.id, { label: course.group.label, key: course.group.key });
-    subjects.set(course.subject.id, { label: course.subject.label, key: course.subject.key });
+    subjects.set(course.subject.id, { label: course.subject.label });
     if (course.courseVariant) {
       variants.set(course.courseVariant.id, {
         label: course.courseVariant.label,
@@ -69,6 +69,7 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
               label: worksheet.label,
               hrefSlug: worksheet.worksheetId,
               worksheetFormat: worksheet.worksheetFormat,
+              sourceFilename: worksheet.sourceFilename ?? '',
             });
           }
         }
@@ -91,9 +92,9 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
   // 3) subjects
   // -------------------------------------------------------------------------
   lines.push("-- Subjects");
-  for (const [subjectId, { label, key }] of subjects) {
+  for (const [subjectId, { label }] of subjects) {
     lines.push(
-      `INSERT INTO subjects (subject_id, subject_label, subject_key) VALUES (${esc(subjectId)}, ${esc(label)}, ${esc(key)}) ON CONFLICT (subject_id) DO UPDATE SET subject_label = EXCLUDED.subject_label, subject_key = EXCLUDED.subject_key;`,
+      `INSERT INTO subjects (subject_id, subject_label) VALUES (${esc(subjectId)}, ${esc(label)}) ON CONFLICT (subject_id) DO UPDATE SET subject_label = EXCLUDED.subject_label;`,
     );
   }
   lines.push("");
@@ -137,9 +138,9 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
   // 7) worksheets
   // -------------------------------------------------------------------------
   lines.push("-- Worksheets");
-  for (const [worksheetId, { label, hrefSlug, worksheetFormat }] of worksheetsMap) {
+  for (const [worksheetId, { label, hrefSlug, worksheetFormat, sourceFilename }] of worksheetsMap) {
     lines.push(
-      `INSERT INTO worksheets (worksheet_id, label, href_slug, worksheet_format) VALUES (${esc(worksheetId)}, ${esc(label)}, ${esc(hrefSlug)}, ${esc(worksheetFormat)}) ON CONFLICT (worksheet_id) DO UPDATE SET label = EXCLUDED.label, href_slug = EXCLUDED.href_slug, worksheet_format = EXCLUDED.worksheet_format;`,
+      `INSERT INTO worksheets (worksheet_id, label, href_slug, worksheet_format, source_filename) VALUES (${esc(worksheetId)}, ${esc(label)}, ${esc(hrefSlug)}, ${esc(worksheetFormat)}, ${esc(sourceFilename)}) ON CONFLICT (worksheet_id) DO UPDATE SET label = EXCLUDED.label, href_slug = EXCLUDED.href_slug, worksheet_format = EXCLUDED.worksheet_format, source_filename = EXCLUDED.source_filename;`,
     );
   }
   lines.push("");

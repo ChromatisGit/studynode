@@ -39,7 +39,6 @@ type CourseRow = {
   description: string;
   group_key: string;
   subject_id: string;
-  subject_key: string;
   subject_label: string;
   slug: string;
   icon: string | null;
@@ -73,7 +72,6 @@ export async function getCourseDTO(courseId: string): Promise<CourseDTO> {
     description: row.description,
     groupKey: row.group_key,
     subjectId: row.subject_id,
-    subjectKey: row.subject_key,
     slug: row.slug,
     icon: row.icon ?? undefined,
     color: row.color,
@@ -82,9 +80,10 @@ export async function getCourseDTO(courseId: string): Promise<CourseDTO> {
 }
 
 export async function getCourseId(groupKey: string, subjectKey: string): Promise<CourseId> {
+  const slug = `/${groupKey}/${subjectKey}`;
   const rows = await anonSQL<{ id: string }[]>`
     SELECT id FROM v_course_dto
-    WHERE group_key = ${groupKey} AND subject_key = ${subjectKey}
+    WHERE slug = ${slug}
     LIMIT 1
   `;
   if (!rows[0]) notFound();
@@ -101,18 +100,16 @@ export async function courseListed(courseId: CourseId): Promise<boolean> {
   return row.is_listed;
 }
 
-export async function getCourseGroupAndSubjectKey(
-  courseId: CourseId,
-): Promise<{ groupKey: string; subjectKey: string }> {
+export async function getCourseSlug(courseId: CourseId): Promise<string> {
   const row = await fetchCourseRow(courseId);
-  return { groupKey: row.group_key, subjectKey: row.subject_key };
+  return row.slug;
 }
 
 export async function getSubject(
   courseId: CourseId,
-): Promise<{ id: string; label: string; key: string }> {
+): Promise<{ id: string; label: string }> {
   const row = await fetchCourseRow(courseId);
-  return { id: row.subject_id, label: row.subject_label, key: row.subject_key };
+  return { id: row.subject_id, label: row.subject_label };
 }
 
 export async function getWorksheetRefs({
@@ -340,4 +337,69 @@ export async function getRegistrationWindow(courseId: CourseId): Promise<string 
 
 export async function isRegistrationOpen(courseId: CourseId): Promise<boolean> {
   return Boolean(await getRegistrationWindow(courseId));
+}
+
+// ==========================================================================
+// Admin: worksheet management
+// ==========================================================================
+
+export type AdminWorksheetRef = {
+  topicId: string;
+  chapterId: string;
+  worksheetId: string;
+  label: string;
+  sourceFilename: string;
+  isHidden: boolean;
+  displayOrder: number;
+};
+
+/**
+ * Returns ALL worksheets (including hidden) for a course — admin only.
+ * Uses userSQL so admin RLS bypasses the is_hidden filter.
+ */
+export async function getAdminWorksheetList(
+  courseId: CourseId,
+  user: UserDTO,
+): Promise<AdminWorksheetRef[]> {
+  const rows = await userSQL(user)<{
+    topic_id: string;
+    chapter_id: string;
+    worksheet_id: string;
+    label: string;
+    source_filename: string;
+    is_hidden: boolean;
+    display_order: number;
+  }[]>`
+    SELECT cw.topic_id, cw.chapter_id, cw.worksheet_id,
+           w.label, w.source_filename, cw.is_hidden, cw.display_order
+    FROM course_worksheets cw
+    JOIN worksheets w ON w.worksheet_id = cw.worksheet_id
+    WHERE cw.course_id = ${courseId}
+    ORDER BY cw.topic_id, cw.chapter_id, cw.display_order
+  `;
+  return rows.map((r) => ({
+    topicId: r.topic_id,
+    chapterId: r.chapter_id,
+    worksheetId: r.worksheet_id,
+    label: r.label,
+    sourceFilename: r.source_filename,
+    isHidden: r.is_hidden,
+    displayOrder: r.display_order,
+  }));
+}
+
+/**
+ * Toggle the is_hidden flag for a single worksheet in a course.
+ */
+export async function toggleWorksheetVisibilityService(
+  user: UserDTO,
+  courseId: CourseId,
+  worksheetId: string,
+  isHidden: boolean,
+): Promise<void> {
+  await userSQL(user)`
+    UPDATE course_worksheets
+    SET is_hidden = ${isHidden}
+    WHERE course_id = ${courseId} AND worksheet_id = ${worksheetId}
+  `;
 }

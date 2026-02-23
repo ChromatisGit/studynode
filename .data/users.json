@@ -1,0 +1,9 @@
+[
+  {
+    "id": "admin-dev",
+    "role": "admin",
+    "groupKey": null,
+    "accessCode": "dev",
+    "pinHash": "$argon2id$v=19$m=65536,t=3,p=4$o1/gbTpwd2sObo5U4v9tqQ$A+nMIDS5/HzY5xsLO10sfGU0RDiF5BvFbJKV/OKIxFQ"
+  }
+]

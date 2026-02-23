@@ -1,7 +1,7 @@
 "use server";
 
 import { getSession, isAdmin } from "@services/authService";
-import { getCourseGroupAndSubjectKey, type CourseId } from "@services/courseService";
+import { getCourseSlug, type CourseId } from "@services/courseService";
 import { setCourseProgress } from "@services/courseService";
 import { revalidatePath } from "next/cache";
 
@@ -31,8 +31,8 @@ export async function setProgressAction(
     revalidatePath("/", "layout");
 
     // Also revalidate the specific course pages
-    const { groupKey, subjectKey } = await getCourseGroupAndSubjectKey(courseId);
-    revalidatePath(`/${groupKey}/${subjectKey}`, "page");
+    const slug = await getCourseSlug(courseId);
+    revalidatePath(slug, "page");
 
     return { ok: true };
   } catch (error) {

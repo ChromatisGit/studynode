@@ -1,0 +1,159 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sn-space-md);
+}
+
+.empty {
+  font-size: 0.875rem;
+  color: var(--sn-text-muted);
+}
+
+/* Chapter */
+
+.chapter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sn-space-xs);
+}
+
+.chapterTitle {
+  font-size: 0.8125rem;
+  font-weight: var(--sn-font-semibold);
+  color: var(--sn-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+  padding-bottom: var(--sn-space-xs);
+  border-bottom: 1px solid var(--sn-border);
+}
+
+/* Worksheet list */
+
+.worksheetList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sn-space-xs);
+}
+
+/* Worksheet row */
+
+.worksheetRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: var(--sn-space-xs) var(--sn-space-sm);
+  align-items: center;
+  padding: var(--sn-space-xs) var(--sn-space-sm);
+  background: var(--sn-surface);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-xs);
+}
+
+.worksheetInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.worksheetLabel {
+  font-size: 0.875rem;
+  font-weight: var(--sn-font-medium);
+  color: var(--sn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.worksheetFilename {
+  font-size: 0.75rem;
+  color: var(--sn-text-muted);
+  font-family: var(--sn-font-mono);
+}
+
+.worksheetActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sn-space-xs);
+  flex-shrink: 0;
+}
+
+/* Toggle buttons */
+
+.toggleVisible,
+.toggleHidden {
+  font-size: 0.75rem;
+  font-weight: var(--sn-font-medium);
+  padding: 0.25rem var(--sn-space-xs);
+  border-radius: var(--sn-radius-xxs);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 5.5rem;
+  text-align: center;
+}
+
+.toggleVisible {
+  background: var(--sn-green-accent-soft-bg);
+  border-color: var(--sn-green-accent-soft-border);
+  color: var(--sn-green-accent-strong);
+}
+
+.toggleVisible:hover {
+  background: var(--sn-green-accent);
+  border-color: var(--sn-green-accent);
+  color: var(--sn-text-on-accent);
+}
+
+.toggleHidden {
+  background: var(--sn-surface-raised);
+  border-color: var(--sn-border);
+  color: var(--sn-text-muted);
+}
+
+.toggleHidden:hover {
+  background: var(--sn-surface-deep);
+  border-color: var(--sn-purple-accent);
+  color: var(--sn-text);
+}
+
+/* Monitor button */
+
+.monitorButton,
+.monitorButtonActive {
+  font-size: 0.75rem;
+  padding: 0.25rem var(--sn-space-xs);
+  border-radius: var(--sn-radius-xxs);
+  cursor: pointer;
+  border: 1px solid var(--sn-border);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.monitorButton {
+  background: var(--sn-surface-raised);
+  color: var(--sn-text);
+}
+
+.monitorButton:hover {
+  background: var(--sn-surface-deep);
+  border-color: var(--sn-purple-accent);
+}
+
+.monitorButtonActive {
+  background: var(--sn-purple-accent-soft-bg);
+  border-color: var(--sn-purple-accent-soft-border);
+  color: var(--sn-purple-accent-strong);
+}
+
+.monitorButtonActive:hover {
+  background: var(--sn-surface-deep);
+  border-color: var(--sn-border);
+  color: var(--sn-text);
+}
+
+/* Monitor panel spans full row width */
+
+.worksheetRow > :nth-child(3) {
+  grid-column: 1 / -1;
+}

@@ -39,6 +39,6 @@ export default async function WorksheetRoute({ params }: PageParams) {
 
   const userId = session?.user?.id;
 
-  return <WorksheetRenderer page={page} worksheetSlug={`${courseId}-${topicId}-${chapterId}-${worksheetId}`} chapterStatus={chapterStatus} userId={userId} />;
+  return <WorksheetRenderer page={page} worksheetSlug={`${courseId}-${topicId}-${chapterId}-${worksheetId}`} chapterStatus={chapterStatus} userId={userId} courseId={courseId} worksheetId={worksheetId} />;
 }
 

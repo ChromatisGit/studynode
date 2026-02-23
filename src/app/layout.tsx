@@ -21,6 +21,9 @@ const themeInitScript = `
 export const metadata: Metadata = {
   title: "StudyNode",
   description: "Lernplattform mit Next.js Komponenten",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

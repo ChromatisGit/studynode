@@ -1,5 +1,4 @@
-import { getSubject } from "@services/courseService";
-import { getCourseDTO, getProgressDTO } from "@services/courseService";
+import { getSubject, getCourseDTO, getProgressDTO, getAdminWorksheetList } from "@services/courseService";
 import { getSession } from "@services/authService";
 import { AdminCourseDetail } from "@features/admin/AdminCourseDetail";
 import { listSlideDecks } from "@services/slideService";
@@ -22,11 +21,14 @@ export default async function AdminCourseDetailPage({ params }: PageParams) {
     getSubject(courseId),
   ]);
 
-  const slideIds = await listSlideDecks({
-    subject: subject.id,
-    topicId: progress.currentTopicId,
-    chapterId: progress.currentChapterId,
-  });
+  const [slideIds, worksheets] = await Promise.all([
+    listSlideDecks({
+      subject: subject.id,
+      topicId: progress.currentTopicId,
+      chapterId: progress.currentChapterId,
+    }),
+    user ? getAdminWorksheetList(courseId, user) : Promise.resolve([]),
+  ]);
 
   return (
     <AdminCourseDetail
@@ -34,6 +36,7 @@ export default async function AdminCourseDetailPage({ params }: PageParams) {
       progress={progress}
       courseId={courseId}
       slideIds={slideIds}
+      worksheets={worksheets}
     />
   );
 }
