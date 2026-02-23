@@ -78,7 +78,7 @@ export function WorksheetStorageProvider({
 
     if (userId && worksheetId) {
       const syncManager = new SyncManager(
-        (responses) => syncWorksheetAction(worksheetId, responses),
+        async (responses) => { await syncWorksheetAction(worksheetId, responses); },
       );
       syncManagerRef.current = syncManager;
 
