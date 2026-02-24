@@ -1,5 +1,5 @@
 import { getSession, isAdmin } from "@services/authService";
-import { withAnonTx } from "@db/tx";
+import { getSlideSession } from "@services/slideService";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -22,23 +22,22 @@ export async function GET(
     return NextResponse.json({ error: "Invalid channel" }, { status: 400 });
   }
 
-  const [row] = await withAnonTx((tx) => tx`
-    SELECT state, updated_at, last_heartbeat
-    FROM slide_sessions
-    WHERE channel_name = ${channel}
-  `);
+  const row = await getSlideSession(channel);
 
   if (!row) return new Response(null, { status: 404 });
 
-  if (Date.now() - new Date(row.last_heartbeat as string).getTime() > STALE_MS) {
+  if (Date.now() - new Date(row.last_heartbeat).getTime() > STALE_MS) {
     return new Response(null, { status: 410 });
   }
 
-  const lastModified = new Date(row.updated_at as string).toUTCString();
+  const updatedAt = new Date(row.updated_at);
+  const lastModified = updatedAt.toUTCString();
   const ifModifiedSince = req.headers.get("If-Modified-Since");
+  // Compare at second precision: toUTCString() truncates ms, so a direct Date
+  // comparison would always fail and never return 304.
   if (
     ifModifiedSince &&
-    new Date(row.updated_at as string) <= new Date(ifModifiedSince)
+    Math.floor(updatedAt.getTime() / 1000) <= Math.floor(new Date(ifModifiedSince).getTime() / 1000)
   ) {
     return new Response(null, {
       status: 304,

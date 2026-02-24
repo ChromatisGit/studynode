@@ -20,27 +20,18 @@ type CourseLayoutProps = {
 };
 
 export default async function CourseLayout({ children, params }: CourseLayoutProps) {
-  const t0 = Date.now();
-
   const session = await getSession();
-  console.log(`[perf] getSession: ${Date.now() - t0}ms`);
-
   const user = session?.user ?? null;
   const isUserAdmin = user ? isAdmin(user) : false;
 
   const { group: groupKey, course: subjectKey } = await params;
 
-  const t1 = Date.now();
   const courseId = await getCourseId(groupKey, subjectKey);
-  console.log(`[perf] getCourseId: ${Date.now() - t1}ms`);
 
-  const t2 = Date.now();
   const [courseDTO, sidebarData] = await Promise.all([
     getCourseDTO(courseId),
     getSidebarDTO({ courseId, user }),
   ]);
-  console.log(`[perf] getCourseDTO+getSidebarDTO: ${Date.now() - t2}ms`);
-  console.log(`[perf] total CourseLayout: ${Date.now() - t0}ms`);
 
   const activeCourseLabel = courseDTO.label;
 
