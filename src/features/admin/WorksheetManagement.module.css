@@ -1,12 +1,14 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--sn-space-md);
+  gap: var(--sn-space-lg);
 }
 
 .empty {
-  font-size: 0.875rem;
+  margin: 0;
   color: var(--sn-text-muted);
+  font-style: italic;
+  font-size: var(--sn-font-size-0-95);
 }
 
 /* Chapter */
@@ -14,18 +16,7 @@
 .chapter {
   display: flex;
   flex-direction: column;
-  gap: var(--sn-space-xs);
-}
-
-.chapterTitle {
-  font-size: 0.8125rem;
-  font-weight: var(--sn-font-semibold);
-  color: var(--sn-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0;
-  padding-bottom: var(--sn-space-xs);
-  border-bottom: 1px solid var(--sn-border);
+  gap: var(--sn-space-sm);
 }
 
 /* Worksheet list */
@@ -39,35 +30,58 @@
 /* Worksheet row */
 
 .worksheetRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  gap: var(--sn-space-xs) var(--sn-space-sm);
-  align-items: center;
-  padding: var(--sn-space-xs) var(--sn-space-sm);
-  background: var(--sn-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sn-space-sm);
+  padding: var(--sn-space-sm) var(--sn-space-md);
+  background: var(--sn-surface-raised);
   border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-xs);
+  border-radius: var(--sn-radius-md);
+  transition: border-color 120ms ease;
+}
+
+.worksheetMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sn-space-md);
 }
 
 .worksheetInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.2rem;
   min-width: 0;
 }
 
 .worksheetLabel {
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--sn-font-size-0-95);
   font-weight: var(--sn-font-medium);
   color: var(--sn-text);
-  white-space: nowrap;
+  text-decoration: none;
   overflow: hidden;
-  text-overflow: ellipsis;
+  transition: color 120ms ease;
+}
+
+.worksheetLabel:hover {
+  color: var(--sn-purple-accent);
+}
+
+.worksheetLabelIcon {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.worksheetLabel:hover .worksheetLabelIcon {
+  opacity: 1;
 }
 
 .worksheetFilename {
-  font-size: 0.75rem;
+  font-size: var(--sn-font-size-0-8);
   color: var(--sn-text-muted);
   font-family: var(--sn-font-mono);
 }
@@ -83,13 +97,13 @@
 
 .toggleVisible,
 .toggleHidden {
-  font-size: 0.75rem;
+  font-size: var(--sn-font-size-0-85);
   font-weight: var(--sn-font-medium);
-  padding: 0.25rem var(--sn-space-xs);
-  border-radius: var(--sn-radius-xxs);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--sn-radius-sm);
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
   min-width: 5.5rem;
   text-align: center;
 }
@@ -107,13 +121,12 @@
 }
 
 .toggleHidden {
-  background: var(--sn-surface-raised);
+  background: var(--sn-surface);
   border-color: var(--sn-border);
   color: var(--sn-text-muted);
 }
 
 .toggleHidden:hover {
-  background: var(--sn-surface-deep);
   border-color: var(--sn-purple-accent);
   color: var(--sn-text);
 }
@@ -122,21 +135,21 @@
 
 .monitorButton,
 .monitorButtonActive {
-  font-size: 0.75rem;
-  padding: 0.25rem var(--sn-space-xs);
-  border-radius: var(--sn-radius-xxs);
+  font-size: var(--sn-font-size-0-85);
+  font-weight: var(--sn-font-medium);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--sn-radius-sm);
   cursor: pointer;
   border: 1px solid var(--sn-border);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .monitorButton {
-  background: var(--sn-surface-raised);
+  background: var(--sn-surface);
   color: var(--sn-text);
 }
 
 .monitorButton:hover {
-  background: var(--sn-surface-deep);
   border-color: var(--sn-purple-accent);
 }
 
@@ -147,13 +160,7 @@
 }
 
 .monitorButtonActive:hover {
-  background: var(--sn-surface-deep);
+  background: var(--sn-surface);
   border-color: var(--sn-border);
   color: var(--sn-text);
-}
-
-/* Monitor panel spans full row width */
-
-.worksheetRow > :nth-child(3) {
-  grid-column: 1 / -1;
 }

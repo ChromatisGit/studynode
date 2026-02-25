@@ -156,7 +156,14 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
       `INSERT INTO courses (course_id, group_id, subject_id, variant_id, slug, icon, color, worksheet_format, is_listed, is_public) VALUES (${esc(course.id)}, ${esc(course.group.id)}, ${esc(course.subject.id)}, ${esc(variantId)}, ${esc(course.slug)}, ${esc(course.icon)}, ${esc(course.color)}, 'web', ${bool(course.isListed)}, ${bool(course.isPublic)}) ON CONFLICT (course_id) DO UPDATE SET group_id = EXCLUDED.group_id, subject_id = EXCLUDED.subject_id, variant_id = EXCLUDED.variant_id, slug = EXCLUDED.slug, icon = EXCLUDED.icon, color = EXCLUDED.color, is_listed = EXCLUDED.is_listed, is_public = EXCLUDED.is_public, updated_at = NOW();`,
     );
 
+    // Save which worksheets are currently visible before wiping junction tables
+    lines.push(`DROP TABLE IF EXISTS _ws_visible;`);
+    lines.push(
+      `CREATE TEMP TABLE _ws_visible AS SELECT worksheet_id FROM course_worksheets WHERE course_id = ${esc(course.id)} AND is_hidden = false;`,
+    );
+
     // Delete and reinsert junction tables to handle structural changes
+    // (CASCADE on course_topics → course_chapters → course_worksheets)
     lines.push(`DELETE FROM course_topics WHERE course_id = ${esc(course.id)};`);
 
     for (const [topicIndex, topic] of course.topics.entries()) {
@@ -177,11 +184,17 @@ export async function generateCourseSQLScript(path: string, courses: Course[]): 
 
         for (const [worksheetIndex, worksheet] of chapter.worksheets.entries()) {
           lines.push(
-            `INSERT INTO course_worksheets (course_id, topic_id, chapter_id, worksheet_id, display_order, is_hidden) VALUES (${esc(course.id)}, ${esc(topic.topicId)}, ${esc(chapter.chapterId)}, ${esc(worksheet.worksheetId)}, ${worksheetIndex}, FALSE);`,
+            `INSERT INTO course_worksheets (course_id, topic_id, chapter_id, worksheet_id, display_order) VALUES (${esc(course.id)}, ${esc(topic.topicId)}, ${esc(chapter.chapterId)}, ${esc(worksheet.worksheetId)}, ${worksheetIndex});`,
           );
         }
       }
     }
+
+    // Restore is_hidden = false for worksheets that were previously visible
+    lines.push(
+      `UPDATE course_worksheets SET is_hidden = false WHERE course_id = ${esc(course.id)} AND worksheet_id IN (SELECT worksheet_id FROM _ws_visible);`,
+    );
+    lines.push(`DROP TABLE _ws_visible;`);
     lines.push("");
   }
 

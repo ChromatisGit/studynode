@@ -1,7 +1,7 @@
 "use server";
 
 import { getSession, isAdmin } from "@services/authService";
-import { upsertSlideSession, heartbeatSlideSession } from "@services/slideService";
+import { upsertSlideSession, heartbeatSlideSession, listSlideDecks } from "@services/slideService";
 import { z } from "zod/v4";
 
 const CHANNEL_RE = /^[a-z0-9-]{1,64}$/;
@@ -43,4 +43,18 @@ export async function heartbeatSlideSessionAction(channelName: string): Promise<
   if (!CHANNEL_RE.test(channelName)) return;
 
   await heartbeatSlideSession(channelName);
+}
+
+export async function listSlideDecksAction(
+  subject: string,
+  topicId: string,
+  chapterId: string,
+): Promise<{ ok: true; slideIds: string[] } | { ok: false; error: string }> {
+  const session = await getSession();
+  if (!session || !isAdmin(session.user)) {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const slideIds = await listSlideDecks({ subject, topicId, chapterId });
+  return { ok: true, slideIds };
 }

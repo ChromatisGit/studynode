@@ -9,9 +9,11 @@
     "manageAction": "Kurs öffnen"
   },
   "courseDetail": {
-    "slideSelection": {
-      "title": "Unterrichtsfolien",
-      "description": "Öffne die Folien des aktuellen Kapitels."
+    "chapterContent": {
+      "title": "Kapitelinhalt",
+      "description": "Folien und Arbeitsblätter des ausgewählten Kapitels.",
+      "slidesLabel": "Folien",
+      "worksheetsLabel": "Arbeitsblätter"
     },
     "progressControl": {
       "title": "Kapitelsteuerung",

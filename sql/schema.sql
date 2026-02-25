@@ -110,7 +110,7 @@ CREATE TABLE course_worksheets (
   chapter_id   TEXT NOT NULL REFERENCES chapters(chapter_id)    ON DELETE CASCADE,
   worksheet_id TEXT NOT NULL REFERENCES worksheets(worksheet_id) ON DELETE CASCADE,
   display_order INTEGER NOT NULL,
-  is_hidden    BOOLEAN NOT NULL DEFAULT false,
+  is_hidden    BOOLEAN NOT NULL DEFAULT true,
   PRIMARY KEY (course_id, topic_id, chapter_id, worksheet_id),
   FOREIGN KEY (course_id, topic_id, chapter_id)
     REFERENCES course_chapters(course_id, topic_id, chapter_id) ON DELETE CASCADE

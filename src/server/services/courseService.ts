@@ -135,6 +135,7 @@ export async function getWorksheetRefs({
     WHERE course_id  = ${courseId}
       AND topic_id   = ${topicId}
       AND chapter_id = ${chapterId}
+      AND NOT is_hidden
     ORDER BY display_order
   `;
   if (rows.length === 0) return null;

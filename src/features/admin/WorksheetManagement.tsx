@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useOptimistic, useTransition } from "react";
-import type { CourseId, ProgressTopicDTO } from "@schema/courseTypes";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
+import type { CourseId } from "@schema/courseTypes";
 import type { AdminWorksheetRef } from "@services/courseService";
 import { toggleWorksheetVisibilityAction } from "@actions/adminActions";
 import { WorksheetMonitor } from "./WorksheetMonitor";
@@ -12,18 +14,20 @@ const TEXT = ADMIN_TEXT.courseDetail.worksheetManagement;
 
 interface WorksheetManagementProps {
   courseId: CourseId;
+  courseSlug: string;
   worksheets: AdminWorksheetRef[];
-  topics: ProgressTopicDTO[];
+  chapterId?: string;
 }
 
 interface WorksheetRowProps {
   courseId: CourseId;
+  courseSlug: string;
   worksheet: AdminWorksheetRef;
   isMonitorOpen: boolean;
   onToggleMonitor: () => void;
 }
 
-function WorksheetRow({ courseId, worksheet, isMonitorOpen, onToggleMonitor }: WorksheetRowProps) {
+function WorksheetRow({ courseId, courseSlug, worksheet, isMonitorOpen, onToggleMonitor }: WorksheetRowProps) {
   const [optimisticHidden, setOptimisticHidden] = useOptimistic(worksheet.isHidden);
   const [, startTransition] = useTransition();
 
@@ -35,26 +39,33 @@ function WorksheetRow({ courseId, worksheet, isMonitorOpen, onToggleMonitor }: W
     });
   };
 
+  const worksheetHref = `${courseSlug}/${worksheet.topicId}/${worksheet.chapterId}/${worksheet.worksheetId}`;
+
   return (
     <div className={styles.worksheetRow}>
-      <div className={styles.worksheetInfo}>
-        <span className={styles.worksheetLabel}>{worksheet.label}</span>
-        <span className={styles.worksheetFilename}>{worksheet.sourceFilename}</span>
-      </div>
-      <div className={styles.worksheetActions}>
-        <button
-          className={optimisticHidden ? styles.toggleHidden : styles.toggleVisible}
-          onClick={handleToggle}
-          title={optimisticHidden ? TEXT.hidden : TEXT.visible}
-        >
-          {optimisticHidden ? TEXT.hidden : TEXT.visible}
-        </button>
-        <button
-          className={isMonitorOpen ? styles.monitorButtonActive : styles.monitorButton}
-          onClick={onToggleMonitor}
-        >
-          {isMonitorOpen ? TEXT.closeMonitor : TEXT.monitorButton}
-        </button>
+      <div className={styles.worksheetMain}>
+        <div className={styles.worksheetInfo}>
+          <Link href={worksheetHref} target="_blank" className={styles.worksheetLabel}>
+            {worksheet.label}
+            <ExternalLink size={12} className={styles.worksheetLabelIcon} />
+          </Link>
+          <span className={styles.worksheetFilename}>{worksheet.sourceFilename}</span>
+        </div>
+        <div className={styles.worksheetActions}>
+          <button
+            className={optimisticHidden ? styles.toggleHidden : styles.toggleVisible}
+            onClick={handleToggle}
+            title={optimisticHidden ? TEXT.hidden : TEXT.visible}
+          >
+            {optimisticHidden ? TEXT.hidden : TEXT.visible}
+          </button>
+          <button
+            className={isMonitorOpen ? styles.monitorButtonActive : styles.monitorButton}
+            onClick={onToggleMonitor}
+          >
+            {isMonitorOpen ? TEXT.closeMonitor : TEXT.monitorButton}
+          </button>
+        </div>
       </div>
       {isMonitorOpen && (
         <WorksheetMonitor courseId={courseId} worksheetId={worksheet.worksheetId} />
@@ -63,16 +74,8 @@ function WorksheetRow({ courseId, worksheet, isMonitorOpen, onToggleMonitor }: W
   );
 }
 
-export function WorksheetManagement({ courseId, worksheets, topics }: WorksheetManagementProps) {
+export function WorksheetManagement({ courseId, courseSlug, worksheets, chapterId }: WorksheetManagementProps) {
   const [openMonitorId, setOpenMonitorId] = useState<string | null>(null);
-
-  // Build a lookup: chapterId → chapter label (from ProgressDTO topics)
-  const chapterLabels: Record<string, string> = {};
-  for (const topic of topics) {
-    for (const chapter of topic.chapters) {
-      chapterLabels[chapter.chapterId] = chapter.label;
-    }
-  }
 
   // Group worksheets by chapterId, preserving order
   const chapterOrder: string[] = [];
@@ -85,24 +88,27 @@ export function WorksheetManagement({ courseId, worksheets, topics }: WorksheetM
     byChapter[ws.chapterId].push(ws);
   }
 
-  if (worksheets.length === 0) {
+  // When a chapterId filter is provided, show only that chapter
+  const visibleChapterOrder = chapterId
+    ? chapterOrder.filter((id) => id === chapterId)
+    : chapterOrder;
+
+  if (visibleChapterOrder.length === 0) {
     return <p className={styles.empty}>{TEXT.noData}</p>;
   }
 
   return (
     <div className={styles.container}>
-      {chapterOrder.map((chapterId) => (
-        <div key={chapterId} className={styles.chapter}>
-          <h3 className={styles.chapterTitle}>
-            {chapterLabels[chapterId] ?? chapterId}
-          </h3>
+      {visibleChapterOrder.map((id) => (
+        <div key={id} className={styles.chapter}>
           <div className={styles.worksheetList}>
-            {byChapter[chapterId].map((ws) => {
+            {byChapter[id].map((ws) => {
               const monitorKey = `${ws.chapterId}:${ws.worksheetId}`;
               return (
                 <WorksheetRow
                   key={ws.worksheetId}
                   courseId={courseId}
+                  courseSlug={courseSlug}
                   worksheet={ws}
                   isMonitorOpen={openMonitorId === monitorKey}
                   onToggleMonitor={() =>
