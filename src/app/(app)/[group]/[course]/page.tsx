@@ -29,6 +29,7 @@ export default async function CourseRoute({ params }: PageParams) {
   const model = {
     title: course.label,
     label: course.label,
+    courseId,
     current: currentTopic?.label ?? null,
     roadmap: progress.topics,
   };

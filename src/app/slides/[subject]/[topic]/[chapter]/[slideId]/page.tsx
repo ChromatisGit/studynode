@@ -1,4 +1,5 @@
 import { getSlideDeck } from "@services/slideService";
+import { getCourseIdBySubjectId } from "@services/courseService";
 import { SlidePresenter } from "@features/slides/SlidePresenter";
 
 type PageParams = {
@@ -18,12 +19,10 @@ export default async function PresenterPage({ params }: PageParams) {
     slideId,
   } = await params;
 
-  const deck = await getSlideDeck({
-    subject,
-    topicId,
-    chapterId,
-    slideId,
-  });
+  const [deck, courseId] = await Promise.all([
+    getSlideDeck({ subject, topicId, chapterId, slideId }),
+    getCourseIdBySubjectId(subject),
+  ]);
 
   const channelName = `studynode-slides-${slideId}`;
   const projectorPath = `/slides/${subject}/${topicId}/${chapterId}/${slideId}/projector`;
@@ -33,6 +32,7 @@ export default async function PresenterPage({ params }: PageParams) {
       deck={deck}
       channelName={channelName}
       projectorPath={projectorPath}
+      courseId={courseId ?? ""}
     />
   );
 }

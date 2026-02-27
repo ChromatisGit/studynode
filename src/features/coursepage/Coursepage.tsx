@@ -3,6 +3,7 @@ import { PageHeader } from "@components/PageHeader/PageHeader";
 import type { ProgressTopicDTO, ProgressChapterDTO } from "@schema/courseTypes";
 import { Roadmap } from "@components/Roadmap";
 import { WorksheetCards } from "@components/WorksheetCards";
+import { QuizBanner } from "@features/quiz/QuizBanner";
 import styles from "./CoursepageLayout.module.css";
 import COURSEPAGE_TEXT from "@coursepage/coursepage.de.json";
 
@@ -17,6 +18,7 @@ function findCurrentChapter(roadmap: ProgressTopicDTO[]): ProgressChapterDTO | u
 type CoursepageModel = {
   title: string;
   label: string;
+  courseId: string;
   roadmap: ProgressTopicDTO[];
 };
 
@@ -25,7 +27,7 @@ interface CoursepagePageProps {
 }
 
 export function CoursepagePage({ model }: CoursepagePageProps) {
-  const { title, label, roadmap } = model;
+  const { title, label, courseId, roadmap } = model;
 
   const currentChapter = findCurrentChapter(roadmap);
   const pageTitle = `${title} - ${COURSEPAGE_TEXT.intro.titleSuffix}`;
@@ -36,6 +38,8 @@ export function CoursepagePage({ model }: CoursepagePageProps) {
       <header className={styles.header}>
         <PageHeader title={pageTitle} />
       </header>
+
+      <QuizBanner courseId={courseId} />
 
       <p className={styles.pageWelcome}>{welcomeText}</p>
       <p className={styles.pageDescription}>{COURSEPAGE_TEXT.intro.description}</p>

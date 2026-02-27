@@ -4,6 +4,8 @@
   z-index: 1000;
   background: var(--sn-bg);
   overflow: hidden;
+  /* Needed so quiz overlay can use position: absolute */
+  isolation: isolate;
   font-size: 1.5rem;
 
   /* Scale up font-size tokens so code blocks and macros also get bigger */

@@ -90,6 +90,21 @@ export async function getCourseId(groupKey: string, subjectKey: string): Promise
   return rows[0].id;
 }
 
+/**
+ * Look up courseId by subject_id (the directory key used in slides).
+ * Returns the first match — subject_ids are typically unique per deployment.
+ */
+export async function getCourseIdBySubjectId(subjectId: string): Promise<CourseId | null> {
+  const rows = await anonSQL<{ id: string }[]>`
+    SELECT c.course_id AS id
+    FROM courses c
+    JOIN subjects s ON s.subject_id = c.subject_id
+    WHERE s.subject_id = ${subjectId}
+    LIMIT 1
+  `;
+  return (rows[0]?.id ?? null) as CourseId | null;
+}
+
 export async function coursePublic(courseId: CourseId): Promise<boolean> {
   const row = await fetchCourseRow(courseId);
   return row.is_public;
