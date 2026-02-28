@@ -10,27 +10,6 @@
   padding: 5%;
 }
 
-/* ── Waiting phase ─────────────────────────────────────────────────── */
-
-.waitingCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75em;
-  text-align: center;
-}
-
-.waitingLabel {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.01em;
-}
-
-.waitingMeta {
-  font-size: clamp(1rem, 2vw, 1.75rem);
-  color: rgba(255, 255, 255, 0.65);
-}
 
 /* ── Active phase ──────────────────────────────────────────────────── */
 
@@ -128,7 +107,7 @@
 }
 
 .barRowCorrect .barLabel {
-  color: #4ade80;
+  color: var(--sn-green-accent);
 }
 
 .barRowNeutral .barLabel {
@@ -147,7 +126,7 @@
 }
 
 .checkIcon {
-  color: #4ade80;
+  color: var(--sn-green-accent);
 }
 
 .optionLetter {
@@ -175,12 +154,12 @@
 }
 
 .barFillCorrect {
-  background: rgba(74, 222, 128, 0.35);
+  background: color-mix(in srgb, var(--sn-green-accent) 35%, transparent);
 }
 
 /* Colorblind-safe: correct rows also get a left border accent */
 .barRowCorrect .barTrack {
-  border-left: 3px solid #4ade80;
+  border-left: 3px solid var(--sn-green-accent);
 }
 
 .barOptionText {

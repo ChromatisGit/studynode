@@ -14,12 +14,13 @@ export function QuizBanner({ courseId }: Props) {
   const [quizState, setQuizState] = useState<QuizStateDTO | null>(null);
   const [sessionOpen, setSessionOpen] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [lastModified, setLastModified] = useState<string | null>(null);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   // Poll for active quiz
   useEffect(() => {
     let active = true;
     let pollDelay = 2000;
+    let lastModified: string | null = null;
 
     const poll = async () => {
       if (!active) return;
@@ -37,7 +38,7 @@ export function QuizBanner({ courseId }: Props) {
           pollDelay = 3000;
         } else if (res.ok) {
           const lm = res.headers.get("Last-Modified");
-          if (lm) setLastModified(lm);
+          if (lm) lastModified = lm;
           const data: QuizStateDTO = await res.json();
           setQuizState(data);
           pollDelay = 2000;
@@ -51,21 +52,22 @@ export function QuizBanner({ courseId }: Props) {
 
     poll();
     return () => { active = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
   const handleJoin = useCallback(async () => {
     if (!quizState || joining) return;
     setJoining(true);
-    await joinQuizAction(quizState.sessionId);
+    setJoinError(null);
+    const result = await joinQuizAction(quizState.sessionId);
     setJoining(false);
+    if (!result.ok) {
+      setJoinError(result.error);
+      return;
+    }
     setSessionOpen(true);
   }, [quizState, joining]);
 
-  // Auto-open if already in a session that progressed
-  useEffect(() => {
-    if (quizState && sessionOpen) return; // already open
-  }, [quizState, sessionOpen]);
+  const handleClose = useCallback(() => setSessionOpen(false), []);
 
   if (!quizState) return null;
 
@@ -81,6 +83,7 @@ export function QuizBanner({ courseId }: Props) {
                 : `Frage ${quizState.currentIndex + 1} von ${quizState.totalQuestions}`}
             </span>
           </div>
+          {joinError && <span className={styles.joinError}>{joinError}</span>}
           <button
             type="button"
             className={styles.joinBtn}
@@ -96,7 +99,7 @@ export function QuizBanner({ courseId }: Props) {
         <QuizSession
           initialState={quizState}
           courseId={courseId}
-          onClose={() => setSessionOpen(false)}
+          onClose={handleClose}
         />
       )}
     </>

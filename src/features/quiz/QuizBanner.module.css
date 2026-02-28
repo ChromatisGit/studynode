@@ -31,7 +31,7 @@
   letter-spacing: 0.07em;
   padding: 2px 8px;
   background: var(--sn-accent);
-  color: #fff;
+  color: var(--sn-text-on-accent);
   border-radius: var(--sn-radius-xs);
 }
 
@@ -51,7 +51,7 @@
   border-radius: var(--sn-radius-sm);
   font-size: 0.875rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--sn-text-on-accent);
   cursor: pointer;
   transition: filter 0.15s;
   min-height: 36px;
@@ -64,4 +64,10 @@
 .joinBtn:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.joinError {
+  font-size: 0.8125rem;
+  color: var(--sn-red-accent);
+  flex-shrink: 0;
 }

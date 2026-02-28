@@ -25,7 +25,7 @@
 
 .panelMeta {
   font-size: 0.8125rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
 }
 
 /* ── Participation ────────────────────────────────── */
@@ -38,7 +38,7 @@
 
 .participationCount {
   font-size: 0.875rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
 }
 
 .participationBar {
@@ -71,7 +71,7 @@
   border-radius: var(--sn-radius-sm);
   font-size: 0.875rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--sn-text-on-accent);
   cursor: pointer;
   transition: filter 0.15s;
   min-height: 38px;
@@ -93,7 +93,7 @@
   border: 1px solid var(--sn-border);
   border-radius: var(--sn-radius-sm);
   font-size: 0.8125rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
   cursor: pointer;
   transition: background 0.15s;
   min-height: 34px;
@@ -112,13 +112,13 @@
 
 .error {
   font-size: 0.8125rem;
-  color: var(--sn-error, #e53e3e);
+  color: var(--sn-red-accent);
   margin: 0;
 }
 
 .closedNote {
   font-size: 0.875rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
   text-align: center;
   margin: 0;
   padding: var(--sn-space-xs) 0;

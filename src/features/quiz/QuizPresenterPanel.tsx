@@ -73,7 +73,7 @@ export function QuizPresenterPanel({ quizMacros, channelName, courseId }: Props)
       try {
         const headers: Record<string, string> = {};
         if (lastModified) headers["If-Modified-Since"] = lastModified;
-        const res = await fetch(`/api/quiz/${sessionId}/results`, { headers });
+        const res = await fetch(`/api/quiz/channel/${encodeURIComponent(channelName)}/results`, { headers });
 
         if (res.status === 304) {
           // unchanged
@@ -92,7 +92,7 @@ export function QuizPresenterPanel({ quizMacros, channelName, courseId }: Props)
 
     poll();
     return () => { active = false; };
-  }, [sessionId]);
+  }, [sessionId, channelName]);
 
   // ---------------------------------------------------------------------------
   // Actions

@@ -4,6 +4,8 @@
     "welcomeTitle": "Willkommen bei StudyNode",
     "joinSubtitle": "Gib deine Zugangsdaten ein, um diesem Kurs beizutreten.",
     "loginSubtitle": "Gib deine Zugangsdaten ein, um fortzufahren.",
+    "tabLogin": "Anmelden",
+    "tabRegister": "Registrieren",
     "accessCodeLabel": "Zugangscode",
     "accessCodeOptional": "(Optional)",
     "accessCodePlaceholderJoin": "Zugangscode eingeben, falls vorhanden",

@@ -1,6 +1,5 @@
 import AccessSectionClient from "@features/access/AccessSection";
-import { getCourseId } from "@services/courseService";
-import { getCourseDTO, isRegistrationOpen } from "@services/courseService";
+import { getCourseId, getCourseDTO, isRegistrationOpen } from "@services/courseService";
 import { getSession } from "@services/authService";
 import { getUserAccessCodeById } from "@services/userService";
 
@@ -8,6 +7,7 @@ type AccessPageProps = {
   searchParams?: Promise<{
     groupKey?: string | string[];
     subjectKey?: string | string[];
+    from?: string | string[];
   }>;
 };
 
@@ -16,13 +16,20 @@ function getSearchParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
+/** Allow only internal paths to prevent open-redirect attacks. */
+function sanitizeFrom(raw: string | null): string | null {
+  if (!raw) return null;
+  if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+  return raw;
+}
+
 export default async function AccessPage({ searchParams }: AccessPageProps) {
   const resolvedSearchParams = await searchParams;
   const groupKey = getSearchParam(resolvedSearchParams?.groupKey);
   const subjectKey = getSearchParam(resolvedSearchParams?.subjectKey);
+  const from = sanitizeFrom(getSearchParam(resolvedSearchParams?.from));
   const isCourseJoin = Boolean(groupKey && subjectKey);
 
-  // Get current user's access code if logged in
   const session = await getSession();
   const currentUserAccessCode = session?.user
     ? await getUserAccessCodeById(session.user.id)
@@ -51,7 +58,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
       courseName={courseName}
       isRegistrationOpen={registrationOpen}
       currentUserAccessCode={currentUserAccessCode}
+      from={from}
     />
   );
 }
-

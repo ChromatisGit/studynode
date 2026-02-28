@@ -92,13 +92,13 @@
   letter-spacing: 0.07em;
   padding: 2px 8px;
   background: var(--sn-accent);
-  color: #fff;
+  color: var(--sn-text-on-accent);
   border-radius: var(--sn-radius-xs);
 }
 
 .progress {
   font-size: 0.875rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
 }
 
 .closeBtn {
@@ -111,7 +111,7 @@
   background: none;
   border-radius: var(--sn-radius-xs);
   font-size: 0.875rem;
-  color: var(--sn-text-secondary);
+  color: var(--sn-text-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }

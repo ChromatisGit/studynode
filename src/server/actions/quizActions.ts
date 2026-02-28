@@ -39,8 +39,16 @@ export async function startQuizAction(
     return { ok: false, error: "Invalid question count" };
   }
 
-  const sessionId = await startQuizSession(channelName, courseId, questions, timerSeconds, session.user);
-  return { ok: true, data: { sessionId } };
+  try {
+    const sessionId = await startQuizSession(channelName, courseId, questions, timerSeconds, session.user);
+    return { ok: true, data: { sessionId } };
+  } catch (err) {
+    // Unique constraint: only one active session per course at a time
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
+      return { ok: false, error: "Für diesen Kurs läuft bereits ein Quiz." };
+    }
+    throw err;
+  }
 }
 
 export async function launchQuizAction(sessionId: string): Promise<Result<void>> {

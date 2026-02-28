@@ -12,10 +12,10 @@ type Props = {
 
 export function QuizProjectorOverlay({ channelName }: Props) {
   const [results, setResults] = useState<QuizResultsDTO | null>(null);
-  const [lastModified, setLastModified] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
+    let lastModified: string | null = null;
 
     const poll = async () => {
       if (!active) return;
@@ -33,7 +33,7 @@ export function QuizProjectorOverlay({ channelName }: Props) {
           setResults(null);
         } else if (res.ok) {
           const lm = res.headers.get("Last-Modified");
-          if (lm) setLastModified(lm);
+          if (lm) lastModified = lm;
           setResults(await res.json());
         }
       } catch { /* ignore */ }
@@ -44,7 +44,6 @@ export function QuizProjectorOverlay({ channelName }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     poll();
     return () => { active = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelName]);
 
   if (!results) return null;
@@ -52,18 +51,9 @@ export function QuizProjectorOverlay({ channelName }: Props) {
   const { phase, question, options, correctIndices, why, participants, answeredCount, optionCounts } = results;
   const maxCount = Math.max(1, ...optionCounts);
 
-  // ── Waiting phase ──────────────────────────────────────────────────────────
+  // ── Waiting phase — keep projector blank until question goes live ──────────
   if (phase === "waiting") {
-    return (
-      <div className={styles.overlay}>
-        <div className={styles.waitingCard}>
-          <div className={styles.waitingLabel}>Quiz startet gleich</div>
-          <div className={styles.waitingMeta}>
-            {participants} {participants === 1 ? "Teilnehmer" : "Teilnehmer"} bereit
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // ── Active phase ───────────────────────────────────────────────────────────

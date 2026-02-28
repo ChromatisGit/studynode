@@ -1,9 +1,11 @@
 import { getSlideDeck } from "@services/slideService";
+import { getSubject } from "@services/courseService";
 import { SlideProjector } from "@features/slides/SlideProjector";
+import type { CourseId } from "@schema/courseTypes";
 
 type PageParams = {
   params: Promise<{
-    subject: string;
+    courseId: string;
     topic: string;
     chapter: string;
     slideId: string;
@@ -12,11 +14,13 @@ type PageParams = {
 
 export default async function ProjectorPage({ params }: PageParams) {
   const {
-    subject,
+    courseId,
     topic: topicId,
     chapter: chapterId,
     slideId,
   } = await params;
+
+  const { id: subject } = await getSubject(courseId as CourseId);
 
   const deck = await getSlideDeck({
     subject,

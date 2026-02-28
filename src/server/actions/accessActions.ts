@@ -14,6 +14,8 @@ export type AccessContext = {
   courseId: string | null;
   courseRoute: string | null;
   isRegistrationOpen: boolean;
+  /** Internal path to redirect to after login/registration (already sanitised by the server page). */
+  from: string | null;
 };
 
 export type ContinueAccessInput = {
@@ -105,7 +107,7 @@ export async function continueAccessAction(
     const user = await getAuthenticatedUser(accessCode, pin, ip);
     if (!user) return invalidCreds();
 
-    return success(user, "/");
+    return success(user, ctx.from ?? "/");
   }
 
   // from here: course join mode
@@ -116,7 +118,7 @@ export async function continueAccessAction(
   const currentUser = session?.user ?? null;
 
   if (currentUser && hasCourseAccess(currentUser, groupKey, courseId)) {
-    return success(currentUser, courseRoute);
+    return success(currentUser, ctx.from ?? courseRoute);
   }
 
   // -------- course join with auth (code + pin) --------
@@ -133,7 +135,7 @@ export async function continueAccessAction(
     const updated = await ensureCourseAccess(user, groupKey, courseId, ip);
     if (!updated) return fail("Failed to enroll in course.", "/");
 
-    return success(updated, courseRoute);
+    return success(updated, ctx.from ?? courseRoute);
   }
 
   // -------- course join with pin only (create user) --------
@@ -144,7 +146,7 @@ export async function continueAccessAction(
   const updated = await ensureCourseAccess(newUser, groupKey, courseId, ip);
   if (!updated) return fail("Failed to enroll in course.", "/");
 
-  return success(updated, courseRoute, newAccessCode);
+  return success(updated, ctx.from ?? courseRoute, newAccessCode);
 }
 
 export async function signOutAction(): Promise<void> {

@@ -65,11 +65,7 @@ export function Navbar({
 
   const showHamburger = isMobile || routeContext.hasTopicContext;
 
-  // Admin panel link logic:
-  // - In admin course view: go back to the course page
-  // - In admin overview: stay at /admin
-  // - In slide view (topic context): go to general /admin
-  // - In regular course view: go to course-specific admin
+
   let adminPanelLink: string;
   if (isAdminView) {
     if (adminCourseId) {
@@ -78,8 +74,6 @@ export function Navbar({
     } else {
       adminPanelLink = "/admin";
     }
-  } else if (routeContext.hasTopicContext) {
-    adminPanelLink = "/admin";
   } else {
     adminPanelLink = activeCourseId ? `/admin/${activeCourseId}` : "/admin";
   }

@@ -92,7 +92,8 @@ export async function getCourseId(groupKey: string, subjectKey: string): Promise
 
 /**
  * Look up courseId by subject_id (the directory key used in slides).
- * Returns the first match — subject_ids are typically unique per deployment.
+ * Prefers non-public (enrolled) courses over public demo courses so that
+ * quiz sessions are associated with the class students are actually enrolled in.
  */
 export async function getCourseIdBySubjectId(subjectId: string): Promise<CourseId | null> {
   const rows = await anonSQL<{ id: string }[]>`
@@ -100,6 +101,7 @@ export async function getCourseIdBySubjectId(subjectId: string): Promise<CourseI
     FROM courses c
     JOIN subjects s ON s.subject_id = c.subject_id
     WHERE s.subject_id = ${subjectId}
+    ORDER BY c.is_public ASC
     LIMIT 1
   `;
   return (rows[0]?.id ?? null) as CourseId | null;
