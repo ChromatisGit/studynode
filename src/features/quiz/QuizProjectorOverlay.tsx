@@ -41,7 +41,6 @@ export function QuizProjectorOverlay({ channelName }: Props) {
       if (active) setTimeout(poll, 1000);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     poll();
     return () => { active = false; };
   }, [channelName]);

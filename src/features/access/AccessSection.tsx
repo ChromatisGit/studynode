@@ -15,6 +15,7 @@ import { AccessCodeModal } from "./AccessCodeModal";
 import ACCESS_TEXT from "./access.de.json";
 
 type AccessSectionProps = {
+  showRegister: boolean;
   isCourseJoin: boolean;
   groupKey: string | null;
   courseId: string | null;
@@ -28,6 +29,7 @@ type AccessSectionProps = {
 type Tab = "login" | "register";
 
 export default function AccessSection({
+  showRegister,
   isCourseJoin,
   groupKey,
   courseId,
@@ -37,7 +39,8 @@ export default function AccessSection({
   currentUserAccessCode,
   from,
 }: AccessSectionProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("login");
+  // Default to "register" tab when joining a course (new students land here first)
+  const [activeTab, setActiveTab] = useState<Tab>(showRegister ? "register" : "login");
   const [accessCode, setAccessCode] = useState(currentUserAccessCode ?? "");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -51,15 +54,12 @@ export default function AccessSection({
     setActiveTab(tab);
     setError("");
     setPin("");
-    // Keep access code state when switching tabs
   };
 
   const handleContinue = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
-    // For the register tab, don't pass an access code so the server uses
-    // course-pin mode (new user creation). For login, always pass it.
     const submittedAccessCode = activeTab === "register" ? "" : accessCode;
 
     startTransition(async () => {
@@ -118,28 +118,30 @@ export default function AccessSection({
           <p className={styles.subtitle}>{subtitle}</p>
         </header>
 
-        <div className={styles.tabs} role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "login"}
-            className={`${styles.tab} ${activeTab === "login" ? styles.tabActive : ""}`}
-            onClick={() => handleTabChange("login")}
-            disabled={isPending}
-          >
-            {ACCESS_TEXT.section.tabLogin}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "register"}
-            className={`${styles.tab} ${activeTab === "register" ? styles.tabActive : ""}`}
-            onClick={() => handleTabChange("register")}
-            disabled={isPending}
-          >
-            {ACCESS_TEXT.section.tabRegister}
-          </button>
-        </div>
+        {showRegister && (
+          <div className={styles.tabs} role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "register"}
+              className={`${styles.tab} ${activeTab === "register" ? styles.tabActive : ""}`}
+              onClick={() => handleTabChange("register")}
+              disabled={isPending}
+            >
+              {ACCESS_TEXT.section.tabRegister}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "login"}
+              className={`${styles.tab} ${activeTab === "login" ? styles.tabActive : ""}`}
+              onClick={() => handleTabChange("login")}
+              disabled={isPending}
+            >
+              {ACCESS_TEXT.section.tabLogin}
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleContinue}>
           <Stack gap="md">

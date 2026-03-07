@@ -26,7 +26,7 @@ type RouteContextValue = {
 
 const RouteContext = createContext<RouteContextValue | undefined>(undefined);
 
-const RESERVED_ROOTS = new Set(["access", "worksheet"]);
+const RESERVED_ROOTS = new Set(["access", "worksheet", "practice", "profile"]);
 const RESERVED_COURSE_SEGMENTS = new Set(["practice"]);
 
 function buildCourseId(groupKey: string, subjectKey: string): CourseId {

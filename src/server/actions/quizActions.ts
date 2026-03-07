@@ -14,8 +14,9 @@ import {
   getQuizResults,
   getQuizSummary,
   listQuizSessions,
+  getActiveQuizForUser,
 } from "@services/quizService";
-import type { StoredQuestion, QuizResultsDTO, QuizSummaryDTO } from "@schema/quizTypes";
+import type { StoredQuestion, QuizResultsDTO, QuizSummaryDTO, QuizStateDTO } from "@schema/quizTypes";
 import type { QuizSessionMeta } from "@services/quizService";
 
 type OkResult<T> = { ok: true; data: T };
@@ -164,4 +165,15 @@ export async function listQuizSessionsAction(
 
   const sessions = await listQuizSessions(courseId, session.user);
   return { ok: true, data: sessions };
+}
+
+// ==========================================================================
+// Student: poll for active quiz (global — across all enrolled courses)
+// ==========================================================================
+
+export async function pollActiveQuizAction(): Promise<Result<QuizStateDTO | null>> {
+  const session = await getSession();
+  assertLoggedIn(session);
+  const state = await getActiveQuizForUser(session.user);
+  return { ok: true, data: state };
 }

@@ -266,6 +266,25 @@ export async function getActiveQuizForCourse(
   return row ? buildStateDTO(row) : null;
 }
 
+/**
+ * Returns the active quiz for any course the user is enrolled in.
+ * Since only one quiz runs at a time, this is effectively the global active quiz.
+ */
+export async function getActiveQuizForUser(user: UserDTO): Promise<QuizStateDTO | null> {
+  if (!user.courseIds.length) return null;
+
+  const [row] = await userSQL(user)<QuizSessionRow[]>`
+    SELECT session_id, channel_name, course_id, phase, questions,
+           current_index, timer_seconds, timer_started_at, updated_at, created_at
+    FROM quiz_sessions
+    WHERE course_id = ANY(${user.courseIds as string[]})
+      AND phase != 'closed'
+    LIMIT 1
+  `;
+
+  return row ? buildStateDTO(row) : null;
+}
+
 // ==========================================================================
 // Admin: live results polling
 // ==========================================================================

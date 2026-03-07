@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { Layout } from "@ui/layout/Layout";
 import { CourseProviders } from "./CourseProviders";
 import { getSession, isAdmin, canUserAccessPage } from "@services/authService";
-import { getCourseId, getCourseDTO, getSidebarDTO, coursePublic } from "@services/courseService";
+import { getCourseId, getSidebarDTO, coursePublic } from "@services/courseService";
 import { signOutAction } from "@actions/accessActions";
 
 type CourseLayoutProps = {
@@ -30,33 +30,27 @@ export default async function CourseLayout({ children, params }: CourseLayoutPro
   const pathname = (await headers()).get("x-pathname") ?? `/${groupKey}/${subjectKey}`;
   const from = encodeURIComponent(pathname);
 
-  // Check authentication before touching the DB for course existence.
-  // This means unauthenticated users are redirected to login regardless of
-  // whether the course path actually exists — preventing path enumeration.
-  if (!session) {
-    redirect(`/access?from=${from}`);
-  }
-
-  // User is logged in — now it's safe to 404 on missing courses.
   const courseId = await getCourseId(groupKey, subjectKey);
 
-  const [courseDTO, sidebarData, isPublic] = await Promise.all([
-    getCourseDTO(courseId),
+  const [sidebarData, isPublic] = await Promise.all([
     getSidebarDTO({ courseId, user }),
     coursePublic(courseId),
   ]);
 
-  if (!isPublic && !canUserAccessPage(user, groupKey, isPublic, courseId)) {
-    // Logged in but wrong group / not enrolled — send back to login so they
-    // can switch accounts (or an admin can share the course-join link).
+  if (!session) {
+    // Allow unauthenticated access only for public courses
+    if (!isPublic) {
+      redirect(`/access?from=${from}`);
+    }
+  } else if (!isPublic && !canUserAccessPage(user, groupKey, isPublic, courseId)) {
+    // Logged in but wrong group / not enrolled
     redirect(`/access?from=${from}`);
   }
 
   return (
     <Layout
       sidebarData={sidebarData}
-      isAdmin={isAdmin(user)}
-      activeCourseLabel={courseDTO.label}
+      isAdmin={user ? isAdmin(user) : false}
       signOutAction={signOutAction}
     >
       <CourseProviders>{children}</CourseProviders>

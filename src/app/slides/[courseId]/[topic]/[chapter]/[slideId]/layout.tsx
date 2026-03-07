@@ -17,9 +17,7 @@ export default async function SlideLayout({ children }: { children: ReactNode })
     <Layout
       sidebarData={sidebarData}
       isAdmin={true}
-      activeCourseLabel={null}
       signOutAction={signOutAction}
-      fullWidth
     >
       <TsWorkerProvider>{children}</TsWorkerProvider>
     </Layout>

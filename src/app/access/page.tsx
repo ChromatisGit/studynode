@@ -1,12 +1,16 @@
+import { redirect } from "next/navigation";
 import AccessSectionClient from "@features/access/AccessSection";
-import { getCourseId, getCourseDTO, isRegistrationOpen } from "@services/courseService";
+import { CoursePicker } from "@features/access/CoursePicker";
+import { getCourseId, getCourseDTO, isRegistrationOpen, getCoursesByAccess } from "@services/courseService";
 import { getSession } from "@services/authService";
-import { getUserAccessCodeById } from "@services/userService";
+import { joinCourseAction } from "@actions/accessActions";
+
 
 type AccessPageProps = {
   searchParams?: Promise<{
     groupKey?: string | string[];
     subjectKey?: string | string[];
+    join?: string | string[];
     from?: string | string[];
   }>;
 };
@@ -28,12 +32,40 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
   const groupKey = getSearchParam(resolvedSearchParams?.groupKey);
   const subjectKey = getSearchParam(resolvedSearchParams?.subjectKey);
   const from = sanitizeFrom(getSearchParam(resolvedSearchParams?.from));
+  const joinParam = getSearchParam(resolvedSearchParams?.join);
+
   const isCourseJoin = Boolean(groupKey && subjectKey);
+  const isCoursePicker = joinParam === "1";
 
   const session = await getSession();
-  const currentUserAccessCode = session?.user
-    ? await getUserAccessCodeById(session.user.id)
-    : null;
+
+  // Authenticated users
+  if (session?.user) {
+    // Auto-enroll for direct course join links — joinCourseAction redirects internally
+    if (isCourseJoin && groupKey && subjectKey) {
+      const resolvedCourseId = await getCourseId(groupKey, subjectKey);
+      await joinCourseAction(resolvedCourseId);
+    }
+    if (isCoursePicker) {
+      const accessGroups = await getCoursesByAccess(session.user);
+      const allNonPublicIds = [...accessGroups.accessible, ...accessGroups.restricted].filter(
+        (id) => !session.user.courseIds.includes(id)
+      );
+      const courses = await Promise.all(allNonPublicIds.map((id) => getCourseDTO(id)));
+      return <CoursePicker courses={courses} />;
+    }
+    redirect("/home");
+  }
+
+  // Course picker for unauthenticated users
+  if (isCoursePicker) {
+    const accessGroups = await getCoursesByAccess(null);
+    const courses = await Promise.all(accessGroups.restricted.map((id) => getCourseDTO(id)));
+    return <CoursePicker courses={courses} />;
+  }
+
+  // Course join form (specific course in URL)
+  const currentUserAccessCode = null; // user is not authenticated at this point
 
   let courseId: string | null = null;
   let courseName = "this course";
@@ -51,6 +83,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
 
   return (
     <AccessSectionClient
+      showRegister={isCourseJoin}
       isCourseJoin={isCourseJoin}
       groupKey={groupKey}
       courseId={courseId}

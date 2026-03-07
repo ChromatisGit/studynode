@@ -64,8 +64,7 @@ async function fetchCourseRow(courseId: CourseId): Promise<CourseRow> {
 // Course metadata
 // ==========================================================================
 
-export async function getCourseDTO(courseId: string): Promise<CourseDTO> {
-  const row = await fetchCourseRow(courseId);
+function rowToCourseDTO(row: CourseRow): CourseDTO {
   return {
     id: row.id,
     label: row.label,
@@ -77,6 +76,19 @@ export async function getCourseDTO(courseId: string): Promise<CourseDTO> {
     color: row.color,
     tags: row.tags,
   };
+}
+
+export async function getCourseDTO(courseId: string): Promise<CourseDTO> {
+  const row = await fetchCourseRow(courseId);
+  return rowToCourseDTO(row);
+}
+
+export async function getCourseDTOs(courseIds: string[]): Promise<CourseDTO[]> {
+  if (courseIds.length === 0) return [];
+  const rows = await anonSQL<CourseRow[]>`
+    SELECT * FROM v_course_dto WHERE id = ANY(${courseIds as unknown as never})
+  `;
+  return rows.map(rowToCourseDTO);
 }
 
 export async function getCourseId(groupKey: string, subjectKey: string): Promise<CourseId> {
@@ -188,8 +200,8 @@ export async function getCoursesByAccess(user: UserDTO | null): Promise<CourseAc
 // ==========================================================================
 
 export async function getNavbarCourses(user: UserDTO): Promise<SidebarCourseDTO[]> {
-  const rows = await userSQL(user)<{ id: string; label: string; slug: string }[]>`
-    SELECT id, label, slug
+  const rows = await userSQL(user)<{ id: string; label: string; slug: string; icon: string | null }[]>`
+    SELECT id, label, slug, icon
     FROM v_course_dto
     WHERE is_listed AND NOT is_public AND (
       current_setting('app.user_role', true) = 'admin'
@@ -202,17 +214,27 @@ export async function getNavbarCourses(user: UserDTO): Promise<SidebarCourseDTO[
     )
     ORDER BY label
   `;
-  return rows.map((r) => ({ id: r.id, label: r.label, href: r.slug }));
+  return rows.map((r) => ({ id: r.id, label: r.label, href: r.slug, icon: r.icon ?? undefined }));
 }
 
-export async function getPublicNavbarCourses(): Promise<SidebarCourseDTO[]> {
-  const rows = await anonSQL<{ id: string; label: string; slug: string }[]>`
-    SELECT id, label, slug
+export async function getPublicNavbarCourses(): Promise<CourseDTO[]> {
+  const rows = await anonSQL<CourseRow[]>`
+    SELECT *
     FROM v_course_dto
     WHERE is_listed AND is_public
     ORDER BY label
   `;
-  return rows.map((r) => ({ id: r.id, label: r.label, href: r.slug }));
+  return rows.map((r) => ({
+    id: r.id,
+    label: r.label,
+    description: r.description,
+    groupKey: r.group_key,
+    subjectId: r.subject_id,
+    slug: r.slug,
+    icon: r.icon ?? undefined,
+    color: r.color,
+    tags: r.tags,
+  }));
 }
 
 // ==========================================================================
@@ -266,7 +288,11 @@ export async function getSidebarDTO({
   const primaryGroupKey = user && !isAdmin(user) ? (user.groupKey ?? undefined) : undefined;
 
   const [courses, progress, accessCode] = await Promise.all([
-    user ? getNavbarCourses(user) : getPublicNavbarCourses(),
+    user
+      ? getNavbarCourses(user)
+      : getPublicNavbarCourses().then((cs) =>
+          cs.map((c) => ({ id: c.id, label: c.label, href: c.slug, icon: c.icon })),
+        ),
     courseId ? getProgressDTO(courseId, user) : Promise.resolve(EMPTY_PROGRESS),
     user && !isAdmin(user) ? getUserAccessCodeById(user.id) : Promise.resolve(null),
   ]);
@@ -277,6 +303,9 @@ export async function getSidebarDTO({
     isAuthenticated,
     primaryGroupKey,
     accessCode: accessCode ?? undefined,
+    // TODO: replace stubs with real DB fields once badge/XP columns exist
+    badge: isAuthenticated ? "🎓" : undefined,
+    xp: isAuthenticated ? 0 : undefined,
   };
 }
 
