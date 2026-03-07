@@ -50,7 +50,8 @@ export default async function CourseLayout({ children, params }: CourseLayoutPro
   return (
     <Layout
       sidebarData={sidebarData}
-      isAdmin={user ? isAdmin(user) : false}
+      isAdmin={isAdmin(user)}
+      activeCourseLabel={courseDTO.label}
       signOutAction={signOutAction}
     >
       <CourseProviders>{children}</CourseProviders>
