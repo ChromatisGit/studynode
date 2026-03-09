@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Circle, ClipboardList, Timer, Users } from "lucide-react";
-import { Button } from "@components/Button";
 import { joinQuizAction, submitQuizResponseAction } from "@actions/quizActions";
 import type { QuizStateDTO } from "@schema/quizTypes";
 import type { StudentStreamEvent, StudentSnapshot } from "@schema/streamTypes";
@@ -20,7 +19,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const lastIndexRef = useRef<number | null>(initialState?.currentIndex ?? null);
-  const lastSessionRef = useRef<string | null>(initialState?.sessionId ?? null);
+  const lastSessionRef = useRef<string | null>(null);
 
   // Reset per-question state when the question index changes
   useEffect(() => {
@@ -81,10 +80,11 @@ export function QuizPage({ initialState }: QuizPageProps) {
 
   useQuizStream({ onEvent });
 
-  const handleSubmit = async () => {
-    if (!quiz || selectedAnswer === null || hasSubmitted) return;
+  const handleAnswerClick = async (i: number) => {
+    if (!quiz || quiz.phase !== "active" || hasSubmitted) return;
+    setSelectedAnswer(i);
     setHasSubmitted(true);
-    await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [selectedAnswer], false);
+    await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [i], false);
   };
 
   // ── No active quiz ──────────────────────────────────────────────────────────
@@ -147,8 +147,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
             {quiz.options.map((option, i) => {
               const isSelected = selectedAnswer === i;
               const isCorrect = quiz.correctIndices?.includes(i);
-              const isReveal =
-                quiz.phase === "reveal_correct" || quiz.phase === "reveal_dist";
+              const isReveal = quiz.phase === "reveal_correct";
 
               let optionClass = styles.option;
               if (isReveal && isCorrect) optionClass = `${styles.option} ${styles.optionCorrect}`;
@@ -161,9 +160,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
                   key={i}
                   type="button"
                   className={optionClass}
-                  onClick={() => {
-                    if (quiz.phase === "active" && !hasSubmitted) setSelectedAnswer(i);
-                  }}
+                  onClick={() => handleAnswerClick(i)}
                   disabled={quiz.phase !== "active" || hasSubmitted}
                   aria-pressed={isSelected}
                 >
@@ -182,20 +179,9 @@ export function QuizPage({ initialState }: QuizPageProps) {
         </div>
 
         {/* Actions / status */}
-        {quiz.phase === "active" && (
+        {quiz.phase === "active" && hasSubmitted && (
           <div className={styles.actions}>
-            {hasSubmitted ? (
-              <p className={styles.submitted}>Antwort abgeschickt — warte auf Ergebnisse…</p>
-            ) : (
-              <Button
-                variant="primary"
-                size="lg"
-                disabled={selectedAnswer === null}
-                onClick={handleSubmit}
-              >
-                Antwort abschicken
-              </Button>
-            )}
+            <p className={styles.submitted}>Antwort abgeschickt — warte auf Ergebnisse…</p>
           </div>
         )}
 

@@ -53,7 +53,7 @@ export default async function CourseLayout({ children, params }: CourseLayoutPro
       isAdmin={user ? isAdmin(user) : false}
       signOutAction={signOutAction}
     >
-      <CourseProviders isLoggedIn={!!user} isAdmin={user ? isAdmin(user) : false}>{children}</CourseProviders>
+      <CourseProviders>{children}</CourseProviders>
     </Layout>
   );
 }

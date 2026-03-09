@@ -88,7 +88,7 @@ export function QuizProjectorOverlay({ quizState }: Props) {
                 >
                   <div className={styles.barLabel}>
                     {phase === "reveal_correct" && isCorrect ? (
-                      <Check size={16} className={styles.checkIcon} aria-label="Richtig" />
+                      <Check size={28} className={styles.checkIcon} aria-label="Richtig" />
                     ) : (
                       <span className={styles.optionLetter}>{String.fromCharCode(65 + i)}</span>
                     )}

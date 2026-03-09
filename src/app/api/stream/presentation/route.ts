@@ -34,7 +34,6 @@ export async function GET(request: Request): Promise<Response> {
     blackout: slideState.blackout,
     macroState: slideState.macroState,
     quiz,
-    presence: 0,
   };
 
   return Response.json(snapshot);

@@ -211,11 +211,12 @@
 }
 
 .barFillCorrect {
-  background: color-mix(in srgb, var(--sn-green-accent, #38a169) 25%, var(--sn-surface));
+  background: var(--sn-green-accent, #38a169);
 }
 
 .barRowCorrect .barTrack {
   border-color: var(--sn-green-accent, #38a169);
+  background: color-mix(in srgb, var(--sn-green-accent, #38a169) 15%, var(--sn-surface));
 }
 
 .barOptionText {
