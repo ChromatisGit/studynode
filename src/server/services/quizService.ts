@@ -10,6 +10,7 @@ import type {
   QuizQuestionSummary,
   StoredQuestion,
 } from "@schema/quizTypes";
+import { publishToChannel } from "@server-lib/ablyServer";
 
 // ==========================================================================
 // Row types (DB → TypeScript)
@@ -17,7 +18,6 @@ import type {
 
 type QuizSessionRow = {
   session_id: string;
-  channel_name: string;
   course_id: string;
   phase: QuizPhase;
   questions: StoredQuestion[];
@@ -38,6 +38,7 @@ function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
 
   return {
     sessionId: row.session_id,
+    courseId: row.course_id,
     phase,
     currentIndex: row.current_index,
     totalQuestions: row.questions.length,
@@ -53,6 +54,47 @@ function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
   };
 }
 
+function buildStudentDTOFromResults(results: QuizResultsDTO): QuizStateDTO {
+  const phase = results.phase as Exclude<QuizPhase, "closed">;
+  return {
+    sessionId: results.sessionId,
+    courseId: results.courseId,
+    phase,
+    currentIndex: results.currentIndex,
+    totalQuestions: results.totalQuestions,
+    question: results.question,
+    options: results.options,
+    ...(phase === "reveal_correct" && {
+      correctIndices: results.correctIndices,
+      why: results.why,
+    }),
+    timerSeconds: results.timerSeconds,
+    timerStartedAt: results.timerStartedAt,
+    updatedAt: results.updatedAt,
+  };
+}
+
+// ==========================================================================
+// Ably broadcast helpers (best-effort; DB is source of truth)
+// ==========================================================================
+
+async function publishQuizUpdate(sessionId: string, user: UserDTO): Promise<void> {
+  const results = await getQuizResults(sessionId, user);
+  if (!results) return;
+  const studentState = buildStudentDTOFromResults(results);
+  await Promise.all([
+    publishToChannel(`classroom:${results.courseId}:admin`, { type: "QUIZ_STATE", quiz: results }),
+    publishToChannel(`classroom:${results.courseId}:student`, { type: "QUIZ_STATE", quiz: studentState }),
+  ]);
+}
+
+async function publishQuizClosed(courseId: string): Promise<void> {
+  await Promise.all([
+    publishToChannel(`classroom:${courseId}:admin`, { type: "QUIZ_STATE", quiz: null }),
+    publishToChannel(`classroom:${courseId}:student`, { type: "QUIZ_STATE", quiz: null }),
+  ]);
+}
+
 // ==========================================================================
 // Admin: session lifecycle
 // ==========================================================================
@@ -62,7 +104,6 @@ function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
  * this course (enforced by the partial unique index).
  */
 export async function startQuizSession(
-  channelName: string,
   courseId: string,
   questions: StoredQuestion[],
   timerSeconds: number | null,
@@ -72,10 +113,16 @@ export async function startQuizSession(
 
   await userSQL(user)`
     INSERT INTO quiz_sessions
-      (session_id, channel_name, course_id, questions, timer_seconds)
+      (session_id, course_id, questions, timer_seconds)
     VALUES
-      (${sessionId}, ${channelName}, ${courseId}, ${questions as never}, ${timerSeconds})
+      (${sessionId}, ${courseId}, ${questions as never}, ${timerSeconds})
   `;
+
+  // Notify students and update admin view
+  await Promise.all([
+    publishToChannel(`classroom:${courseId}:student`, { type: "QUIZ_STARTED", courseId, sessionId }),
+    publishQuizUpdate(sessionId, user),
+  ]);
 
   return sessionId;
 }
@@ -93,6 +140,7 @@ export async function launchQuizQuestion(
     WHERE session_id = ${sessionId}
       AND phase = 'waiting'
   `;
+  await publishQuizUpdate(sessionId, user);
 }
 
 /** active → reveal_dist (distribution shown, no correct highlighted yet) */
@@ -107,6 +155,7 @@ export async function revealDistribution(
     WHERE session_id = ${sessionId}
       AND phase IN ('active', 'waiting')
   `;
+  await publishQuizUpdate(sessionId, user);
 }
 
 /** reveal_dist → reveal_correct (correct answer + #why shown) */
@@ -121,35 +170,36 @@ export async function revealCorrectAnswer(
     WHERE session_id = ${sessionId}
       AND phase = 'reveal_dist'
   `;
+  await publishQuizUpdate(sessionId, user);
 }
 
-/** reveal_correct → waiting for next question; increments current_index */
+/** reveal_correct → active for next question; increments current_index */
 export async function nextQuizQuestion(
   sessionId: string,
   user: UserDTO,
 ): Promise<void> {
   await userSQL(user)`
     UPDATE quiz_sessions
-    SET phase            = 'waiting',
+    SET phase            = 'active',
         current_index    = current_index + 1,
-        timer_started_at = NULL,
+        timer_started_at = now(),
         updated_at       = now()
     WHERE session_id = ${sessionId}
       AND phase = 'reveal_correct'
   `;
+  await publishQuizUpdate(sessionId, user);
 }
 
 /**
  * Skip the current question (any non-closed phase).
- * Marks the session as skipped by moving to next question in 'waiting' phase.
  * If already on the last question, closes the session instead.
  */
 export async function skipQuestion(
   sessionId: string,
   user: UserDTO,
 ): Promise<void> {
-  const [row] = await userSQL(user)<Pick<QuizSessionRow, "current_index" | "questions">[]>`
-    SELECT current_index, questions
+  const [row] = await userSQL(user)<Pick<QuizSessionRow, "current_index" | "questions" | "course_id">[]>`
+    SELECT current_index, questions, course_id
     FROM quiz_sessions
     WHERE session_id = ${sessionId}
       AND phase != 'closed'
@@ -165,6 +215,7 @@ export async function skipQuestion(
           updated_at = now()
       WHERE session_id = ${sessionId}
     `;
+    await publishQuizClosed(row.course_id);
   } else {
     await userSQL(user)`
       UPDATE quiz_sessions
@@ -174,6 +225,7 @@ export async function skipQuestion(
           updated_at       = now()
       WHERE session_id = ${sessionId}
     `;
+    await publishQuizUpdate(sessionId, user);
   }
 }
 
@@ -182,12 +234,29 @@ export async function closeQuizSession(
   sessionId: string,
   user: UserDTO,
 ): Promise<void> {
-  await userSQL(user)`
+  const [row] = await userSQL(user)<Pick<QuizSessionRow, "course_id">[]>`
     UPDATE quiz_sessions
     SET phase      = 'closed',
         updated_at = now()
     WHERE session_id = ${sessionId}
+    RETURNING course_id
   `;
+  if (row) await publishQuizClosed(row.course_id);
+}
+
+/** Force-closes any active (non-closed) quiz session for a course. */
+export async function closeActiveQuizForCourse(
+  courseId: string,
+  user: UserDTO,
+): Promise<void> {
+  await userSQL(user)`
+    UPDATE quiz_sessions
+    SET phase      = 'closed',
+        updated_at = now()
+    WHERE course_id = ${courseId}
+      AND phase != 'closed'
+  `;
+  await publishQuizClosed(courseId);
 }
 
 // ==========================================================================
@@ -208,8 +277,7 @@ export async function joinQuizSession(
 
 /**
  * Store a student's answer for the current question.
- * After inserting, calls try_advance_quiz_phase() to auto-advance if everyone
- * has answered. Returns false if the session is no longer in 'active' phase.
+ * Calls try_advance_quiz_phase() to auto-advance if everyone has answered.
  */
 export async function submitQuizResponse(
   sessionId: string,
@@ -218,7 +286,6 @@ export async function submitQuizResponse(
   timedOut: boolean,
   user: UserDTO,
 ): Promise<{ ok: boolean; reason?: string }> {
-  // Verify session is still active for this question
   const [session] = await userSQL(user)<Pick<QuizSessionRow, "phase" | "current_index">[]>`
     SELECT phase, current_index
     FROM quiz_sessions
@@ -235,9 +302,10 @@ export async function submitQuizResponse(
     ON CONFLICT DO NOTHING
   `;
 
-  // Trigger auto-advance check via SECURITY DEFINER function
-  // (bypasses RLS — student can trigger phase transition)
   await anonSQL`SELECT try_advance_quiz_phase(${sessionId}, ${questionIndex})`;
+
+  // Push updated answer counts to admin in realtime
+  await publishQuizUpdate(sessionId, user);
 
   return { ok: true };
 }
@@ -246,16 +314,12 @@ export async function submitQuizResponse(
 // Student: poll for current quiz state
 // ==========================================================================
 
-/**
- * Returns the active quiz state for a course.
- * Only returns sessions in non-closed phases (RLS enforces enrollment check).
- */
 export async function getActiveQuizForCourse(
   courseId: string,
   user: UserDTO,
 ): Promise<QuizStateDTO | null> {
   const [row] = await userSQL(user)<QuizSessionRow[]>`
-    SELECT session_id, channel_name, course_id, phase, questions,
+    SELECT session_id, course_id, phase, questions,
            current_index, timer_seconds, timer_started_at, updated_at, created_at
     FROM quiz_sessions
     WHERE course_id = ${courseId}
@@ -266,15 +330,11 @@ export async function getActiveQuizForCourse(
   return row ? buildStateDTO(row) : null;
 }
 
-/**
- * Returns the active quiz for any course the user is enrolled in.
- * Since only one quiz runs at a time, this is effectively the global active quiz.
- */
 export async function getActiveQuizForUser(user: UserDTO): Promise<QuizStateDTO | null> {
   if (!user.courseIds.length) return null;
 
   const [row] = await userSQL(user)<QuizSessionRow[]>`
-    SELECT session_id, channel_name, course_id, phase, questions,
+    SELECT session_id, course_id, phase, questions,
            current_index, timer_seconds, timer_started_at, updated_at, created_at
     FROM quiz_sessions
     WHERE course_id = ANY(${user.courseIds as string[]})
@@ -289,16 +349,27 @@ export async function getActiveQuizForUser(user: UserDTO): Promise<QuizStateDTO 
 // Admin: live results polling
 // ==========================================================================
 
-/**
- * Returns aggregate results for the current question of a session.
- * Admin only — called by the presenter + projector polling endpoint.
- */
+export async function getActiveQuizResults(
+  courseId: string,
+  user: UserDTO,
+): Promise<QuizResultsDTO | null> {
+  const [row] = await userSQL(user)<{ session_id: string }[]>`
+    SELECT session_id
+    FROM quiz_sessions
+    WHERE course_id = ${courseId}
+      AND phase != 'closed'
+    LIMIT 1
+  `;
+  if (!row) return null;
+  return getQuizResults(row.session_id, user);
+}
+
 export async function getQuizResults(
   sessionId: string,
   user: UserDTO,
 ): Promise<QuizResultsDTO | null> {
   const [row] = await userSQL(user)<QuizSessionRow[]>`
-    SELECT session_id, channel_name, course_id, phase, questions,
+    SELECT session_id, course_id, phase, questions,
            current_index, timer_seconds, timer_started_at, updated_at, created_at
     FROM quiz_sessions
     WHERE session_id = ${sessionId}
@@ -334,6 +405,7 @@ export async function getQuizResults(
 
   return {
     sessionId: row.session_id,
+    courseId: row.course_id,
     phase: row.phase,
     currentIndex: row.current_index,
     totalQuestions: row.questions.length,
@@ -350,33 +422,10 @@ export async function getQuizResults(
   };
 }
 
-/**
- * Returns results for the active session on a given channelName.
- * Used by the projector, which knows channelName but not sessionId.
- */
-export async function getQuizResultsByChannel(
-  channelName: string,
-  user: UserDTO,
-): Promise<QuizResultsDTO | null> {
-  const [row] = await userSQL(user)<{ session_id: string }[]>`
-    SELECT session_id
-    FROM quiz_sessions
-    WHERE channel_name = ${channelName}
-      AND phase != 'closed'
-    LIMIT 1
-  `;
-  if (!row) return null;
-  return getQuizResults(row.session_id, user);
-}
-
 // ==========================================================================
 // Admin: post-session summary
 // ==========================================================================
 
-/**
- * Returns per-question statistics after a session is closed.
- * Used by the teacher review screen.
- */
 export async function getQuizSummary(
   sessionId: string,
   user: UserDTO,
@@ -404,7 +453,6 @@ export async function getQuizSummary(
   `;
   const participants = participantCount[0]?.count ?? 0;
 
-  // Group responses by question
   const byQuestion = new Map<number, number[][]>();
   for (const r of responseRows) {
     const list = byQuestion.get(r.question_index) ?? [];
@@ -423,7 +471,6 @@ export async function getQuizSummary(
           optionCounts[idx]++;
         }
       }
-      // Count as correct if all selected indices are in correctIndices and lengths match
       const isCorrect =
         selected.length === q.correctIndices.length &&
         selected.every((s) => q.correctIndices.includes(s));

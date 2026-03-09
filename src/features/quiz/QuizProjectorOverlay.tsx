@@ -1,65 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import type { QuizResultsDTO } from "@schema/quizTypes";
 import { renderInlineMarkdown } from "@ui/lib/renderInlineMarkdown";
 import styles from "./QuizProjectorOverlay.module.css";
 
 type Props = {
-  channelName: string;
+  /** Live quiz state pushed from the DO via the projector's WebSocket stream. */
+  quizState: QuizResultsDTO | null;
 };
 
-export function QuizProjectorOverlay({ channelName }: Props) {
-  const [results, setResults] = useState<QuizResultsDTO | null>(null);
+export function QuizProjectorOverlay({ quizState }: Props) {
+  if (!quizState) return null;
 
-  useEffect(() => {
-    let active = true;
-    let lastModified: string | null = null;
-
-    const poll = async () => {
-      if (!active) return;
-      try {
-        const headers: Record<string, string> = {};
-        if (lastModified) headers["If-Modified-Since"] = lastModified;
-
-        const res = await fetch(`/api/quiz/channel/${encodeURIComponent(channelName)}/results`, {
-          headers,
-        });
-
-        if (res.status === 304) {
-          // unchanged
-        } else if (res.status === 410 || res.status === 404) {
-          setResults(null);
-        } else if (res.ok) {
-          const lm = res.headers.get("Last-Modified");
-          if (lm) lastModified = lm;
-          setResults(await res.json());
-        }
-      } catch { /* ignore */ }
-
-      if (active) setTimeout(poll, 1000);
-    };
-
-    poll();
-    return () => { active = false; };
-  }, [channelName]);
-
-  if (!results) return null;
-
-  const { phase, question, options, correctIndices, why, participants, answeredCount, optionCounts } = results;
+  const { phase, question, options, correctIndices, why, participants, answeredCount, optionCounts } = quizState;
   const maxCount = Math.max(1, ...optionCounts);
 
-  // ── Waiting phase — keep projector blank until question goes live ──────────
+  // ── Waiting phase ───────────────────────────────────────────────────────────
   if (phase === "waiting") {
-    return null;
+    return (
+      <div className={styles.slide}>
+        <div className={styles.waitingCard}>
+          <div className={styles.waitingIcon}>📋</div>
+          <h1 className={styles.waitingTitle}>Quiz startet gleich</h1>
+          <p className={styles.waitingHint}>
+            Wechsle auf deinem Gerät zum Quiz-Tab und mach dich bereit.
+          </p>
+          <span className={styles.waitingBadge}>Quiz-Tab öffnen</span>
+        </div>
+      </div>
+    );
   }
 
-  // ── Active phase ───────────────────────────────────────────────────────────
+  // ── Active phase ────────────────────────────────────────────────────────────
   if (phase === "active") {
     return (
-      <div className={styles.overlay}>
+      <div className={styles.slide}>
         <div className={styles.activeCard}>
+          <p className={styles.questionMeta}>
+            Frage {quizState.currentIndex + 1} / {quizState.totalQuestions}
+          </p>
           <div className={styles.questionText}>{renderInlineMarkdown(question)}</div>
           <div className={styles.activeOptions}>
             {options.map((opt, i) => (
@@ -85,11 +65,14 @@ export function QuizProjectorOverlay({ channelName }: Props) {
     );
   }
 
-  // ── reveal_dist / reveal_correct ───────────────────────────────────────────
+  // ── Reveal phase ────────────────────────────────────────────────────────────
   if (phase === "reveal_dist" || phase === "reveal_correct") {
     return (
-      <div className={styles.overlay}>
+      <div className={styles.slide}>
         <div className={styles.revealCard}>
+          <p className={styles.questionMeta}>
+            Frage {quizState.currentIndex + 1} / {quizState.totalQuestions}
+          </p>
           <div className={styles.questionText}>{renderInlineMarkdown(question)}</div>
 
           <div className={styles.bars}>

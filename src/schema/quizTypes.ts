@@ -24,6 +24,7 @@ export type StoredQuestion = {
  */
 export type QuizStateDTO = {
   sessionId: string;
+  courseId: string;
   phase: Exclude<QuizPhase, "closed">;
   currentIndex: number;
   totalQuestions: number;
@@ -46,6 +47,7 @@ export type QuizStateDTO = {
  */
 export type QuizResultsDTO = {
   sessionId: string;
+  courseId: string;
   phase: QuizPhase;
   currentIndex: number;
   totalQuestions: number;

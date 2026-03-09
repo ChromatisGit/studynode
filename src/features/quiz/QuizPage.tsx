@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Circle, ClipboardList, Timer, Users } from "lucide-react";
 import { Button } from "@components/Button";
-import { pollActiveQuizAction, joinQuizAction, submitQuizResponseAction } from "@actions/quizActions";
+import { joinQuizAction, submitQuizResponseAction } from "@actions/quizActions";
 import type { QuizStateDTO } from "@schema/quizTypes";
+import type { StudentStreamEvent, StudentSnapshot } from "@schema/streamTypes";
+import { useQuizStream } from "./hooks/useQuizStream";
 import styles from "./QuizPage.module.css";
 
 type QuizPageProps = {
+  /** Initial quiz state from server-side render; null = no active quiz. */
   initialState: QuizStateDTO | null;
 };
 
@@ -17,6 +20,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const lastIndexRef = useRef<number | null>(initialState?.currentIndex ?? null);
+  const lastSessionRef = useRef<string | null>(initialState?.sessionId ?? null);
 
   // Reset per-question state when the question index changes
   useEffect(() => {
@@ -27,6 +31,14 @@ export function QuizPage({ initialState }: QuizPageProps) {
     }
   }, [quiz]);
 
+  // Auto-join when a session becomes available or changes
+  useEffect(() => {
+    if (quiz?.sessionId && quiz.sessionId !== lastSessionRef.current) {
+      lastSessionRef.current = quiz.sessionId;
+      joinQuizAction(quiz.sessionId).catch(() => {});
+    }
+  }, [quiz?.sessionId]);
+
   // Countdown timer
   useEffect(() => {
     if (!quiz?.timerSeconds || !quiz.timerStartedAt || quiz.phase !== "active") {
@@ -34,27 +46,40 @@ export function QuizPage({ initialState }: QuizPageProps) {
       return;
     }
     const end = new Date(quiz.timerStartedAt).getTime() + quiz.timerSeconds * 1000;
-    const tick = () => setTimeLeft(Math.max(0, Math.round((end - Date.now()) / 1000)));
+    const tick = () => {
+      const remaining = Math.max(0, Math.round((end - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining === 0 && !hasSubmitted) {
+        // Auto-submit on timeout
+        setHasSubmitted(true);
+        if (quiz.sessionId) {
+          submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [], true).catch(() => {});
+        }
+      }
+    };
     tick();
     const id = setInterval(tick, 500);
     return () => clearInterval(id);
-  }, [quiz?.timerStartedAt, quiz?.timerSeconds, quiz?.phase]);
+  }, [quiz?.timerStartedAt, quiz?.timerSeconds, quiz?.phase, quiz?.sessionId, quiz?.currentIndex, hasSubmitted]);
 
-  // Poll for state updates every 4 seconds
-  useEffect(() => {
-    const id = setInterval(async () => {
-      const result = await pollActiveQuizAction();
-      if (result.ok) setQuiz(result.data);
-    }, 4000);
-    return () => clearInterval(id);
+  // WebSocket: receive live quiz state from the DO
+  const onEvent = useCallback((event: StudentStreamEvent) => {
+    switch (event.type) {
+      case "INIT": {
+        const init = event as StudentSnapshot;
+        setQuiz(init.quiz);
+        break;
+      }
+      case "QUIZ_STATE":
+        setQuiz(event.quiz);
+        break;
+      case "QUIZ_STARTED":
+        // Do nothing — the QUIZ_STATE event that follows will update the quiz state
+        break;
+    }
   }, []);
 
-  // Auto-join when a session becomes available
-  useEffect(() => {
-    if (quiz?.sessionId) {
-      joinQuizAction(quiz.sessionId);
-    }
-  }, [quiz?.sessionId]);
+  useQuizStream({ onEvent });
 
   const handleSubmit = async () => {
     if (!quiz || selectedAnswer === null || hasSubmitted) return;
@@ -62,29 +87,29 @@ export function QuizPage({ initialState }: QuizPageProps) {
     await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [selectedAnswer], false);
   };
 
-  // ── No active quiz ──────────────────────────────────────────────────────
+  // ── No active quiz ──────────────────────────────────────────────────────────
   if (!quiz) {
     return (
       <div className={styles.page}>
         <div className={styles.empty}>
           <ClipboardList size={56} className={styles.emptyIcon} aria-hidden />
-          <h1 className={styles.emptyTitle}>No quiz active</h1>
+          <h1 className={styles.emptyTitle}>Kein Quiz aktiv</h1>
           <p className={styles.emptyDesc}>
-            Your teacher will start a quiz — come back here when they announce it.
+            Dein Lehrer startet gleich ein Quiz — diese Seite aktualisiert sich automatisch.
           </p>
         </div>
       </div>
     );
   }
 
-  // ── Waiting ─────────────────────────────────────────────────────────────
+  // ── Waiting ─────────────────────────────────────────────────────────────────
   if (quiz.phase === "waiting") {
     return (
       <div className={styles.page}>
         <div className={styles.empty}>
           <div className={styles.emptyIcon} aria-hidden>⏳</div>
-          <h1 className={styles.emptyTitle}>Quiz starting…</h1>
-          <p className={styles.emptyDesc}>Your teacher is about to launch the first question.</p>
+          <h1 className={styles.emptyTitle}>Quiz startet gleich…</h1>
+          <p className={styles.emptyDesc}>Dein Lehrer startet die erste Frage.</p>
         </div>
       </div>
     );
@@ -100,7 +125,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
           <div className={styles.meta}>
             <span className={styles.progress}>
               <Users size={14} aria-hidden />
-              Question {quiz.currentIndex + 1} of {quiz.totalQuestions}
+              Frage {quiz.currentIndex + 1} von {quiz.totalQuestions}
             </span>
             {timeLeft !== null && quiz.phase === "active" && (
               <span className={timeLeft <= 10 ? styles.timerUrgent : styles.timer}>
@@ -160,7 +185,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
         {quiz.phase === "active" && (
           <div className={styles.actions}>
             {hasSubmitted ? (
-              <p className={styles.submitted}>Answer submitted — waiting for results…</p>
+              <p className={styles.submitted}>Antwort abgeschickt — warte auf Ergebnisse…</p>
             ) : (
               <Button
                 variant="primary"
@@ -168,19 +193,19 @@ export function QuizPage({ initialState }: QuizPageProps) {
                 disabled={selectedAnswer === null}
                 onClick={handleSubmit}
               >
-                Submit Answer
+                Antwort abschicken
               </Button>
             )}
           </div>
         )}
 
         {quiz.phase === "reveal_dist" && (
-          <p className={styles.statusMsg}>Results incoming…</p>
+          <p className={styles.statusMsg}>Auswertung folgt…</p>
         )}
 
         {quiz.phase === "reveal_correct" && quiz.why && (
           <div className={styles.explanation}>
-            <p className={styles.explanationLabel}>Why?</p>
+            <p className={styles.explanationLabel}>Erklärung</p>
             <p className={styles.explanationText}>{quiz.why}</p>
           </div>
         )}
@@ -188,8 +213,8 @@ export function QuizPage({ initialState }: QuizPageProps) {
         {quiz.phase === "reveal_correct" && (
           <p className={styles.statusMsg}>
             {quiz.currentIndex + 1 < quiz.totalQuestions
-              ? "Next question coming up…"
-              : "Quiz complete — great job!"}
+              ? "Nächste Frage kommt…"
+              : "Quiz abgeschlossen — gut gemacht!"}
           </p>
         )}
       </div>

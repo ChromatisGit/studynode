@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Home,
   BookOpen,
-  Brain,
   Moon,
   Sun,
   LogOut,
@@ -98,14 +97,6 @@ export function Sidebar({
             >
               <BookOpen size={18} className={styles.icon} aria-hidden />
               {!collapsed && <span>Practice</span>}
-            </AppLink>
-
-            <AppLink
-              href="/quiz"
-              className={clsx(styles.navItem, isActive("/quiz") && styles.active)}
-            >
-              <Brain size={18} className={styles.icon} aria-hidden />
-              {!collapsed && <span>Quiz</span>}
             </AppLink>
 
             {sidebarData.courses.length > 0 && (

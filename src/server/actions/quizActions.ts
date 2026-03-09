@@ -9,14 +9,14 @@ import {
   nextQuizQuestion,
   skipQuestion,
   closeQuizSession,
+  closeActiveQuizForCourse,
   joinQuizSession,
   submitQuizResponse,
   getQuizResults,
   getQuizSummary,
   listQuizSessions,
-  getActiveQuizForUser,
 } from "@services/quizService";
-import type { StoredQuestion, QuizResultsDTO, QuizSummaryDTO, QuizStateDTO } from "@schema/quizTypes";
+import type { StoredQuestion, QuizResultsDTO, QuizSummaryDTO } from "@schema/quizTypes";
 import type { QuizSessionMeta } from "@services/quizService";
 
 type OkResult<T> = { ok: true; data: T };
@@ -28,7 +28,6 @@ type Result<T> = OkResult<T> | ErrResult;
 // ==========================================================================
 
 export async function startQuizAction(
-  channelName: string,
   courseId: string,
   questions: StoredQuestion[],
   timerSeconds: number | null,
@@ -41,7 +40,7 @@ export async function startQuizAction(
   }
 
   try {
-    const sessionId = await startQuizSession(channelName, courseId, questions, timerSeconds, session.user);
+    const sessionId = await startQuizSession(courseId, questions, timerSeconds, session.user);
     return { ok: true, data: { sessionId } };
   } catch (err) {
     // Unique constraint: only one active session per course at a time
@@ -91,6 +90,13 @@ export async function closeQuizAction(sessionId: string): Promise<Result<void>> 
   const session = await getSession();
   assertAdminAccess(session);
   await closeQuizSession(sessionId, session.user);
+  return { ok: true, data: undefined };
+}
+
+export async function forceCloseQuizForCourseAction(courseId: string): Promise<Result<void>> {
+  const session = await getSession();
+  assertAdminAccess(session);
+  await closeActiveQuizForCourse(courseId, session.user);
   return { ok: true, data: undefined };
 }
 
@@ -167,13 +173,3 @@ export async function listQuizSessionsAction(
   return { ok: true, data: sessions };
 }
 
-// ==========================================================================
-// Student: poll for active quiz (global — across all enrolled courses)
-// ==========================================================================
-
-export async function pollActiveQuizAction(): Promise<Result<QuizStateDTO | null>> {
-  const session = await getSession();
-  assertLoggedIn(session);
-  const state = await getActiveQuizForUser(session.user);
-  return { ok: true, data: state };
-}
