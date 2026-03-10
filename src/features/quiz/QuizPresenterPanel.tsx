@@ -45,15 +45,13 @@ type Props = {
   courseId: string;
   /** Live quiz state pushed from the DO via WebSocket (null = no active quiz) */
   quizResults: QuizResultsDTO | null;
-  /** Number of connected student WebSocket subscribers */
-  presence: number;
 };
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function QuizPresenterPanel({ quizMacros, courseId, quizResults, presence }: Props) {
+export function QuizPresenterPanel({ quizMacros, courseId, quizResults }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -144,7 +142,7 @@ export function QuizPresenterPanel({ quizMacros, courseId, quizResults, presence
   const idx = quizResults?.currentIndex ?? 0;
   const total = quizResults?.totalQuestions ?? questions.length;
   const answered = quizResults?.answeredCount ?? 0;
-  const participants = quizResults?.participants ?? presence;
+  const participants = quizResults?.participants ?? 0;
   const isLast = idx >= total - 1;
 
   return (
@@ -160,7 +158,6 @@ export function QuizPresenterPanel({ quizMacros, courseId, quizResults, presence
       <div className={styles.participation}>
         <span className={styles.participationCount}>
           {answered} / {participants} geantwortet
-          {presence > 0 && ` · ${presence} verbunden`}
         </span>
         {participants > 0 && (
           <div className={styles.participationBar}>

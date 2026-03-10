@@ -307,6 +307,7 @@ export async function joinQuizSession(
     VALUES (${sessionId}, ${user.id})
     ON CONFLICT DO NOTHING
   `;
+  await publishQuizUpdate(sessionId, user);
 }
 
 /**

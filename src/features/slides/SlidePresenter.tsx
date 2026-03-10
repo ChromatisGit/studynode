@@ -82,21 +82,15 @@ export function SlidePresenter({ deck, courseId, projectorPath }: SlidePresenter
 
   // Quiz state received via WebSocket (pushed from DO after student submissions)
   const [quizResults, setQuizResults] = useState<QuizResultsDTO | null>(null);
-  const [presence, setPresence] = useState(0);
-
   const onEvent = useCallback((event: AdminStreamEvent) => {
     switch (event.type) {
       case "INIT": {
         const init = event as AdminSnapshot;
         setQuizResults(init.quiz);
-        setPresence(init.presence);
         break;
       }
       case "QUIZ_STATE":
         setQuizResults(event.quiz as QuizResultsDTO | null);
-        break;
-      case "PRESENCE":
-        setPresence(event.count);
         break;
     }
   }, []);
@@ -168,7 +162,6 @@ export function SlidePresenter({ deck, courseId, projectorPath }: SlidePresenter
                 quizMacros={quizMacros}
                 courseId={courseId}
                 quizResults={quizResults}
-                presence={presence}
               />
             )}
 

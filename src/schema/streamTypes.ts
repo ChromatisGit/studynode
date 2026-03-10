@@ -22,8 +22,6 @@ export type AdminSnapshot = {
   macroState: Record<string, string>;
   /** null if no active quiz */
   quiz: QuizResultsDTO | null;
-  /** number of live student connections */
-  presence: number;
 };
 
 export type StudentSnapshot = {
@@ -63,12 +61,6 @@ export type QuizStartedEvent = {
   sessionId: string;
 };
 
-/** Sent to admin subscribers when student connection count changes */
-export type PresenceEvent = {
-  type: "PRESENCE";
-  count: number;
-};
-
 export type PingEvent = {
   type: "PING";
 };
@@ -79,7 +71,6 @@ export type AdminStreamEvent =
   | AdminSnapshot
   | SlideStateEvent
   | QuizAdminEvent
-  | PresenceEvent
   | PingEvent;
 
 // ── Student stream: union of everything a student subscriber can receive ──────
