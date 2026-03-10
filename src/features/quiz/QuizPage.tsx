@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Circle, ClipboardList, Timer, Users } from "lucide-react";
 import { Button } from "@components/Button";
 import { joinQuizAction, submitQuizResponseAction } from "@actions/quizActions";
 import type { QuizStateDTO } from "@schema/quizTypes";
 import type { StudentStreamEvent, StudentSnapshot } from "@schema/streamTypes";
 import { useQuizStream } from "./hooks/useQuizStream";
+import { renderInlineMarkdown } from "@ui/lib/renderInlineMarkdown";
 import styles from "./QuizPage.module.css";
 
 type QuizPageProps = {
@@ -15,12 +17,27 @@ type QuizPageProps = {
 };
 
 export function QuizPage({ initialState }: QuizPageProps) {
+  const router = useRouter();
   const [quiz, setQuiz] = useState<QuizStateDTO | null>(initialState);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const lastIndexRef = useRef<number | null>(initialState?.currentIndex ?? null);
   const lastSessionRef = useRef<string | null>(initialState?.sessionId ?? null);
+  /** ms to add to Date.now() to approximate server time; corrects client clock skew */
+  const serverOffsetRef = useRef(0);
+
+  // Score tracking
+  const [correctCount, setCorrectCount] = useState(0);
+  const correctCountRef = useRef(0);
+  const scoredQuestionRef = useRef(-1);
+
+  // End-of-quiz redirect state
+  const [quizEndScore, setQuizEndScore] = useState<{ correct: number; total: number } | null>(null);
+  const [homeCountdown, setHomeCountdown] = useState<number | null>(null);
+  const homeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wasActiveRef = useRef(!!initialState);
+  const prevTotalRef = useRef<number>(initialState?.totalQuestions ?? 0);
 
   // Reset per-question state when the question index changes
   useEffect(() => {
@@ -39,6 +56,52 @@ export function QuizPage({ initialState }: QuizPageProps) {
     }
   }, [quiz?.sessionId]);
 
+  // Accumulate score: increment once per question when correct answer is revealed
+  useEffect(() => {
+    if (
+      quiz?.phase === "reveal_correct" &&
+      quiz.correctIndices &&
+      quiz.currentIndex !== scoredQuestionRef.current
+    ) {
+      scoredQuestionRef.current = quiz.currentIndex;
+      if (selectedAnswer !== null && quiz.correctIndices.includes(selectedAnswer)) {
+        correctCountRef.current += 1;
+        setCorrectCount(correctCountRef.current);
+      }
+    }
+  }, [quiz?.phase, quiz?.currentIndex, quiz?.correctIndices, selectedAnswer]);
+
+  // Detect quiz close → capture score and start home redirect countdown
+  useEffect(() => {
+    if (quiz !== null) {
+      wasActiveRef.current = true;
+      prevTotalRef.current = quiz.totalQuestions;
+      return;
+    }
+    if (!wasActiveRef.current) return;
+    wasActiveRef.current = false;
+    setQuizEndScore({ correct: correctCountRef.current, total: prevTotalRef.current });
+    setHomeCountdown(5);
+    homeIntervalRef.current = setInterval(() => {
+      setHomeCountdown((c) => {
+        if (c === null || c <= 1) {
+          clearInterval(homeIntervalRef.current!);
+          homeIntervalRef.current = null;
+          router.push("/home");
+          return null;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  }, [quiz, router]);
+
+  // Cleanup home redirect interval on unmount
+  useEffect(() => {
+    return () => {
+      if (homeIntervalRef.current) clearInterval(homeIntervalRef.current);
+    };
+  }, []);
+
   // Countdown timer
   useEffect(() => {
     if (!quiz?.timerSeconds || !quiz.timerStartedAt || quiz.phase !== "active") {
@@ -47,7 +110,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
     }
     const end = new Date(quiz.timerStartedAt).getTime() + quiz.timerSeconds * 1000;
     const tick = () => {
-      const remaining = Math.max(0, Math.round((end - Date.now()) / 1000));
+      const remaining = Math.max(0, Math.round((end - (Date.now() + serverOffsetRef.current)) / 1000));
       setTimeLeft(remaining);
       if (remaining === 0 && !hasSubmitted) {
         // Auto-submit on timeout
@@ -67,11 +130,19 @@ export function QuizPage({ initialState }: QuizPageProps) {
     switch (event.type) {
       case "INIT": {
         const init = event as StudentSnapshot;
+        serverOffsetRef.current = new Date(init.serverNow).getTime() - Date.now();
         setQuiz(init.quiz);
         break;
       }
       case "QUIZ_STATE":
-        setQuiz(event.quiz);
+        setQuiz((prev) => {
+          const next = event.quiz;
+          // Discard stale Ably events that arrive after a fresher DB snapshot
+          if (prev?.updatedAt && next?.updatedAt && next.updatedAt < prev.updatedAt) {
+            return prev;
+          }
+          return next;
+        });
         break;
       case "QUIZ_STARTED":
         // Do nothing — the QUIZ_STATE event that follows will update the quiz state
@@ -86,6 +157,26 @@ export function QuizPage({ initialState }: QuizPageProps) {
     setHasSubmitted(true);
     await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [selectedAnswer], false);
   };
+
+  // ── Quiz ended → show score + redirect to /home ─────────────────────────────
+  if (!quiz && quizEndScore !== null && homeCountdown !== null) {
+    return (
+      <div className={styles.endOverlay}>
+        <div className={styles.endCard}>
+          <span className={styles.endIcon}>🏁</span>
+          <p className={styles.endTitle}>Quiz beendet!</p>
+          <div className={styles.endScore}>
+            <p className={styles.endScoreValue}>
+              {quizEndScore.correct} / {quizEndScore.total}
+            </p>
+            <p className={styles.endScoreLabel}>richtig beantwortet</p>
+          </div>
+          <div className={styles.countdownRing}>{homeCountdown}</div>
+          <p className={styles.endSubtitle}>Weiterleitung zur Startseite…</p>
+        </div>
+      </div>
+    );
+  }
 
   // ── No active quiz ──────────────────────────────────────────────────────────
   if (!quiz) {
@@ -116,6 +207,17 @@ export function QuizPage({ initialState }: QuizPageProps) {
   }
 
   const progress = ((quiz.currentIndex + 1) / quiz.totalQuestions) * 100;
+  const isLastReveal =
+    quiz.phase === "reveal_correct" && quiz.currentIndex + 1 >= quiz.totalQuestions;
+  const scorePct = quiz.totalQuestions > 0 ? correctCount / quiz.totalQuestions : 0;
+  const scoreMessage =
+    scorePct === 1
+      ? "Perfekt — alles richtig! 🎉"
+      : scorePct >= 0.75
+        ? "Sehr gut gemacht! 👏"
+        : scorePct >= 0.5
+          ? "Gut gemacht!"
+          : "Weiter üben!";
 
   return (
     <div className={styles.page}>
@@ -141,44 +243,46 @@ export function QuizPage({ initialState }: QuizPageProps) {
 
         {/* Question */}
         <div className={styles.questionCard}>
-          <p className={styles.question}>{quiz.question}</p>
+          <p className={styles.question}>{renderInlineMarkdown(quiz.question)}</p>
 
-          <div className={styles.options}>
-            {quiz.options.map((option, i) => {
-              const isSelected = selectedAnswer === i;
-              const isCorrect = quiz.correctIndices?.includes(i);
-              const isReveal =
-                quiz.phase === "reveal_correct" || quiz.phase === "reveal_dist";
+          {!isLastReveal && (
+            <div className={styles.options}>
+              {quiz.options.map((option, i) => {
+                const isSelected = selectedAnswer === i;
+                const isCorrect = quiz.correctIndices?.includes(i);
+                const isReveal =
+                  quiz.phase === "reveal_correct" || quiz.phase === "reveal_dist";
 
-              let optionClass = styles.option;
-              if (isReveal && isCorrect) optionClass = `${styles.option} ${styles.optionCorrect}`;
-              else if (isReveal && isSelected && !isCorrect)
-                optionClass = `${styles.option} ${styles.optionWrong}`;
-              else if (isSelected) optionClass = `${styles.option} ${styles.optionSelected}`;
+                let optionClass = styles.option;
+                if (isReveal && isCorrect) optionClass = `${styles.option} ${styles.optionCorrect}`;
+                else if (isReveal && isSelected && !isCorrect)
+                  optionClass = `${styles.option} ${styles.optionWrong}`;
+                else if (isSelected) optionClass = `${styles.option} ${styles.optionSelected}`;
 
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={optionClass}
-                  onClick={() => {
-                    if (quiz.phase === "active" && !hasSubmitted) setSelectedAnswer(i);
-                  }}
-                  disabled={quiz.phase !== "active" || hasSubmitted}
-                  aria-pressed={isSelected}
-                >
-                  <span className={styles.optionLetter}>{String.fromCharCode(65 + i)}</span>
-                  <span className={styles.optionText}>{option}</span>
-                  {isReveal && isCorrect && (
-                    <CheckCircle2 size={18} className={styles.optionIcon} aria-hidden />
-                  )}
-                  {isReveal && isSelected && !isCorrect && (
-                    <Circle size={18} className={styles.optionIcon} aria-hidden />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={optionClass}
+                    onClick={() => {
+                      if (quiz.phase === "active" && !hasSubmitted) setSelectedAnswer(i);
+                    }}
+                    disabled={quiz.phase !== "active" || hasSubmitted}
+                    aria-pressed={isSelected}
+                  >
+                    <span className={styles.optionLetter}>{String.fromCharCode(65 + i)}</span>
+                    <span className={styles.optionText}>{renderInlineMarkdown(option)}</span>
+                    {isReveal && isCorrect && (
+                      <CheckCircle2 size={18} className={styles.optionIcon} aria-hidden />
+                    )}
+                    {isReveal && isSelected && !isCorrect && (
+                      <Circle size={18} className={styles.optionIcon} aria-hidden />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Actions / status */}
@@ -206,16 +310,23 @@ export function QuizPage({ initialState }: QuizPageProps) {
         {quiz.phase === "reveal_correct" && quiz.why && (
           <div className={styles.explanation}>
             <p className={styles.explanationLabel}>Erklärung</p>
-            <p className={styles.explanationText}>{quiz.why}</p>
+            <p className={styles.explanationText}>{renderInlineMarkdown(quiz.why)}</p>
           </div>
         )}
 
-        {quiz.phase === "reveal_correct" && (
-          <p className={styles.statusMsg}>
-            {quiz.currentIndex + 1 < quiz.totalQuestions
-              ? "Nächste Frage kommt…"
-              : "Quiz abgeschlossen — gut gemacht!"}
-          </p>
+        {isLastReveal && (
+          <div className={styles.scoreCard}>
+            <span className={styles.scoreEmoji}>🏆</span>
+            <p className={styles.scoreFraction}>
+              {correctCount} / {quiz.totalQuestions}
+            </p>
+            <p className={styles.scoreSubLabel}>richtig beantwortet</p>
+            <p className={styles.scoreMessage}>{scoreMessage}</p>
+          </div>
+        )}
+
+        {!isLastReveal && quiz.phase === "reveal_correct" && (
+          <p className={styles.statusMsg}>Nächste Frage kommt…</p>
         )}
       </div>
     </div>

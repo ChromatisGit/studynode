@@ -80,7 +80,7 @@ export function Sidebar({
       </div>
 
       {/* Nav */}
-      <nav className={styles.nav} aria-label="Main navigation">
+      <nav className={clsx(styles.nav, showTopicNav && styles.navFixed)} aria-label="Main navigation">
         {sidebarData.isAuthenticated && (
           <>
             <AppLink

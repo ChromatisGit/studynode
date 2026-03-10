@@ -28,6 +28,12 @@ type QuizSessionRow = {
   created_at: string;
 };
 
+type QuizResultsRow = QuizSessionRow & {
+  participant_count: number;
+  /** json_agg of quiz_responses.selected for the current question; null when no responses yet */
+  responses: number[][] | null;
+};
+
 // ==========================================================================
 // Helpers
 // ==========================================================================
@@ -48,6 +54,34 @@ function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
       correctIndices: q.correctIndices,
       why: q.why,
     }),
+    timerSeconds: row.timer_seconds,
+    timerStartedAt: row.timer_started_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function buildResultsDTO(row: QuizResultsRow): QuizResultsDTO {
+  const q = row.questions[row.current_index];
+  const responses = row.responses ?? [];
+  const optionCounts = new Array<number>(q.options.length).fill(0);
+  for (const selected of responses) {
+    for (const idx of selected) {
+      if (idx >= 0 && idx < optionCounts.length) optionCounts[idx]++;
+    }
+  }
+  return {
+    sessionId: row.session_id,
+    courseId: row.course_id,
+    phase: row.phase,
+    currentIndex: row.current_index,
+    totalQuestions: row.questions.length,
+    question: q.question,
+    options: q.options,
+    correctIndices: q.correctIndices,
+    why: q.why,
+    participants: row.participant_count,
+    answeredCount: responses.length,
+    optionCounts,
     timerSeconds: row.timer_seconds,
     timerStartedAt: row.timer_started_at,
     updatedAt: row.updated_at,
@@ -353,73 +387,42 @@ export async function getActiveQuizResults(
   courseId: string,
   user: UserDTO,
 ): Promise<QuizResultsDTO | null> {
-  const [row] = await userSQL(user)<{ session_id: string }[]>`
-    SELECT session_id
-    FROM quiz_sessions
-    WHERE course_id = ${courseId}
-      AND phase != 'closed'
+  const [row] = await userSQL(user)<QuizResultsRow[]>`
+    SELECT
+      s.session_id, s.course_id, s.phase, s.questions,
+      s.current_index, s.timer_seconds, s.timer_started_at, s.updated_at, s.created_at,
+      (SELECT COUNT(*)::int FROM quiz_participants p WHERE p.session_id = s.session_id) AS participant_count,
+      COALESCE(
+        (SELECT json_agg(r.selected) FROM quiz_responses r
+         WHERE r.session_id = s.session_id AND r.question_index = s.current_index),
+        '[]'::json
+      ) AS responses
+    FROM quiz_sessions s
+    WHERE s.course_id = ${courseId}
+      AND s.phase != 'closed'
     LIMIT 1
   `;
-  if (!row) return null;
-  return getQuizResults(row.session_id, user);
+  return row ? buildResultsDTO(row) : null;
 }
 
 export async function getQuizResults(
   sessionId: string,
   user: UserDTO,
 ): Promise<QuizResultsDTO | null> {
-  const [row] = await userSQL(user)<QuizSessionRow[]>`
-    SELECT session_id, course_id, phase, questions,
-           current_index, timer_seconds, timer_started_at, updated_at, created_at
-    FROM quiz_sessions
-    WHERE session_id = ${sessionId}
+  const [row] = await userSQL(user)<QuizResultsRow[]>`
+    SELECT
+      s.session_id, s.course_id, s.phase, s.questions,
+      s.current_index, s.timer_seconds, s.timer_started_at, s.updated_at, s.created_at,
+      (SELECT COUNT(*)::int FROM quiz_participants p WHERE p.session_id = s.session_id) AS participant_count,
+      COALESCE(
+        (SELECT json_agg(r.selected) FROM quiz_responses r
+         WHERE r.session_id = s.session_id AND r.question_index = s.current_index),
+        '[]'::json
+      ) AS responses
+    FROM quiz_sessions s
+    WHERE s.session_id = ${sessionId}
   `;
-
-  if (!row) return null;
-
-  const q = row.questions[row.current_index];
-
-  const [participantRow, responseRows] = await Promise.all([
-    userSQL(user)<{ count: number }[]>`
-      SELECT COUNT(*)::int AS count
-      FROM quiz_participants
-      WHERE session_id = ${sessionId}
-    `,
-    userSQL(user)<{ selected: number[] }[]>`
-      SELECT selected
-      FROM quiz_responses
-      WHERE session_id = ${sessionId}
-        AND question_index = ${row.current_index}
-    `,
-  ]);
-
-  const participants = participantRow[0]?.count ?? 0;
-  const optionCounts = new Array<number>(q.options.length).fill(0);
-  for (const r of responseRows) {
-    for (const idx of r.selected) {
-      if (idx >= 0 && idx < optionCounts.length) {
-        optionCounts[idx]++;
-      }
-    }
-  }
-
-  return {
-    sessionId: row.session_id,
-    courseId: row.course_id,
-    phase: row.phase,
-    currentIndex: row.current_index,
-    totalQuestions: row.questions.length,
-    question: q.question,
-    options: q.options,
-    correctIndices: q.correctIndices,
-    why: q.why,
-    participants,
-    answeredCount: responseRows.length,
-    optionCounts,
-    timerSeconds: row.timer_seconds,
-    timerStartedAt: row.timer_started_at,
-    updatedAt: row.updated_at,
-  };
+  return row ? buildResultsDTO(row) : null;
 }
 
 // ==========================================================================

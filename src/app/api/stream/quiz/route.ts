@@ -22,6 +22,7 @@ export async function GET(_request: Request): Promise<Response> {
   const snapshot: StudentSnapshot = {
     type: "INIT",
     quiz,
+    serverNow: new Date().toISOString(),
   };
 
   return Response.json(snapshot);

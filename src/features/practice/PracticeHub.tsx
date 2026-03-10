@@ -32,8 +32,8 @@ export function PracticeHub({ courses, xp, badge: _badge }: PracticeHubProps) {
     <div className={styles.page}>
       <div className={styles.inner}>
         <PageHeader
-          title="Übungen"
-          subtitle="Wähle ein Modul und starte eine Session."
+          title="Work in Progress"
+          subtitle="Dieses Feature wird gerade noch entwickelt und funktioniert noch nicht!"
           actions={xp !== undefined ? (
             <div className={styles.xpCard}>
               <Zap size={16} className={styles.xpIcon} aria-hidden />

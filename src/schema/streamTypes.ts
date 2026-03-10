@@ -30,6 +30,8 @@ export type StudentSnapshot = {
   type: "INIT";
   /** null if no active quiz in enrolled course */
   quiz: QuizStateDTO | null;
+  /** Server UTC timestamp at response time; used by clients to correct clock skew */
+  serverNow: string;
 };
 
 // ── Live events (pushed to subscribers) ─────────────────────────────────────

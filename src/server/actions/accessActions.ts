@@ -163,7 +163,7 @@ export async function joinCourseAction(courseId: string): Promise<void> {
   await addCourseToUser(session.user, courseId, ip);
 
   const course = await getCourseDTO(courseId);
-  redirect(`/${course.groupKey}/${course.slug}`);
+  redirect(course.slug);
 }
 
 export async function signOutAction(): Promise<void> {

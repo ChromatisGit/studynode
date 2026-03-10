@@ -25,7 +25,8 @@ export async function publishToChannel(channel: string, data: unknown): Promise<
   try {
     const name = (data as { type: string }).type;
     await getRest().channels.get(channel).publish(name, data);
-  } catch {
-    // Non-fatal: clients will pick up state on next interaction
+  } catch (error) {
+    // Non-fatal: clients will pick up state on next poll
+    console.error("[Ably] publish failed on channel", channel, error);
   }
 }
