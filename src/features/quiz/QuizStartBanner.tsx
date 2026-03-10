@@ -20,7 +20,6 @@ export function QuizStartBanner() {
   const router = useRouter();
   const pathname = usePathname();
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [quizActive, setQuizActive] = useState(false);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasStartedRef = useRef(false);
 
@@ -51,7 +50,7 @@ export function QuizStartBanner() {
         return c - 1;
       });
     }, 1000);
-  }, [router]);
+  }, []);
 
   const onEvent = useCallback((event: StudentStreamEvent) => {
     switch (event.type) {

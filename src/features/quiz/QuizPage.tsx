@@ -155,7 +155,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
     if (!quiz || quiz.phase !== "active" || hasSubmitted) return;
     setSelectedAnswer(i);
     setHasSubmitted(true);
-    await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [selectedAnswer], false);
+    await submitQuizResponseAction(quiz.sessionId, quiz.currentIndex, [i], false);
   };
 
   // ── Quiz ended → show score + redirect to /home ─────────────────────────────
@@ -264,9 +264,7 @@ export function QuizPage({ initialState }: QuizPageProps) {
                     key={i}
                     type="button"
                     className={optionClass}
-                    onClick={() => {
-                      if (quiz.phase === "active" && !hasSubmitted) setSelectedAnswer(i);
-                    }}
+                    onClick={() => handleAnswerClick(i)}
                     disabled={quiz.phase !== "active" || hasSubmitted}
                     aria-pressed={isSelected}
                   >
