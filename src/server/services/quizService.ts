@@ -22,8 +22,6 @@ type QuizSessionRow = {
   phase: QuizPhase;
   questions: StoredQuestion[];
   current_index: number;
-  timer_seconds: number | null;
-  timer_started_at: string | null;
   updated_at: string;
   created_at: string;
 };
@@ -41,7 +39,6 @@ type QuizResultsRow = QuizSessionRow & {
 function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
   const q = row.questions[row.current_index];
   const phase = row.phase as Exclude<QuizPhase, "closed">;
-
   return {
     sessionId: row.session_id,
     courseId: row.course_id,
@@ -52,15 +49,15 @@ function buildStateDTO(row: QuizSessionRow): QuizStateDTO {
     options: q.options,
     ...(phase === "reveal_correct" && {
       correctIndices: q.correctIndices,
-      why: q.why,
     }),
-    timerSeconds: row.timer_seconds,
-    timerStartedAt: row.timer_started_at,
     updatedAt: row.updated_at,
   };
 }
 
-function buildResultsDTO(row: QuizResultsRow): QuizResultsDTO {
+function buildResultsDTO(
+  row: QuizResultsRow,
+  allResponses?: { question_index: number; selected: number[] }[],
+): QuizResultsDTO {
   const q = row.questions[row.current_index];
   const responses = row.responses ?? [];
   const optionCounts = new Array<number>(q.options.length).fill(0);
@@ -69,7 +66,8 @@ function buildResultsDTO(row: QuizResultsRow): QuizResultsDTO {
       if (idx >= 0 && idx < optionCounts.length) optionCounts[idx]++;
     }
   }
-  return {
+
+  const dto: QuizResultsDTO = {
     sessionId: row.session_id,
     courseId: row.course_id,
     phase: row.phase,
@@ -78,19 +76,28 @@ function buildResultsDTO(row: QuizResultsRow): QuizResultsDTO {
     question: q.question,
     options: q.options,
     correctIndices: q.correctIndices,
-    why: q.why,
     participants: row.participant_count,
     answeredCount: responses.length,
     optionCounts,
-    timerSeconds: row.timer_seconds,
-    timerStartedAt: row.timer_started_at,
     updatedAt: row.updated_at,
   };
+
+  if (row.phase === "summary" && allResponses) {
+    dto.questionSummaries = buildQuestionSummaries(
+      row.questions,
+      row.participant_count,
+      allResponses,
+    );
+  }
+
+  return dto;
 }
 
 function buildStudentDTOFromResults(results: QuizResultsDTO): QuizStateDTO {
   const phase = results.phase as Exclude<QuizPhase, "closed">;
-  return {
+  const isReveal = phase === "reveal_dist" || phase === "reveal_correct";
+
+  const dto: QuizStateDTO = {
     sessionId: results.sessionId,
     courseId: results.courseId,
     phase,
@@ -98,23 +105,81 @@ function buildStudentDTOFromResults(results: QuizResultsDTO): QuizStateDTO {
     totalQuestions: results.totalQuestions,
     question: results.question,
     options: results.options,
-    ...(phase === "reveal_correct" && {
-      correctIndices: results.correctIndices,
-      why: results.why,
-    }),
-    timerSeconds: results.timerSeconds,
-    timerStartedAt: results.timerStartedAt,
+    participants: results.participants,
     updatedAt: results.updatedAt,
   };
+
+  if (phase === "reveal_correct" || phase === "summary") {
+    dto.correctIndices = results.correctIndices;
+  }
+
+  if (isReveal) {
+    dto.optionCounts = results.optionCounts;
+    dto.answeredCount = results.answeredCount;
+  }
+
+  if (phase === "summary" && results.questionSummaries) {
+    dto.questionSummaries = results.questionSummaries;
+  }
+
+  return dto;
+}
+
+function buildQuestionSummaries(
+  questions: StoredQuestion[],
+  participants: number,
+  allResponses: { question_index: number; selected: number[] }[],
+): QuizQuestionSummary[] {
+  const byQuestion = new Map<number, number[][]>();
+  for (const r of allResponses) {
+    const list = byQuestion.get(r.question_index) ?? [];
+    list.push(r.selected);
+    byQuestion.set(r.question_index, list);
+  }
+
+  return questions.map((q, i) => {
+    const responses = byQuestion.get(i) ?? [];
+    const optionCounts = new Array<number>(q.options.length).fill(0);
+    let correctCount = 0;
+    for (const selected of responses) {
+      for (const idx of selected) {
+        if (idx >= 0 && idx < optionCounts.length) optionCounts[idx]++;
+      }
+      const isCorrect =
+        selected.length === q.correctIndices.length &&
+        selected.every((s) => q.correctIndices.includes(s));
+      if (isCorrect) correctCount++;
+    }
+    return {
+      questionIndex: i,
+      question: q.question,
+      options: q.options,
+      correctIndices: q.correctIndices,
+      participants,
+      optionCounts,
+      percentCorrect: participants > 0 ? Math.round((correctCount / participants) * 100) : 0,
+    };
+  });
 }
 
 // ==========================================================================
 // Ably broadcast helpers (best-effort; DB is source of truth)
 // ==========================================================================
 
-async function publishQuizUpdate(sessionId: string, user: UserDTO): Promise<void> {
-  const results = await getQuizResults(sessionId, user);
-  if (!results) return;
+async function publishQuizUpdate(sessionId: string): Promise<void> {
+  const [row] = await anonSQL<QuizResultsRow[]>`
+    SELECT * FROM get_quiz_broadcast_data(${sessionId})
+  `;
+  if (!row) return;
+
+  let allResponses: { question_index: number; selected: number[] }[] | undefined;
+  if (row.phase === "summary") {
+    allResponses = await anonSQL<{ question_index: number; selected: number[] }[]>`
+      SELECT question_index, selected FROM quiz_responses WHERE session_id = ${sessionId}
+    `;
+  }
+
+  const results = buildResultsDTO(row, allResponses);
   const studentState = buildStudentDTOFromResults(results);
   await Promise.all([
     publishToChannel(`classroom:${results.courseId}:admin`, { type: "QUIZ_STATE", quiz: results }),
@@ -140,44 +205,41 @@ async function publishQuizClosed(courseId: string): Promise<void> {
 export async function startQuizSession(
   courseId: string,
   questions: StoredQuestion[],
-  timerSeconds: number | null,
   user: UserDTO,
 ): Promise<string> {
   const sessionId = crypto.randomUUID();
 
   await userSQL(user)`
     INSERT INTO quiz_sessions
-      (session_id, course_id, questions, timer_seconds)
+      (session_id, course_id, questions)
     VALUES
-      (${sessionId}, ${courseId}, ${questions as never}, ${timerSeconds})
+      (${sessionId}, ${courseId}, ${questions as never})
   `;
 
-  // Notify students and update admin view
   await Promise.all([
     publishToChannel(`classroom:${courseId}:student`, { type: "QUIZ_STARTED", courseId, sessionId }),
-    publishQuizUpdate(sessionId, user),
+    publishQuizUpdate(sessionId),
   ]);
 
   return sessionId;
 }
 
-/** waiting → active; starts the timer timestamp */
+/** waiting → active */
 export async function launchQuizQuestion(
   sessionId: string,
   user: UserDTO,
 ): Promise<void> {
   await userSQL(user)`
     UPDATE quiz_sessions
-    SET phase            = 'active',
-        timer_started_at = now(),
-        updated_at       = now()
+    SET phase      = 'active',
+        updated_at = now()
     WHERE session_id = ${sessionId}
       AND phase = 'waiting'
   `;
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 }
 
-/** active → reveal_dist (distribution shown, no correct highlighted yet) */
+/** active → reveal_dist */
 export async function revealDistribution(
   sessionId: string,
   user: UserDTO,
@@ -189,10 +251,10 @@ export async function revealDistribution(
     WHERE session_id = ${sessionId}
       AND phase IN ('active', 'waiting')
   `;
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 }
 
-/** reveal_dist → reveal_correct (correct answer + #why shown) */
+/** reveal_dist → reveal_correct */
 export async function revealCorrectAnswer(
   sessionId: string,
   user: UserDTO,
@@ -204,7 +266,7 @@ export async function revealCorrectAnswer(
     WHERE session_id = ${sessionId}
       AND phase = 'reveal_dist'
   `;
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 }
 
 /** reveal_correct → active for next question; increments current_index */
@@ -214,56 +276,34 @@ export async function nextQuizQuestion(
 ): Promise<void> {
   await userSQL(user)`
     UPDATE quiz_sessions
-    SET phase            = 'active',
-        current_index    = current_index + 1,
-        timer_started_at = now(),
-        updated_at       = now()
+    SET phase         = 'active',
+        current_index = current_index + 1,
+        updated_at    = now()
     WHERE session_id = ${sessionId}
       AND phase = 'reveal_correct'
   `;
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 }
 
 /**
- * Skip the current question (any non-closed phase).
- * If already on the last question, closes the session instead.
+ * reveal_correct → summary (last question only).
+ * Triggers the end-of-quiz reflection phase.
  */
-export async function skipQuestion(
+export async function enterSummary(
   sessionId: string,
   user: UserDTO,
 ): Promise<void> {
-  const [row] = await userSQL(user)<Pick<QuizSessionRow, "current_index" | "questions" | "course_id">[]>`
-    SELECT current_index, questions, course_id
-    FROM quiz_sessions
+  await userSQL(user)`
+    UPDATE quiz_sessions
+    SET phase      = 'summary',
+        updated_at = now()
     WHERE session_id = ${sessionId}
-      AND phase != 'closed'
+      AND phase = 'reveal_correct'
   `;
-  if (!row) return;
-
-  const isLast = row.current_index >= (row.questions as StoredQuestion[]).length - 1;
-
-  if (isLast) {
-    await userSQL(user)`
-      UPDATE quiz_sessions
-      SET phase      = 'closed',
-          updated_at = now()
-      WHERE session_id = ${sessionId}
-    `;
-    await publishQuizClosed(row.course_id);
-  } else {
-    await userSQL(user)`
-      UPDATE quiz_sessions
-      SET phase            = 'waiting',
-          current_index    = current_index + 1,
-          timer_started_at = NULL,
-          updated_at       = now()
-      WHERE session_id = ${sessionId}
-    `;
-    await publishQuizUpdate(sessionId, user);
-  }
+  await publishQuizUpdate(sessionId);
 }
 
-/** Closes the session (after last question's reveal_correct phase) */
+/** summary → closed. Teacher dismisses the summary screen. */
 export async function closeQuizSession(
   sessionId: string,
   user: UserDTO,
@@ -307,18 +347,17 @@ export async function joinQuizSession(
     VALUES (${sessionId}, ${user.id})
     ON CONFLICT DO NOTHING
   `;
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 }
 
 /**
- * Store a student's answer for the current question.
- * Calls try_advance_quiz_phase() to auto-advance if everyone has answered.
+ * Store or update a student's answer for the current question.
+ * Students may re-select as long as the phase remains active.
  */
 export async function submitQuizResponse(
   sessionId: string,
   questionIndex: number,
   selected: number[],
-  timedOut: boolean,
   user: UserDTO,
 ): Promise<{ ok: boolean; reason?: string }> {
   const [session] = await userSQL(user)<Pick<QuizSessionRow, "phase" | "current_index">[]>`
@@ -332,15 +371,13 @@ export async function submitQuizResponse(
   if (session.current_index !== questionIndex) return { ok: false, reason: "wrong_question" };
 
   await userSQL(user)`
-    INSERT INTO quiz_responses (session_id, user_id, question_index, selected, timed_out)
-    VALUES (${sessionId}, ${user.id}, ${questionIndex}, ${selected as never}, ${timedOut})
-    ON CONFLICT DO NOTHING
+    INSERT INTO quiz_responses (session_id, user_id, question_index, selected)
+    VALUES (${sessionId}, ${user.id}, ${questionIndex}, ${selected as never})
+    ON CONFLICT (session_id, user_id, question_index)
+    DO UPDATE SET selected = EXCLUDED.selected
   `;
 
-  await anonSQL`SELECT try_advance_quiz_phase(${sessionId}, ${questionIndex})`;
-
-  // Push updated answer counts to admin in realtime
-  await publishQuizUpdate(sessionId, user);
+  await publishQuizUpdate(sessionId);
 
   return { ok: true };
 }
@@ -355,13 +392,12 @@ export async function getActiveQuizForCourse(
 ): Promise<QuizStateDTO | null> {
   const [row] = await userSQL(user)<QuizSessionRow[]>`
     SELECT session_id, course_id, phase, questions,
-           current_index, timer_seconds, timer_started_at, updated_at, created_at
+           current_index, updated_at, created_at
     FROM quiz_sessions
     WHERE course_id = ${courseId}
       AND phase != 'closed'
     LIMIT 1
   `;
-
   return row ? buildStateDTO(row) : null;
 }
 
@@ -370,13 +406,12 @@ export async function getActiveQuizForUser(user: UserDTO): Promise<QuizStateDTO 
 
   const [row] = await userSQL(user)<QuizSessionRow[]>`
     SELECT session_id, course_id, phase, questions,
-           current_index, timer_seconds, timer_started_at, updated_at, created_at
+           current_index, updated_at, created_at
     FROM quiz_sessions
     WHERE course_id = ANY(${user.courseIds as string[]})
       AND phase != 'closed'
     LIMIT 1
   `;
-
   return row ? buildStateDTO(row) : null;
 }
 
@@ -391,7 +426,7 @@ export async function getActiveQuizResults(
   const [row] = await userSQL(user)<QuizResultsRow[]>`
     SELECT
       s.session_id, s.course_id, s.phase, s.questions,
-      s.current_index, s.timer_seconds, s.timer_started_at, s.updated_at, s.created_at,
+      s.current_index, s.updated_at, s.created_at,
       (SELECT COUNT(*)::int FROM quiz_participants p WHERE p.session_id = s.session_id) AS participant_count,
       COALESCE(
         (SELECT json_agg(r.selected) FROM quiz_responses r
@@ -403,7 +438,16 @@ export async function getActiveQuizResults(
       AND s.phase != 'closed'
     LIMIT 1
   `;
-  return row ? buildResultsDTO(row) : null;
+  if (!row) return null;
+
+  let allResponses: { question_index: number; selected: number[] }[] | undefined;
+  if (row.phase === "summary") {
+    allResponses = await userSQL(user)<{ question_index: number; selected: number[] }[]>`
+      SELECT question_index, selected FROM quiz_responses WHERE session_id = ${row.session_id}
+    `;
+  }
+
+  return buildResultsDTO(row, allResponses);
 }
 
 export async function getQuizResults(
@@ -413,7 +457,7 @@ export async function getQuizResults(
   const [row] = await userSQL(user)<QuizResultsRow[]>`
     SELECT
       s.session_id, s.course_id, s.phase, s.questions,
-      s.current_index, s.timer_seconds, s.timer_started_at, s.updated_at, s.created_at,
+      s.current_index, s.updated_at, s.created_at,
       (SELECT COUNT(*)::int FROM quiz_participants p WHERE p.session_id = s.session_id) AS participant_count,
       COALESCE(
         (SELECT json_agg(r.selected) FROM quiz_responses r
@@ -439,65 +483,22 @@ export async function getQuizSummary(
     FROM quiz_sessions
     WHERE session_id = ${sessionId}
   `;
-
   if (!row) return null;
 
-  const questions = row.questions as StoredQuestion[];
-
-  const responseRows = await userSQL(user)<{ question_index: number; selected: number[] }[]>`
-    SELECT question_index, selected
-    FROM quiz_responses
-    WHERE session_id = ${sessionId}
-  `;
-
   const participantCount = await userSQL(user)<{ count: number }[]>`
-    SELECT COUNT(*)::int AS count
-    FROM quiz_participants
-    WHERE session_id = ${sessionId}
+    SELECT COUNT(*)::int AS count FROM quiz_participants WHERE session_id = ${sessionId}
   `;
   const participants = participantCount[0]?.count ?? 0;
 
-  const byQuestion = new Map<number, number[][]>();
-  for (const r of responseRows) {
-    const list = byQuestion.get(r.question_index) ?? [];
-    list.push(r.selected);
-    byQuestion.set(r.question_index, list);
-  }
-
-  const summaryQuestions: QuizQuestionSummary[] = questions.map((q, i) => {
-    const responses = byQuestion.get(i) ?? [];
-    const optionCounts = new Array<number>(q.options.length).fill(0);
-    let correctCount = 0;
-
-    for (const selected of responses) {
-      for (const idx of selected) {
-        if (idx >= 0 && idx < optionCounts.length) {
-          optionCounts[idx]++;
-        }
-      }
-      const isCorrect =
-        selected.length === q.correctIndices.length &&
-        selected.every((s) => q.correctIndices.includes(s));
-      if (isCorrect) correctCount++;
-    }
-
-    return {
-      questionIndex: i,
-      question: q.question,
-      options: q.options,
-      correctIndices: q.correctIndices,
-      why: q.why,
-      participants,
-      optionCounts,
-      percentCorrect: participants > 0 ? Math.round((correctCount / participants) * 100) : 0,
-    };
-  });
+  const responseRows = await userSQL(user)<{ question_index: number; selected: number[] }[]>`
+    SELECT question_index, selected FROM quiz_responses WHERE session_id = ${sessionId}
+  `;
 
   return {
     sessionId: row.session_id,
     courseId: row.course_id,
     createdAt: row.created_at,
-    questions: summaryQuestions,
+    questions: buildQuestionSummaries(row.questions, participants, responseRows),
   };
 }
 

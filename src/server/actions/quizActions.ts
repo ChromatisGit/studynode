@@ -7,7 +7,7 @@ import {
   revealDistribution,
   revealCorrectAnswer,
   nextQuizQuestion,
-  skipQuestion,
+  enterSummary,
   closeQuizSession,
   closeActiveQuizForCourse,
   joinQuizSession,
@@ -30,7 +30,6 @@ type Result<T> = OkResult<T> | ErrResult;
 export async function startQuizAction(
   courseId: string,
   questions: StoredQuestion[],
-  timerSeconds: number | null,
 ): Promise<Result<{ sessionId: string }>> {
   const session = await getSession();
   assertAdminAccess(session);
@@ -40,10 +39,9 @@ export async function startQuizAction(
   }
 
   try {
-    const sessionId = await startQuizSession(courseId, questions, timerSeconds, session.user);
+    const sessionId = await startQuizSession(courseId, questions, session.user);
     return { ok: true, data: { sessionId } };
   } catch (err) {
-    // Unique constraint: only one active session per course at a time
     if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
       return { ok: false, error: "Für diesen Kurs läuft bereits ein Quiz." };
     }
@@ -79,10 +77,10 @@ export async function nextQuizQuestionAction(sessionId: string): Promise<Result<
   return { ok: true, data: undefined };
 }
 
-export async function skipQuestionAction(sessionId: string): Promise<Result<void>> {
+export async function enterSummaryAction(sessionId: string): Promise<Result<void>> {
   const session = await getSession();
   assertAdminAccess(session);
-  await skipQuestion(sessionId, session.user);
+  await enterSummary(sessionId, session.user);
   return { ok: true, data: undefined };
 }
 
@@ -115,23 +113,14 @@ export async function submitQuizResponseAction(
   sessionId: string,
   questionIndex: number,
   selected: number[],
-  timedOut: boolean,
 ): Promise<Result<void>> {
   const session = await getSession();
   assertLoggedIn(session);
 
-  const result = await submitQuizResponse(
-    sessionId,
-    questionIndex,
-    selected,
-    timedOut,
-    session.user,
-  );
-
+  const result = await submitQuizResponse(sessionId, questionIndex, selected, session.user);
   if (!result.ok) {
     return { ok: false, error: result.reason ?? "submission_failed" };
   }
-
   return { ok: true, data: undefined };
 }
 
@@ -147,7 +136,6 @@ export async function getQuizResultsAction(
 
   const results = await getQuizResults(sessionId, session.user);
   if (!results) return { ok: false, error: "session_not_found" };
-
   return { ok: true, data: results };
 }
 
@@ -159,7 +147,6 @@ export async function getQuizSummaryAction(
 
   const summary = await getQuizSummary(sessionId, session.user);
   if (!summary) return { ok: false, error: "session_not_found" };
-
   return { ok: true, data: summary };
 }
 
@@ -172,4 +159,3 @@ export async function listQuizSessionsAction(
   const sessions = await listQuizSessions(courseId, session.user);
   return { ok: true, data: sessions };
 }
-

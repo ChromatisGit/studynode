@@ -20,7 +20,7 @@ export function Layout({
   children,
   fullWidth,
 }: LayoutProps) {
-  const lastCourseHref = sidebarData.courses[0]?.href ?? null;
+  const primaryCourseHref = sidebarData.courses[0]?.href ?? null;
 
   return (
     <div className={styles.layout}>
@@ -33,8 +33,9 @@ export function Layout({
       <main className={`${styles.main}${fullWidth ? ` ${styles.mainFullWidth}` : ""}`}>{children}</main>
       <MobileNav
         isAuthenticated={sidebarData.isAuthenticated}
-        lastCourseHref={lastCourseHref}
+        primaryCourseHref={primaryCourseHref}
         isAdmin={isAdmin}
+        enrolledCoursesCount={sidebarData.courses.length}
       />
     </div>
   );

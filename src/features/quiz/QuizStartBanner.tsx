@@ -21,17 +21,8 @@ export function QuizStartBanner() {
   const pathname = usePathname();
   const [countdown, setCountdown] = useState<number | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const hasStartedRef = useRef(false);
 
   const isOnQuizPage = pathname?.startsWith("/quiz") ?? false;
-
-  // Navigate when countdown completes
-  useEffect(() => {
-    if (hasStartedRef.current && countdown === null) {
-      hasStartedRef.current = false;
-      router.push("/quiz");
-    }
-  }, [countdown, router]);
 
   const startCountdown = useCallback(() => {
     if (countdownRef.current) return; // already running
@@ -41,16 +32,15 @@ export function QuizStartBanner() {
     countdownRef.current = setInterval(() => {
       setCountdown((c) => {
         if (c === null || c <= 1) {
-          if (countdownRef.current) {
-            clearInterval(countdownRef.current);
-            countdownRef.current = null;
-          }
+          clearInterval(countdownRef.current!);
+          countdownRef.current = null;
+          router.push("/quiz");
           return null;
         }
         return c - 1;
       });
     }, 1000);
-  }, []);
+  }, [router]);
 
   const onEvent = useCallback((event: StudentStreamEvent) => {
     switch (event.type) {
@@ -76,8 +66,8 @@ export function QuizStartBanner() {
     };
   }, []);
 
-  // Never show on the quiz page itself
-  if (isOnQuizPage) return null;
+  // Never show on the quiz page, or when no countdown is active
+  if (isOnQuizPage || countdown === null) return null;
 
   return (
     <div className={styles.overlay}>

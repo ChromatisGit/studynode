@@ -6,7 +6,6 @@ import { useRouteContext } from "@ui/contexts/RouteContext";
 import { SidebarTopicNav } from "./SidebarTopicNav";
 import {
   GraduationCap,
-  Home,
   BookOpen,
   Moon,
   Sun,
@@ -35,18 +34,16 @@ export function Sidebar({
   isAdmin,
   signOutAction,
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(pathname === "/");
+  const [isPending, startTransition] = useTransition();
   const { theme, toggleTheme } = useTheme();
   const { topic, chapter, hasTopicContext } = useRouteContext();
 
   const showTopicNav = hasTopicContext && sidebarData.topics.length > 0 && !collapsed;
 
   const isActive = (href: string) => {
-    if (href === "/home") return pathname === "/home";
     if (href === "/practice") return pathname.startsWith("/practice");
-    if (href === "/quiz") return pathname.startsWith("/quiz");
     return pathname.startsWith(href);
   };
 
@@ -84,14 +81,6 @@ export function Sidebar({
         {sidebarData.isAuthenticated && (
           <>
             <AppLink
-              href="/home"
-              className={clsx(styles.navItem, isActive("/home") && styles.active)}
-            >
-              <Home size={18} className={styles.icon} aria-hidden />
-              {!collapsed && <span>Home</span>}
-            </AppLink>
-
-            <AppLink
               href="/practice"
               className={clsx(styles.navItem, isActive("/practice") && styles.active)}
             >
@@ -102,7 +91,7 @@ export function Sidebar({
             {sidebarData.courses.length > 0 && (
               <>
                 {!collapsed && (
-                  <p className={styles.sectionLabel}>Courses</p>
+                  <p className={styles.sectionLabel}>Meine Kurse</p>
                 )}
                 {sidebarData.courses.map((course) => (
                   <AppLink
