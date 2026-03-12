@@ -29,6 +29,7 @@ import type { CodeTaskMacro } from "./codeTask/types";
 import type { TextTaskMacro } from "./textTask/types";
 import type { PresenterNoteMacro } from "./pn/types";
 import type { LayoutMacro } from "./layout/types";
+import type { KTableMacro } from "./ktable/types";
 
 // ============================================================================
 // COMPONENT IMPORTS - Add new macro component imports here
@@ -46,6 +47,7 @@ import QuizRenderer from "./quiz/Renderer";
 import CodeTaskRenderer from "./codeTask/Renderer";
 import TextTaskRenderer from "./textTask/Renderer";
 import LayoutRenderer from "./layout/Renderer";
+import KTableRenderer from "./ktable/Renderer";
 
 // ============================================================================
 // MACRO TYPE (union of all macro types)
@@ -55,6 +57,7 @@ export type Macro =
   | NoteMacro
   | CardMacro
   | PairsMacro
+  | KTableMacro
   | ImageMacro
   | TableMacro
   | CodeRunnerMacro
@@ -77,6 +80,7 @@ const macros = {
   note: { Component: NoteRenderer, category: "display" as const, state: "none" as const },
   card: { Component: CardRenderer, category: "display" as const, state: "none" as const },
   pairs: { Component: PairsRenderer, category: "display" as const, state: "none" as const },
+  ktable: { Component: KTableRenderer, category: "display" as const, state: "none" as const },
   image: { Component: ImageRenderer, category: "display" as const, state: "none" as const },
   table: { Component: TableRenderer, category: "display" as const, state: "none" as const },
   codeRunner: { Component: CodeRunnerRenderer, category: "display" as const, state: "interactive" as const },
