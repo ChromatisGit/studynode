@@ -253,10 +253,18 @@
 
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
+// Items separated by paragraph breaks inside a single [ ] body.
 
-#let steps(..items) = {
-  let arr = items.pos()
-  for i in range(arr.len()) {
+#let steps(body) = {
+  let items = ()
+  let buf = ()
+  for c in body.children {
+    if c.func() == parbreak {
+      if buf.len() > 0 { items.push(buf.join()); buf = () }
+    } else { buf.push(c) }
+  }
+  if buf.len() > 0 { items.push(buf.join()) }
+  for i in range(items.len()) {
     grid(
       columns: (22pt, 1fr),
       column-gutter: 10pt,
@@ -269,31 +277,47 @@
           )
         )
       ),
-      pad(top: 2pt, arr.at(i))
+      pad(top: 2pt, items.at(i))
     )
-    if i < arr.len() - 1 { v(gap.sm) }
+    if i < items.len() - 1 { v(gap.sm) }
   }
   v(gap.md)
 }
 
 
 // ─── Layouts ─────────────────────────────────────────────────────────────────
+// Columns separated by --- (em dash — ) inside a single [ ] body.
 
-#let slide-split(left, right) = {
+#let _split-em-dash(body) = {
+  let parts = ((),)
+  for c in body.children {
+    if c.has("text") and c.text.trim() == "—" {
+      parts.push(())
+    } else {
+      let last = parts.pop()
+      parts.push(last + (c,))
+    }
+  }
+  parts.map(p => p.join())
+}
+
+#let slideSplit(body) = {
+  let p = _split-em-dash(body)
   grid(
     columns: (1fr, 1fr),
     column-gutter: gap.lg,
-    left,
-    right
+    p.at(0, default: []),
+    p.at(1, default: [])
   )
 }
 
-#let slide-main(body, aside: []) = {
+#let slideMain(body) = {
+  let p = _split-em-dash(body)
   grid(
     columns: (2fr, 1fr),
     column-gutter: gap.lg,
-    body,
-    aside
+    p.at(0, default: []),
+    p.at(1, default: [])
   )
 }
 

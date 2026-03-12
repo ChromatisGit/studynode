@@ -21,6 +21,8 @@ import { parser as codeTaskParser } from "@macros/codeTask/parser";
 import { parser as textTaskParser } from "@macros/textTask/parser";
 import { parser as pnParser } from "@macros/pn/parser";
 import { parser as ktableParser } from "@macros/ktable/parser";
+import { parser as formulaParser } from "@macros/formula/parser";
+import { parser as calloutParser } from "@macros/callout/parser";
 
 // Import Macro type from registry (types only, no runtime deps)
 import type { Macro } from "@macros/registry";
@@ -50,6 +52,8 @@ const parserMap: Map<string, ParserDef> = new Map([
   ["textTask", textTaskParser],
   ["pn", pnParser],
   ["ktable", ktableParser],
+  ["formula", formulaParser],
+  ["callout", calloutParser],
 ] as [string, ParserDef][]);
 
 export function parseMacroType(node: RawMacro, contentType?: ContentType): Macro | MacroGroup {
