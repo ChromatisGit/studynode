@@ -28,6 +28,16 @@
   background: color-mix(in srgb, var(--sn-orange-accent) 8%, var(--sn-surface));
 }
 
+.answer {
+  border: none;
+  border-left: 4px solid var(--sn-green-accent);
+  background: color-mix(in srgb, var(--sn-green-accent) 8%, var(--sn-surface));
+}
+
+.plain {
+  border-left-width: 1px;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -71,6 +81,14 @@
 
 .warning .label {
   color: var(--sn-orange-accent-strong);
+}
+
+.answer .icon {
+  color: var(--sn-green-accent);
+}
+
+.answer .label {
+  color: var(--sn-green-accent-strong);
 }
 
 .content > :first-child {
