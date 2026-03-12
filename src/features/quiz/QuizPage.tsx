@@ -38,7 +38,15 @@ export function QuizPage({ initialState }: QuizPageProps) {
     }
   }, [quiz]);
 
-  // Auto-join when a session becomes available or changes
+  // Join on mount if a session is already active (student arrived mid-quiz)
+  useEffect(() => {
+    if (initialState?.sessionId) {
+      joinQuizAction(initialState.sessionId).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-join when a new session becomes available
   useEffect(() => {
     if (quiz?.sessionId && quiz.sessionId !== lastSessionRef.current) {
       lastSessionRef.current = quiz.sessionId;

@@ -6,7 +6,7 @@
   padding: var(--sn-space-md);
   border: 1px solid var(--sn-border);
   border-radius: var(--sn-radius-md);
-  background: var(--sn-surface-raised);
+  background: var(--sn-surface);
   text-decoration: none;
   max-width: 520px;
   transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;

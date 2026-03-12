@@ -20,6 +20,7 @@ export function QuizStartBanner() {
   const router = useRouter();
   const pathname = usePathname();
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isOnQuizPage = pathname?.startsWith("/quiz") ?? false;
@@ -34,13 +35,13 @@ export function QuizStartBanner() {
         if (c === null || c <= 1) {
           clearInterval(countdownRef.current!);
           countdownRef.current = null;
-          router.push("/quiz");
+          setShouldNavigate(true);
           return null;
         }
         return c - 1;
       });
     }, 1000);
-  }, [router]);
+  }, []);
 
   const onEvent = useCallback((event: StudentStreamEvent) => {
     switch (event.type) {
@@ -59,6 +60,10 @@ export function QuizStartBanner() {
   }, [startCountdown]);
 
   useQuizStream({ onEvent });
+
+  useEffect(() => {
+    if (shouldNavigate) router.push("/quiz");
+  }, [shouldNavigate, router]);
 
   useEffect(() => {
     return () => {
