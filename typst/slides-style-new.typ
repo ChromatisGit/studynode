@@ -31,13 +31,41 @@
 #let padding = (xs: 4pt, sm: 8pt, md: 14pt, lg: 20pt)
 #let gap     = (xs: 6pt, sm: 10pt, md: 16pt, lg: 24pt, xl: 32pt)
 
+// Slide format: "16:9" (default, 33.87 × 19.05 cm) or "4:3" (25.4 × 19.05 cm)
+#let slide-format = "4:3"
+
+#let _page-w = if slide-format == "4:3" { 25.4cm  } else { 33.87cm }
+#let _page-h = if slide-format == "4:3" { 19.05cm } else { 19.05cm }
+#let _card-w = _page-w - 0.8cm
+#let _card-h = _page-h - 0.6cm
+
+// Minimum widths for cards and bullet point containers (in cm)
+#let card-min-width   = 12cm  // focus-box and result-box
+#let points-min-width = 9cm   // bullet point container
+
 #let font-body = ("DM Sans", "Segoe UI", "Inter")
 #let font-mono = ("Cascadia Code", "Cascadia Mono", "Consolas")
 
+// Typography scale — all sizes proportional to font-size-base
+#let font-size-base = 13pt
+#let fs-tiny    = font-size-base * 0.577  // ≈  7.5pt — minor hint text
+#let fs-badge   = font-size-base * 0.615  // ≈  8pt   — badge labels
+#let fs-caption = font-size-base * 0.692  // ≈  9pt   — captions, image labels
+#let fs-small   = font-size-base * 0.769  // ≈ 10pt   — link text, quiz elements
+#let fs-sub     = font-size-base * 0.846  // ≈ 11pt   — section subtitle
+#let fs-minor   = font-size-base * 0.923  // ≈ 12pt   — card body text
+#let fs-body    = font-size-base          // = 13pt   — default body text
+#let fs-focus   = font-size-base * 1.077  // ≈ 14pt   — focus box content
+#let fs-heading = font-size-base * 1.154  // ≈ 15pt   — headers, card titles, formula
+#let fs-task    = font-size-base * 1.615  // ≈ 21pt   — task slide focus
+#let fs-title   = font-size-base * 2.0    // ≈ 26pt   — title slide
+#let fs-section = font-size-base * 2.615  // ≈ 34pt   — section slide
+
 // Save built-ins before shadowing
-#let _std-image = image
-#let _std-link  = link
-#let _std-list  = list
+#let _std-image  = image
+#let _std-link   = link
+#let _std-list   = list
+#let _std-layout = layout
 
 
 // ─── Main Style ───────────────────────────────────────────────────────────────
@@ -45,16 +73,16 @@
 #let slides-style(body) = {
   show: doc => {
     set page(
-      width:  33.87cm,
-      height: 19.05cm,   // 16:9
+      width:  _page-w,
+      height: _page-h,
       margin: (x: 1.5cm, y: 1.0cm),
       fill: colors.page,
       background: {
         // subtle drop shadow
         place(center + horizon, dy: 3pt,
           block(
-            width:  33.87cm - 0.8cm,
-            height: 19.05cm - 0.6cm,
+            width:  _card-w,
+            height: _card-h,
             fill:   rgb("#1d183012"),
             radius: 16pt,
           )
@@ -62,8 +90,8 @@
         // white card
         place(center + horizon,
           block(
-            width:  33.87cm - 0.8cm,
-            height: 19.05cm - 0.6cm,
+            width:  _card-w,
+            height: _card-h,
             fill:   white,
             radius: 16pt,
             stroke: 0.7pt + colors.border,
@@ -71,7 +99,7 @@
         )
       },
     )
-    set text(font: font-body, size: 13pt, fill: colors.text)
+    set text(font: font-body, size: font-size-base, fill: colors.text)
     set par(leading: 0.8em)
     doc
   }
@@ -88,9 +116,9 @@
 
 #let title(body) = {
   align(center + horizon, {
-    text(size: 9pt, fill: colors.muted, weight: "medium")[Foliensatz zu]
+    text(size: fs-caption, fill: colors.muted, weight: "medium")[Foliensatz zu]
     v(gap.sm)
-    text(size: 26pt, weight: "bold", fill: colors.text, body)
+    text(size: fs-title, weight: "bold", fill: colors.text, body)
     v(gap.md)
     line(length: 3cm, stroke: 2pt + colors.purple)
   })
@@ -110,7 +138,7 @@
   inset: (x: 5pt, y: 2pt),
   radius: 3pt,
   fill: color.transparentize(82%),
-  text(size: 8pt, weight: "bold", fill: color, upper(label))
+  text(size: fs-badge, weight: "bold", fill: color, upper(label))
 )
 
 // Badge + title in one line, followed by a divider
@@ -120,7 +148,7 @@
     column-gutter: 7pt,
     align(center + horizon, _badge(badge-label, badge-color)),
     align(left + horizon,
-      text(size: 15pt, weight: "bold", fill: colors.text, slide-title)
+      text(size: fs-heading, weight: "bold", fill: colors.text, slide-title)
     ),
   )
   v(gap.xs)
@@ -129,73 +157,104 @@
 }
 
 // Colored statement / question box
+// Auto-width: grows to fit content, but never narrower than card-min-width-ratio of available width.
+// Text inside is always left-aligned.
 #let _focus-box(content, accent) = {
-  block(
-    width: 100%,
-    radius: radius,
-    fill: accent.transparentize(91%),
-    stroke: (left: 3.5pt + accent, rest: 0.5pt + accent.transparentize(65%)),
-    inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
-    { set text(size: 14pt); content }
-  )
+  layout(size => context {
+    let min-w  = card-min-width
+    let inner  = { set text(size: fs-focus); set align(left); content }
+    let proto  = block(
+      radius: radius,
+      inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
+      inner,
+    )
+    let w = calc.max(calc.min(measure(proto).width, size.width), min-w)
+    block(
+      width: w,
+      radius: radius,
+      fill: accent.transparentize(91%),
+      stroke: (left: 3.5pt + accent, rest: 0.5pt + accent.transparentize(65%)),
+      inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
+      inner,
+    )
+  })
   v(gap.md)
 }
 
-// Result / answer / conclusion box
-#let _result-box(content, accent, label) = {
-  block(
-    width: 100%,
-    radius: radius,
-    fill: accent.transparentize(90%),
-    stroke: (left: 3.5pt + accent, rest: 0.5pt + accent.transparentize(65%)),
-    inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
-    {
-      text(size: 8pt, weight: "bold", fill: accent, upper(label))
-      v(gap.xs)
-      set text(size: 13pt)
-      content
-    }
-  )
+// Result card — no label/title, content only. Text always left-aligned.
+// centered: true → the box itself is centered on the slide (text stays left inside)
+#let _result-box(content, accent, centered: false) = {
+  layout(size => context {
+    let min-w = card-min-width
+    let inner = { set align(left); set text(size: fs-body); content }
+    let proto = block(
+      radius: radius,
+      inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
+      inner,
+    )
+    let w = calc.max(calc.min(measure(proto).width, size.width), min-w)
+    let the-block = block(
+      width: w,
+      radius: radius,
+      fill: accent.transparentize(90%),
+      stroke: (left: 3.5pt + accent, rest: 0.5pt + accent.transparentize(65%)),
+      inset: (left: padding.lg, right: padding.lg, top: padding.md, bottom: padding.md),
+      inner,
+    )
+    if centered { align(center, the-block) } else { the-block }
+  })
   v(gap.sm)
 }
 
-// Numbered list with colored circle badges
-#let _steps-list(items, badge-color) = {
-  for i in range(items.len()) {
-    grid(
-      columns: (24pt, 1fr),
-      column-gutter: 10pt,
-      align(top,
-        block(
-          width: 24pt, height: 24pt,
-          fill: badge-color, radius: 12pt,
-          align(center + horizon,
-            text(size: 10pt, weight: "bold", fill: white, str(i + 1))
-          )
+// Bullet point list with colored dot markers.
+// Rendered inside an invisible container: auto-width, min points-min-width-ratio of available width.
+// Text inside is always left-aligned.
+#let _points-list(items, bullet-color, min-width: points-min-width, font-size: none) = {
+  layout(size => context {
+    let min-w = min-width
+    let rows = {
+      set align(left)
+      if font-size != none { set text(size: font-size) }
+      for i in range(items.len()) {
+        grid(
+          columns: (14pt, 1fr),
+          column-gutter: 8pt,
+          align(top, pad(top: 4pt,
+            block(width: 7pt, height: 7pt, radius: 3.5pt, fill: bullet-color)
+          )),
+          pad(top: 1pt, items.at(i))
         )
-      ),
-      pad(top: 3pt, items.at(i))
-    )
-    if i < items.len() - 1 { v(gap.md) }
-  }
+        if i < items.len() - 1 { v(gap.sm) }
+      }
+    }
+    let proto = block(rows)
+    let w = calc.max(calc.min(measure(proto).width, size.width), min-w)
+    block(width: w, rows)
+  })
   v(gap.md)
 }
 
-// Layout helper: text-content and material side-by-side or stacked
+// Layout helper: left text-content and right material according to layout
+// "split" (default): 2-col grid when material present, single column otherwise
+// "center": everything stacked and center-aligned
 #let _with-material(text-content, mat, layout) = {
-  if mat == none {
-    text-content
-  } else if layout == "split" {
-    grid(
-      columns: (2fr, 1fr),
-      column-gutter: gap.lg,
-      text-content,
-      mat,
-    )
+  if layout == "center" {
+    align(center, {
+      text-content
+      if mat != none { mat }
+    })
   } else {
-    // stacked
-    text-content
-    mat
+    // split (default)
+    if mat != none {
+      grid(
+        columns: (1fr, 1fr),
+        column-gutter: gap.lg,
+        text-content,
+        mat,
+      )
+    } else {
+      text-content
+    }
   }
 }
 
@@ -209,7 +268,7 @@
       radius: radius,
       fill: tints.purple,
       inset: (x: padding.lg, y: padding.md),
-      { set text(size: 15pt); expr }
+      { set text(size: fs-heading); expr }
     )
   )
   v(gap.md)
@@ -218,7 +277,7 @@
 #let link(url: "", label: none) = {
   let display = if label != none { label } else { text(url) }
   block(
-    width: 100%,
+    width: card-min-width,
     inset: (x: padding.md, y: padding.sm),
     radius: radius,
     stroke: 0.8pt + colors.blue,
@@ -226,30 +285,28 @@
     grid(
       columns: (auto, 1fr, auto),
       column-gutter: 6pt,
-      align(center + horizon, text(size: 10pt, fill: colors.blue)[→]),
-      align(left + horizon, text(size: 10pt, fill: colors.blue, weight: "semibold", display)),
-      align(right + horizon, text(size: 7.5pt, fill: colors.muted)[(öffnet im Browser)]),
+      align(center + horizon, text(size: fs-small, fill: colors.blue)[→]),
+      align(left + horizon, text(size: fs-small, fill: colors.blue, weight: "semibold", display)),
+      align(right + horizon, text(size: fs-tiny, fill: colors.muted)[(öffnet im Browser)]),
     )
   )
   v(gap.md)
 }
 
-#let image(file: "", label: none) = {
-  block(
-    width: 100%,
-    height: 5cm,
-    stroke: (paint: colors.border, dash: "dashed"),
-    radius: radius,
-    fill: tints.muted,
-    align(center + horizon,
-      text(size: 9pt, fill: colors.muted, style: "italic")[Bild: #file]
+#let image(file: "", label: none, height: 1fr) = {
+  // height: 1fr (default) fills remaining page height — correct for standalone page-flow use.
+  // Pass height: auto when the image is inside a grid cell to prevent row expansion.
+  align(center,
+    _std-image(
+      file,
+      width:  100%,
+      height: height,
+      fit:    "contain",
     )
   )
   if label != none {
-    v(gap.xs)
-    align(center, text(size: 9pt, fill: colors.muted, label))
+    align(center, text(size: fs-caption, fill: colors.muted, label))
   }
-  v(gap.md)
 }
 
 #let list(body) = {
@@ -278,10 +335,10 @@
     block(width: 26cm,
       align(center, {
         if subtitle != none {
-          text(size: 11pt, weight: "medium", fill: white.transparentize(35%), subtitle)
+          text(size: fs-sub, weight: "medium", fill: white.transparentize(35%), subtitle)
           v(gap.sm)
         }
-        text(size: 34pt, weight: "bold", fill: white, title)
+        text(size: fs-section, weight: "bold", fill: white, title)
         v(gap.md)
         line(length: 4cm, stroke: 1.5pt + white.transparentize(55%))
       })
@@ -300,29 +357,21 @@
   title:    [],
   focus:    none,
   material: none,
-  steps:    none,
-  layout:   "stacked",
+  points:   none,
+  layout:   "center",
   pn:       none,
 ) = {
   pagebreak(weak: true)
   _header("Einstieg", colors.orange, title)
 
-  if layout == "split" and material != none {
-    grid(
-      columns: (2fr, 1fr),
-      column-gutter: gap.lg,
-      {
-        if focus != none { _focus-box(focus, colors.orange) }
-        if steps != none { _steps-list(steps, colors.orange) }
-      },
-      material,
-    )
-  } else {
-    // stacked: focus → material → steps
-    if focus    != none { _focus-box(focus, colors.orange) }
-    if material != none { material }
-    if steps    != none { _steps-list(steps, colors.orange) }
-  }
+  _with-material(
+    {
+      if focus  != none { _focus-box(focus, colors.orange) }
+      if points != none { _points-list(points, colors.orange) }
+    },
+    material,
+    layout,
+  )
 }
 
 
@@ -334,76 +383,121 @@
 #let conceptSlide(
   title:    [],
   focus:    none,
-  steps:    none,
+  points:   none,
   material: none,
-  layout:   "stacked",
+  layout:   "center",
   pn:       none,
 ) = {
   pagebreak(weak: true)
   _header("Konzept", colors.purple, title)
 
-  // focus always full-width above content
-  if focus != none { _focus-box(focus, colors.purple) }
-
-  if layout == "split" and material != none {
-    grid(
-      columns: (2fr, 1fr),
-      column-gutter: gap.lg,
-      { if steps != none { _steps-list(steps, colors.purple) } },
-      material,
-    )
-  } else {
-    if material != none { material }
-    if steps    != none { _steps-list(steps, colors.purple) }
-  }
+  _with-material(
+    {
+      if focus  != none { _focus-box(focus, colors.purple) }
+      if points != none { _points-list(points, colors.purple) }
+    },
+    material,
+    layout,
+  )
 }
 
 
 // ─── 4. compareSlide ──────────────────────────────────────────────────────────
 // Contrasts two or more things.
-// focus = comparison question (blue box). columns = side-by-side panels.
+// focus = comparison question (blue box). columns = side-by-side cards.
 // result = synthesis conclusion (purple — Erkenntnis, not a solution).
+// layout kept for API compatibility; alignment is determined by card count.
+// reveal: "all" | "rowWise" | "colWise" — ignored in PDF (all content always visible).
+// columns items: (title: [], content: ([], [], ...))
 
 #let compareSlide(
   title:   [],
   focus:   none,
   columns: (),
   result:  none,
+  reveal:  "rowWise",
+  layout:  "center",
   pn:      none,
 ) = {
   pagebreak(weak: true)
   _header("Vergleich", colors.blue, title)
 
-  if focus != none { _focus-box(focus, colors.blue) }
+  if focus != none { align(center, _focus-box(focus, colors.blue)) }
 
-  // Build column grid: header row + content row
   let count = columns.len()
   if count > 0 {
-    let col-fractions = (1fr,) * count
-    let header-cells = ()
-    let content-cells = ()
-    for col in columns {
-      header-cells.push(
+    _std-layout(size => context {
+      let min-card-w = 0.30 * _page-w   // 30 % of page width ≈ 10.2 cm
+      let gutter     = gap.lg
+      let use-fixed  = count <= 2
+
+      // Actual outer card width (needed for accurate height measurement)
+      let card-w = if use-fixed {
+        min-card-w
+      } else {
+        (size.width - (count - 1) * gutter) / count
+      }
+
+      // Shared card inner content builder — content is an array of bullet items
+      let card-inner(col) = {
+        align(center, text(size: fs-heading, weight: "bold", fill: colors.text, col.title))
+        line(length: 100%, stroke: 0.6pt + colors.blue.transparentize(60%))
+        v(6pt)
+        {
+          set align(left)
+          set text(size: fs-minor)
+          let items = col.content
+          for i in range(items.len()) {
+            grid(
+              columns: (12pt, 1fr),
+              column-gutter: 6pt,
+              align(top, pad(top: 3pt,
+                block(width: 6pt, height: 6pt, radius: 3pt, fill: colors.blue)
+              )),
+              pad(top: 1pt, items.at(i)),
+            )
+            if i < items.len() - 1 { v(gap.xs) }
+          }
+        }
+      }
+
+      // Measure each card at its real width to find the tallest
+      let max-h = columns.fold(0pt, (acc, col) => calc.max(acc,
+        measure(block(
+          width: card-w,
+          inset: (x: padding.lg, y: padding.md),
+          card-inner(col),
+        )).height
+      ))
+
+      let col-widths = if use-fixed { (min-card-w,) * count } else { (1fr,) * count }
+
+      let cards = columns.map(col =>
         block(
-          width: 100%,
-          stroke: (bottom: 1.5pt + colors.blue),
-          inset: (bottom: 6pt, top: 0pt, x: 0pt),
-          text(size: 11pt, weight: "bold", fill: colors.blue, col.title)
+          width:  100%,
+          height: max-h,
+          radius: radius,
+          fill:   colors.blue.transparentize(91%),
+          stroke: 0.6pt + colors.border,
+          inset:  (x: padding.lg, y: padding.md),
+          card-inner(col),
         )
       )
-      content-cells.push(pad(top: 8pt, col.content))
-    }
-    grid(
-      columns:        col-fractions,
-      column-gutter:  gap.lg,
-      row-gutter:     0pt,
-      ..header-cells,
-      ..content-cells,
-    )
+
+      let g = grid(
+        columns:       col-widths,
+        column-gutter: gutter,
+        ..cards,
+      )
+
+      if use-fixed { align(center, g) } else { g }
+    })
     v(gap.md)
   }
 
-  if result != none { _result-box(result, colors.purple, "Fazit") }
+  if result != none {
+    _result-box(result, colors.purple, centered: true)
+  }
 }
 
 
@@ -415,55 +509,55 @@
 #let exampleSlide(
   title:     [],
   material:  none,
-  steps:     none,
+  points:    none,
   result:    none,
   revealAll: false,
-  layout:    "stacked",
+  layout:    "center",
   pn:        none,
 ) = {
   pagebreak(weak: true)
   _header("Beispiel", colors.muted, title)
 
-  // stacked: material → steps → result
-  if material != none { material }
-  if steps    != none { _steps-list(steps, colors.muted) }
-  if result   != none { _result-box(result, colors.green, "Lösung") }
+  _with-material(
+    { if points != none { _points-list(points, colors.muted) } },
+    material,
+    layout,
+  )
+  if result != none {
+    _result-box(result, colors.green,
+      centered: layout == "center" or material != none)
+  }
 }
 
 
 // ─── 6. promptSlide ───────────────────────────────────────────────────────────
 // Question for classroom dialogue.
 // focus = question (blue box). result = answer (green — revealed on click in live).
-// Default layout: split when material present, stacked otherwise.
+// focus + material follow layout. result always centered.
 
 #let promptSlide(
   title:    [],
   focus:    none,
   material: none,
+  points:   none,
   result:   none,
-  layout:   auto,
+  layout:   "center",
   pn:       none,
 ) = {
   pagebreak(weak: true)
   _header("Frage", colors.blue, title)
 
-  let eff-layout = if layout == auto {
-    if material != none { "split" } else { "stacked" }
-  } else { layout }
-
-  if eff-layout == "split" and material != none {
-    grid(
-      columns: (2fr, 1fr),
-      column-gutter: gap.lg,
-      { if focus != none { _focus-box(focus, colors.blue) } },
-      material,
-    )
-  } else {
-    if focus    != none { _focus-box(focus, colors.blue) }
-    if material != none { material }
+  _with-material(
+    {
+      if focus  != none { _focus-box(focus, colors.blue) }
+      if points != none { _points-list(points, colors.blue) }
+    },
+    material,
+    layout,
+  )
+  if result != none {
+    _result-box(result, colors.green, centered: true)
   }
-
-  if result != none { _result-box(result, colors.green, "Antwort") }
 }
 
 
@@ -474,13 +568,16 @@
 #let taskSlide(
   title:    [],
   focus:    none,
+  points:   none,
+  result:   none,
   material: none,
-  layout:   "stacked",
+  layout:   "center",
   pn:       none,
 ) = {
   pagebreak(weak: true)
   _header("Auftrag", colors.teal, title)
 
+  // Big teal focus block — always full-width, layout-independent
   if focus != none {
     block(
       width: 100%,
@@ -488,13 +585,20 @@
       fill: colors.teal,
       inset: (x: padding.lg, y: gap.xl),
       align(center,
-        text(size: 21pt, weight: "bold", fill: white, focus)
+        text(size: fs-task, weight: "bold", fill: white, focus)
       )
     )
     v(gap.md)
   }
 
-  if material != none { material }
+  _with-material(
+    { if points != none { _points-list(points, colors.teal) } },
+    material,
+    layout,
+  )
+  if result != none {
+    _result-box(result, colors.teal, centered: true)
+  }
 }
 
 
@@ -503,31 +607,19 @@
 // No focus, no result (spec).
 
 #let recapSlide(
-  title: [],
-  steps: (),
-  pn:    none,
+  title:  [],
+  points: (),
+  layout: "center",
+  pn:     none,
 ) = {
   pagebreak(weak: true)
   _header("Zusammenfassung", colors.green, title)
 
-  for i in range(steps.len()) {
-    grid(
-      columns: (24pt, 1fr),
-      column-gutter: 10pt,
-      align(top,
-        block(
-          width: 24pt, height: 24pt,
-          fill: colors.green, radius: 12pt,
-          align(center + horizon,
-            text(size: 10pt, weight: "bold", fill: white, str(i + 1))
-          )
-        )
-      ),
-      pad(top: 3pt, steps.at(i))
-    )
-    if i < steps.len() - 1 { v(gap.lg) }  // generous spacing for recap
+  if layout == "center" {
+    align(center, _points-list(points, colors.green, min-width: card-min-width, font-size: fs-heading))
+  } else {
+    _points-list(points, colors.green, min-width: card-min-width, font-size: fs-heading)
   }
-  v(gap.md)
 }
 
 
@@ -569,12 +661,12 @@
             radius: 12pt,
             fill: badge-fill,
             align(center + horizon,
-              text(size: 10pt, weight: "bold", fill: white,
+              text(size: fs-small, weight: "bold", fill: white,
                 letters.at(i, default: "?"))
             )
           )
         ),
-        align(horizon, text(size: 13pt, options.at(i)))
+        align(horizon, text(size: fs-body, options.at(i)))
       )
     )
     if i < options.len() - 1 { v(gap.xs) }
