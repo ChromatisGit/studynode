@@ -1,4 +1,3 @@
-import type { Markdown } from "@schema/page";
 import type { RawText } from "@pipeline/types";
 import type { ProtectedBlock } from "@pipeline/pageParser/codeBlockGuard";
 import type { Macro } from "@macros/registry";
@@ -84,7 +83,6 @@ function parseGroupContent(node: RawMacroBlock, protectedBlocks: ProtectedBlock[
 
     macroGroup.macros = groupNodes.flatMap((node) => {
         const result = parseMacro(node, protectedBlocks, filePath, contentType)
-        if (result.type === "group") return result.macros
         return [result]
     })
 
@@ -113,7 +111,7 @@ function parseSlideMainContent(node: RawMacroBlock, protectedBlocks: ProtectedBl
     };
 }
 
-function parseStepsContent(node: RawMacroBlock, protectedBlocks: ProtectedBlock[], filePath: string): StepsMacro {
+function parseStepsContent(node: RawMacroBlock, protectedBlocks: ProtectedBlock[], _filePath: string): StepsMacro {
     const content = node.content ?? "";
     const items = content.split(/\n\n+/).map(s => s.trim()).filter(Boolean);
     return {
