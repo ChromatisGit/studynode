@@ -41,7 +41,7 @@
 
 // Minimum widths for cards and bullet point containers (in cm)
 #let card-min-width   = 12cm  // focus-box and result-box
-#let points-min-width = 9cm   // bullet point container
+#let points-width = 9cm   // bullet point block width
 
 #let font-body = ("DM Sans", "Segoe UI", "Inter")
 #let font-mono = ("Cascadia Code", "Cascadia Mono", "Consolas")
@@ -66,6 +66,21 @@
 #let _std-link   = link
 #let _std-list   = list
 #let _std-layout = layout
+
+
+// ─── Slide State ──────────────────────────────────────────────────────────────
+
+#let _slide-title    = state("sn-slide-title", [])
+#let _slide-type     = state("sn-slide-type", "")
+#let _slide-accent   = state("sn-slide-accent", colors.purple)
+#let _result-accent  = state("sn-result-accent", colors.green)
+#let _result-content = state("sn-result-content", none)
+#let _focus-content  = state("sn-focus-content", none)
+#let _columns-state  = state("sn-columns", ())
+#let _in-material      = state("sn-in-material", false)
+#let _quiz-item-correct = state("sn-quiz-item-correct", false)
+#let _quiz-is-first     = state("sn-quiz-is-first", true)
+#let _quiz-question     = state("sn-quiz-question", none)
 
 
 // ─── Main Style ───────────────────────────────────────────────────────────────
@@ -99,6 +114,10 @@
         )
       },
     )
+    // = Headings become slide titles — no visual output, slide functions render them
+    show heading.where(level: 1): it => {
+      _slide-title.update(it.body)
+    }
     set text(font: font-body, size: font-size-base, fill: colors.text)
     set par(leading: 0.8em)
     doc
@@ -110,25 +129,6 @@
 // ─── Presenter Notes — invisible in PDF ───────────────────────────────────────
 
 #let pn(body) = []
-
-
-// ─── Title Slide ──────────────────────────────────────────────────────────────
-
-#let title(body) = {
-  align(center + horizon, {
-    text(size: fs-caption, fill: colors.muted, weight: "medium")[Foliensatz zu]
-    v(gap.sm)
-    text(size: fs-title, weight: "bold", fill: colors.text, body)
-    v(gap.md)
-    line(length: 3cm, stroke: 2pt + colors.purple)
-  })
-  place(bottom + center,
-    text(size: 7.5pt, fill: colors.muted)[
-      Statischer PDF-Export — im Unterricht wurde eine interaktive Version auf studynode.de verwendet.
-    ]
-  )
-  pagebreak(weak: false)
-}
 
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
@@ -206,36 +206,31 @@
   v(gap.sm)
 }
 
-// Bullet point list with colored dot markers.
-// Rendered inside an invisible container: auto-width, min points-min-width-ratio of available width.
-// Text inside is always left-aligned.
-#let _points-list(items, bullet-color, min-width: points-min-width, font-size: none) = {
-  layout(size => context {
-    let min-w = min-width
-    let rows = {
+// Render body-block content with colored bullet markers for list items.
+// Each list item is placed in its own centered points-width block with left-aligned content.
+// Focus boxes and images are unaffected — they handle their own sizing via layout().
+#let _styled-body(body, color, font-size: none) = {
+  set _std-list(spacing: gap.sm)
+  if font-size != none { set text(size: font-size) }
+  show _std-list.item: it => align(center,
+    block(width: points-width, {
       set align(left)
-      if font-size != none { set text(size: font-size) }
-      for i in range(items.len()) {
-        grid(
-          columns: (14pt, 1fr),
-          column-gutter: 8pt,
-          align(top, pad(top: 4pt,
-            block(width: 7pt, height: 7pt, radius: 3.5pt, fill: bullet-color)
-          )),
-          pad(top: 1pt, items.at(i))
-        )
-        if i < items.len() - 1 { v(gap.sm) }
-      }
-    }
-    let proto = block(rows)
-    let w = calc.max(calc.min(measure(proto).width, size.width), min-w)
-    block(width: w, rows)
-  })
+      grid(
+        columns: (14pt, 1fr),
+        column-gutter: 8pt,
+        align(top, pad(top: 4pt,
+          block(width: 7pt, height: 7pt, radius: 3.5pt, fill: color)
+        )),
+        pad(top: 1pt, it.body),
+      )
+    })
+  )
+  body
   v(gap.md)
 }
 
 // Layout helper: left text-content and right material according to layout
-// "split" (default): 2-col grid when material present, single column otherwise
+// "split": 2-col grid when material present, single column otherwise
 // "center": everything stacked and center-aligned
 #let _with-material(text-content, mat, layout) = {
   if layout == "center" {
@@ -244,18 +239,70 @@
       if mat != none { mat }
     })
   } else {
-    // split (default)
+    // split
     if mat != none {
       grid(
         columns: (1fr, 1fr),
         column-gutter: gap.lg,
         text-content,
-        mat,
+        {
+          _in-material.update(true)
+          mat
+          _in-material.update(false)
+        },
       )
     } else {
       text-content
     }
   }
+}
+
+// Render result stored via #result[...] — always centered, below main content
+#let _render-result() = context {
+  let r = _result-content.get()
+  if r != none {
+    _result-box(r, _result-accent.get(), centered: true)
+  }
+}
+
+
+// ─── Inline Macros ────────────────────────────────────────────────────────────
+
+// #focus[...] — renders a focus box using the current slide's accent color.
+// In taskSlide: stores content in state (rendered full-width before the body grid).
+#let focus(body) = context {
+  if _slide-type.get() == "task" {
+    _focus-content.update(body)
+  } else {
+    _focus-box(body, _slide-accent.get())
+  }
+}
+
+// #result[...] — stores content; slide function renders it below the main area
+#let result(body) = { _result-content.update(body) }
+
+// #col[title][body] — appends a column to compareSlide
+#let col(title, body) = {
+  _columns-state.update(cols => cols + ((title: title, body: body),))
+}
+
+
+// ─── Title Slide ──────────────────────────────────────────────────────────────
+
+#let title(body) = {
+  align(center + horizon, {
+    text(size: fs-caption, fill: colors.muted, weight: "medium")[Foliensatz zu]
+    v(gap.sm)
+    text(size: fs-title, weight: "bold", fill: colors.text, body)
+    v(gap.md)
+    line(length: 3cm, stroke: 2pt + colors.purple)
+  })
+  place(bottom + center,
+    text(size: 7.5pt, fill: colors.muted)[
+      Statischer PDF-Export — im Unterricht wurde eine interaktive Version auf studynode.de verwendet.
+    ]
+  )
+  pagebreak(weak: false)
 }
 
 
@@ -293,14 +340,14 @@
   v(gap.md)
 }
 
-#let image(file: "", label: none, height: 1fr) = {
-  // height: 1fr (default) fills remaining page height — correct for standalone page-flow use.
-  // Pass height: auto when the image is inside a grid cell to prevent row expansion.
+#let image(file: "", label: none, height: none) = context {
+  // height: none → auto-detect: use auto inside material column, 1fr elsewhere
+  let h = if height != none { height } else if _in-material.get() { auto } else { 1fr }
   align(center,
     _std-image(
       file,
       width:  100%,
-      height: height,
+      height: h,
       fit:    "contain",
     )
   )
@@ -318,10 +365,15 @@
 
 // ─── 1. sectionSlide ──────────────────────────────────────────────────────────
 // Full purple background — no white card. Purely orientational.
+// Usage:
+//   = Section Title
+//   #sectionSlide                     ← no subtitle
+//   #sectionSlide[Optional subtitle]
 
-#let sectionSlide(title: [], subtitle: none, pn: none) = {
+#let sectionSlide(..args) = {
+  let subtitle = args.pos().at(0, default: none)
   pagebreak(weak: true)
-  // Purple overlay covering the white card (card = page - 0.8cm each side)
+  // Purple overlay covering the white card
   place(top + left, dx: -1.5cm, dy: -1.0cm,
     block(
       width:  33.87cm - 0.8cm,
@@ -330,346 +382,429 @@
       radius: 16pt,
     )
   )
-  // Centered content — placed after the rect so it renders above it
-  place(center + horizon,
-    block(width: 26cm,
-      align(center, {
-        if subtitle != none {
-          text(size: fs-sub, weight: "medium", fill: white.transparentize(35%), subtitle)
-          v(gap.sm)
-        }
-        text(size: fs-section, weight: "bold", fill: white, title)
-        v(gap.md)
-        line(length: 4cm, stroke: 1.5pt + white.transparentize(55%))
-      })
+  context {
+    let title = _slide-title.get()
+    place(center + horizon,
+      block(width: 26cm,
+        align(center, {
+          if subtitle != none {
+            text(size: fs-sub, weight: "medium", fill: white.transparentize(35%), subtitle)
+            v(gap.sm)
+          }
+          text(size: fs-section, weight: "bold", fill: white, title)
+          v(gap.md)
+          line(length: 4cm, stroke: 1.5pt + white.transparentize(55%))
+        })
+      )
     )
-  )
+  }
   v(16.5cm) // page filler so next slide starts on a new page
 }
 
 
 // ─── 2. hookSlide ─────────────────────────────────────────────────────────────
 // Opens a problem or guiding question. Creates curiosity.
-// focus = Leitfrage (orange box). material below or split right.
-// No result (spec).
+// #focus[...] = Leitfrage (orange). Second block = material (→ split layout).
+// Usage:
+//   = Slide Title
+//   #hookSlide[
+//     #focus[Leitfrage]
+//     - bullet
+//   ][
+//     #image(...)   ← optional → split layout
+//   ]
 
-#let hookSlide(
-  title:    [],
-  focus:    none,
-  material: none,
-  points:   none,
-  layout:   "center",
-  pn:       none,
-) = {
+#let hookSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  let mat  = args.pos().at(1, default: none)
   pagebreak(weak: true)
-  _header("Einstieg", colors.orange, title)
-
+  _slide-accent.update(colors.orange)
+  _result-accent.update(colors.green)
+  _result-content.update(none)
+  context { _header("Einstieg", colors.orange, _slide-title.get()) }
   _with-material(
-    {
-      if focus  != none { _focus-box(focus, colors.orange) }
-      if points != none { _points-list(points, colors.orange) }
-    },
-    material,
-    layout,
+    { if body != none { _styled-body(body, colors.orange) } },
+    mat,
+    if mat != none { "split" } else { "center" },
   )
+  _render-result()
 }
 
 
 // ─── 3. conceptSlide ──────────────────────────────────────────────────────────
 // Introduces a concept, rule, or definition.
-// focus = core statement (purple definition box). steps clarify it.
-// No result (spec).
+// #focus[...] = core definition (purple). Second block = optional material.
 
-#let conceptSlide(
-  title:    [],
-  focus:    none,
-  points:   none,
-  material: none,
-  layout:   "center",
-  pn:       none,
-) = {
+#let conceptSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  let mat  = args.pos().at(1, default: none)
   pagebreak(weak: true)
-  _header("Konzept", colors.purple, title)
-
+  _slide-accent.update(colors.purple)
+  _result-accent.update(colors.green)
+  _result-content.update(none)
+  context { _header("Konzept", colors.purple, _slide-title.get()) }
   _with-material(
-    {
-      if focus  != none { _focus-box(focus, colors.purple) }
-      if points != none { _points-list(points, colors.purple) }
-    },
-    material,
-    layout,
+    { if body != none { _styled-body(body, colors.purple) } },
+    mat,
+    if mat != none { "split" } else { "center" },
   )
+  _render-result()
 }
 
 
 // ─── 4. compareSlide ──────────────────────────────────────────────────────────
 // Contrasts two or more things.
-// focus = comparison question (blue box). columns = side-by-side cards.
-// result = synthesis conclusion (purple — Erkenntnis, not a solution).
-// layout kept for API compatibility; alignment is determined by card count.
-// reveal: "all" | "rowWise" | "colWise" — ignored in PDF (all content always visible).
-// columns items: (title: [], content: ([], [], ...))
+// #focus[...] = comparison question (blue box, centered above columns).
+// #col[title][body] = one comparison column (append as many as needed).
+// #result[...] = synthesis conclusion (purple, always centered below columns).
+// Usage:
+//   = Slide Title
+//   #compareSlide[
+//     #focus[Frage?]
+//     #col[A][content A]
+//     #col[B][content B]
+//     #result[Erkenntnis]
+//   ]
 
-#let compareSlide(
-  title:   [],
-  focus:   none,
-  columns: (),
-  result:  none,
-  reveal:  "rowWise",
-  layout:  "center",
-  pn:      none,
-) = {
+#let compareSlide(..args) = {
+  let body = args.pos().at(0, default: none)
   pagebreak(weak: true)
-  _header("Vergleich", colors.blue, title)
+  _slide-accent.update(colors.blue)
+  _result-accent.update(colors.purple)
+  _result-content.update(none)
+  _columns-state.update(())
+  context { _header("Vergleich", colors.blue, _slide-title.get()) }
 
-  if focus != none { align(center, _focus-box(focus, colors.blue)) }
+  // Render body — triggers #focus, #col, #result, #pn calls (focus centered)
+  if body != none { align(center, _styled-body(body, colors.blue)) }
 
-  let count = columns.len()
-  if count > 0 {
-    _std-layout(size => context {
-      let min-card-w = 0.30 * _page-w   // 30 % of page width ≈ 10.2 cm
-      let gutter     = gap.lg
-      let use-fixed  = count <= 2
+  context {
+    let columns = _columns-state.get()
+    let count = columns.len()
+    if count > 0 {
+      _std-layout(size => context {
+        let min-card-w = 0.30 * _page-w
+        let gutter     = gap.lg
+        let use-fixed  = count <= 2
 
-      // Actual outer card width (needed for accurate height measurement)
-      let card-w = if use-fixed {
-        min-card-w
-      } else {
-        (size.width - (count - 1) * gutter) / count
-      }
+        let card-w = if use-fixed {
+          min-card-w
+        } else {
+          (size.width - (count - 1) * gutter) / count
+        }
 
-      // Shared card inner content builder — content is an array of bullet items
-      let card-inner(col) = {
-        align(center, text(size: fs-heading, weight: "bold", fill: colors.text, col.title))
-        line(length: 100%, stroke: 0.6pt + colors.blue.transparentize(60%))
-        v(6pt)
-        {
-          set align(left)
-          set text(size: fs-minor)
-          let items = col.content
-          for i in range(items.len()) {
-            grid(
+        let card-inner(col) = {
+          align(center, text(size: fs-heading, weight: "bold", fill: colors.text, col.title))
+          line(length: 100%, stroke: 0.6pt + colors.blue.transparentize(60%))
+          v(6pt)
+          {
+            set align(left)
+            set text(size: fs-minor)
+            show _std-list.item: it => grid(
               columns: (12pt, 1fr),
               column-gutter: 6pt,
               align(top, pad(top: 3pt,
                 block(width: 6pt, height: 6pt, radius: 3pt, fill: colors.blue)
               )),
-              pad(top: 1pt, items.at(i)),
+              pad(top: 1pt, it.body),
             )
-            if i < items.len() - 1 { v(gap.xs) }
+            col.body
           }
         }
-      }
 
-      // Measure each card at its real width to find the tallest
-      let max-h = columns.fold(0pt, (acc, col) => calc.max(acc,
-        measure(block(
-          width: card-w,
-          inset: (x: padding.lg, y: padding.md),
-          card-inner(col),
-        )).height
-      ))
+        let max-h = columns.fold(0pt, (acc, col) => calc.max(acc,
+          measure(block(
+            width: card-w,
+            inset: (x: padding.lg, y: padding.md),
+            card-inner(col),
+          )).height
+        ))
 
-      let col-widths = if use-fixed { (min-card-w,) * count } else { (1fr,) * count }
+        let col-widths = if use-fixed { (min-card-w,) * count } else { (1fr,) * count }
 
-      let cards = columns.map(col =>
-        block(
-          width:  100%,
-          height: max-h,
-          radius: radius,
-          fill:   colors.blue.transparentize(91%),
-          stroke: 0.6pt + colors.border,
-          inset:  (x: padding.lg, y: padding.md),
-          card-inner(col),
+        let cards = columns.map(col =>
+          block(
+            width:  100%,
+            height: max-h,
+            radius: radius,
+            fill:   colors.blue.transparentize(91%),
+            stroke: 0.6pt + colors.border,
+            inset:  (x: padding.lg, y: padding.md),
+            card-inner(col),
+          )
         )
-      )
 
-      let g = grid(
-        columns:       col-widths,
-        column-gutter: gutter,
-        ..cards,
-      )
+        let g = grid(
+          columns:       col-widths,
+          column-gutter: gutter,
+          ..cards,
+        )
 
-      if use-fixed { align(center, g) } else { g }
-    })
-    v(gap.md)
+        if use-fixed { align(center, g) } else { g }
+      })
+      v(gap.md)
+    }
   }
 
-  if result != none {
-    _result-box(result, colors.purple, centered: true)
-  }
+  _render-result()
 }
 
 
 // ─── 5. exampleSlide ──────────────────────────────────────────────────────────
-// Shows a worked example, optionally with step-by-step derivation.
-// No focus. result = final answer (green — Lösung).
-// revealAll: no effect in PDF (all content always visible).
+// Shows a worked example. #result[...] = final answer (green, below content).
 
-#let exampleSlide(
-  title:     [],
-  material:  none,
-  points:    none,
-  result:    none,
-  revealAll: false,
-  layout:    "center",
-  pn:        none,
-) = {
+#let exampleSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  let mat  = args.pos().at(1, default: none)
   pagebreak(weak: true)
-  _header("Beispiel", colors.muted, title)
-
+  _slide-accent.update(colors.muted)
+  _result-accent.update(colors.green)
+  _result-content.update(none)
+  context { _header("Beispiel", colors.muted, _slide-title.get()) }
   _with-material(
-    { if points != none { _points-list(points, colors.muted) } },
-    material,
-    layout,
+    { if body != none { _styled-body(body, colors.muted) } },
+    mat,
+    if mat != none { "split" } else { "center" },
   )
-  if result != none {
-    _result-box(result, colors.green,
-      centered: layout == "center" or material != none)
-  }
+  _render-result()
 }
 
 
 // ─── 6. promptSlide ───────────────────────────────────────────────────────────
 // Question for classroom dialogue.
-// focus = question (blue box). result = answer (green — revealed on click in live).
-// focus + material follow layout. result always centered.
+// #focus[...] = question (blue). #result[...] = answer (green, always below grid).
 
-#let promptSlide(
-  title:    [],
-  focus:    none,
-  material: none,
-  points:   none,
-  result:   none,
-  layout:   "center",
-  pn:       none,
-) = {
+#let promptSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  let mat  = args.pos().at(1, default: none)
   pagebreak(weak: true)
-  _header("Frage", colors.blue, title)
-
+  _slide-accent.update(colors.blue)
+  _result-accent.update(colors.green)
+  _result-content.update(none)
+  context { _header("Frage", colors.blue, _slide-title.get()) }
   _with-material(
-    {
-      if focus  != none { _focus-box(focus, colors.blue) }
-      if points != none { _points-list(points, colors.blue) }
-    },
-    material,
-    layout,
+    { if body != none { _styled-body(body, colors.blue) } },
+    mat,
+    if mat != none { "split" } else { "center" },
   )
-  if result != none {
-    _result-box(result, colors.green, centered: true)
-  }
+  _render-result()
 }
 
 
 // ─── 7. taskSlide ─────────────────────────────────────────────────────────────
-// Work assignment. focus dominates the slide visually.
-// focus = instruction (large, teal fill, white text). No result (spec).
+// Work assignment. Two positional blocks:
+//   [body] — #focus, #result, #pn as inline macros + bullet list mixed together
+//   [mat]  — material (right column) — optional
+//
+// #focus[...] is captured via state and rendered full-width above the grid.
+// #result[...] is captured via state and rendered full-width below the grid.
+// Bullet list items in body render in the left column (or centered if no mat).
+//
+// Usage — simple:
+//   = Slide Title
+//   #taskSlide[
+//     #focus[Öffne StudyNode]
+//   ]
+//
+// Usage — with steps and material:
+//   = Slide Title
+//   #taskSlide[
+//     #focus[Öffne StudyNode]
+//     #result[Hinweis]
+//     #pn[...]
+//     - Schritt 1
+//     - Schritt 2
+//   ][
+//     #image(file: "/assets/website.png", height: auto)
+//   ]
 
-#let taskSlide(
-  title:    [],
-  focus:    none,
-  points:   none,
-  result:   none,
-  material: none,
-  layout:   "center",
-  pn:       none,
-) = {
+#let taskSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  let mat  = args.pos().at(1, default: none)
   pagebreak(weak: true)
-  _header("Auftrag", colors.teal, title)
-
-  // Big teal focus block — always full-width, layout-independent
-  if focus != none {
-    block(
-      width: 100%,
-      radius: radius,
-      fill: colors.teal,
-      inset: (x: padding.lg, y: gap.xl),
-      align(center,
-        text(size: fs-task, weight: "bold", fill: white, focus)
+  _slide-type.update("task")
+  _slide-accent.update(colors.teal)
+  _result-accent.update(colors.teal)
+  _result-content.update(none)
+  _focus-content.update(none)
+  context { _header("Auftrag", colors.teal, _slide-title.get()) }
+  // Capture pass: render body invisibly so #focus/#result update state
+  if body != none { place(hide(body)) }
+  // Render focus full-width from captured state
+  context {
+    let f = _focus-content.get()
+    if f != none {
+      block(
+        width: 100%,
+        radius: radius,
+        fill: colors.teal,
+        inset: (x: padding.lg, y: gap.xl),
+        align(center,
+          text(size: fs-task, weight: "bold", fill: white, f)
+        )
       )
-    )
-    v(gap.md)
+      v(gap.md)
+    }
   }
-
+  // Visual pass: body (bullets + inline macros) in left column, material in right
   _with-material(
-    { if points != none { _points-list(points, colors.teal) } },
-    material,
-    layout,
+    { if body != none { _styled-body(body, colors.teal) } },
+    mat,
+    if mat != none { "split" } else { "center" },
   )
-  if result != none {
-    _result-box(result, colors.teal, centered: true)
-  }
+  _render-result()
+  _slide-type.update("")
 }
 
 
 // ─── 8. recapSlide ────────────────────────────────────────────────────────────
-// Secures key insights. steps = core points (green badges, extra spacing).
-// No focus, no result (spec).
+// Secures key insights. Content centered in a prominent card, vertically centered.
 
-#let recapSlide(
-  title:  [],
-  points: (),
-  layout: "center",
-  pn:     none,
-) = {
+#let recapSlide(..args) = {
+  let body = args.pos().at(0, default: none)
   pagebreak(weak: true)
-  _header("Zusammenfassung", colors.green, title)
+  _slide-accent.update(colors.orange)
+  _result-accent.update(colors.orange)
+  _result-content.update(none)
+  context { _header("Zusammenfassung", colors.orange, _slide-title.get()) }
 
-  if layout == "center" {
-    align(center, _points-list(points, colors.green, min-width: card-min-width, font-size: fs-heading))
-  } else {
-    _points-list(points, colors.green, min-width: card-min-width, font-size: fs-heading)
+  if body != none {
+    v(1fr)
+    align(center,
+      block(
+        width: 18cm,
+        radius: radius,
+        fill: colors.orange.transparentize(92%),
+        stroke: (left: 4pt + colors.orange, rest: 0.8pt + colors.orange.transparentize(60%)),
+        inset: (left: padding.lg, right: padding.lg, top: gap.md, bottom: gap.lg),
+        {
+          align(center,
+            text(size: fs-minor, weight: "semibold", fill: colors.orange, tracking: 0.5pt,
+              upper[Das Wichtigste]
+            )
+          )
+          v(gap.sm)
+          line(length: 100%, stroke: 0.6pt + colors.orange.transparentize(60%))
+          v(gap.md)
+          set text(size: fs-body)
+          set align(left)
+          show _std-list.item: it => pad(bottom: gap.md,
+            grid(
+              columns: (18pt, 1fr),
+              column-gutter: 6pt,
+              align(top, text(fill: colors.orange, weight: "bold", size: fs-body * 1.3, "▸")),
+              align(top + left, pad(top: 1pt, it.body)),
+            )
+          )
+          set _std-list(spacing: 0pt)
+          body
+        }
+      )
+    )
+    v(1fr)
   }
 }
 
 
 // ─── 9. quizSlide ─────────────────────────────────────────────────────────────
-// Interactive multiple-choice question (answered via devices in live class).
-// In PDF: options listed vertically, correct answer marked green.
+// Multiple-choice question. Options are list items with [x] / [ ] markers.
+// Correct items are detected via capture pass and rendered in green.
+//
+// Usage:
+//   = Slide Title
+//   #quizSlide[
+//     #focus[Welche Funktion ist eine Polynomfunktion?]
+//     #pn[Hinweise für die Lehrkraft]
+//     - [x] $f(x) = 3x^2 + 2x + 1$
+//     - [ ] $f(x) = sqrt(x) + 2$
+//     - [ ] $f(x) = 2^x$
+//     - [ ] $f(x) = 1/x$
+//   ]
 
-#let quizSlide(
-  title:   [],
-  focus:   none,
-  options: (),
-  correct: 1,
-  pn:      none,
-) = {
-  pagebreak(weak: true)
-  _header("Quiz", colors.orange, title)
+#let quizSlide(..args) = {
+  let body = args.pos().at(0, default: none)
+  if body == none { return }
 
-  if focus != none { _focus-box(focus, colors.orange) }
+  let letters = ("A", "B", "C", "D", "E", "F")
 
-  let letters = ("A", "B", "C", "D")
-  for i in range(options.len()) {
-    let is-correct   = (i + 1) == correct
-    let item-fill    = if is-correct { tints.green  } else { white }
-    let item-stroke  = if is-correct { colors.green } else { colors.border }
-    let badge-fill   = if is-correct { colors.green } else { colors.orange }
+  _quiz-is-first.update(true)
+  _quiz-question.update(none)
 
-    block(
-      width: 100%,
-      radius: radius,
-      fill: item-fill,
-      stroke: 0.6pt + item-stroke,
-      inset: (x: padding.lg, y: padding.md),
-      grid(
-        columns: (26pt, 1fr),
-        column-gutter: 10pt,
-        align(center + horizon,
-          block(
-            width: 24pt, height: 24pt,
-            radius: 12pt,
-            fill: badge-fill,
-            align(center + horizon,
-              text(size: fs-small, weight: "bold", fill: white,
-                letters.at(i, default: "?"))
-            )
-          )
-        ),
-        align(horizon, text(size: fs-body, options.at(i)))
-      )
-    )
-    if i < options.len() - 1 { v(gap.xs) }
+  // First slide: page break + header (subsequent ones emitted from the list show rule)
+  pagebreak()
+  _slide-accent.update(colors.teal)
+  _result-accent.update(colors.green)
+  _result-content.update(none)
+  context { _header("Quiz", colors.teal, _slide-title.get()) }
+
+  // Paragraphs = question text; suppress direct output and store for the next list
+  show par: it => {
+    _quiz-question.update(it.body)
+    []
   }
-  v(gap.md)
+  show parbreak: _ => []
+
+  // Each list = one question's answer options
+  show _std-list: it => {
+    let items = it.children
+
+    // All questions after the first get their own page + fresh header
+    context {
+      if not _quiz-is-first.get() {
+        pagebreak()
+        _slide-accent.update(colors.teal)
+        _header("Quiz", colors.teal, _slide-title.get())
+      }
+    }
+    _quiz-is-first.update(false)
+
+    // Render stored question as focus box
+    context {
+      let q = _quiz-question.get()
+      if q != none { _focus-box(q, colors.teal) }
+    }
+    _quiz-question.update(none)
+
+    // Answer cards
+    for (i, item) in items.enumerate() {
+      let letter = letters.at(i, default: str(i + 1))
+      _quiz-item-correct.update(false)
+      place(hide({
+        show regex("\\[x\\]"): { _quiz-item-correct.update(true); [] }
+        item.body
+      }))
+      context {
+        let is-correct  = _quiz-item-correct.get()
+        let item-fill   = if is-correct { tints.green  } else { white }
+        let item-stroke = if is-correct { colors.green } else { colors.border }
+        let badge-fill  = if is-correct { colors.green } else { colors.teal }
+        block(
+          width: 100%,
+          radius: radius,
+          fill: item-fill,
+          stroke: 0.6pt + item-stroke,
+          inset: (x: padding.lg, y: padding.md),
+          grid(
+            columns: (26pt, 1fr),
+            column-gutter: 10pt,
+            align(center + horizon,
+              block(width: 24pt, height: 24pt, radius: 12pt, fill: badge-fill,
+                align(center + horizon,
+                  text(size: fs-small, weight: "bold", fill: white, letter)
+                )
+              )
+            ),
+            align(horizon, {
+              set text(size: fs-body)
+              show regex("\\[[ x]\\]\\s?"): none
+              item.body
+            }),
+          )
+        )
+        if i < items.len() - 1 { v(gap.xs) }
+      }
+    }
+  }
+
+  body
 }
