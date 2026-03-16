@@ -308,7 +308,9 @@
 
 // ─── Material Helpers ─────────────────────────────────────────────────────────
 
-#let formula(expr: none) = {
+#let formula(..args) = {
+  let body = args.pos().at(0, default: none)
+  let expr = body
   align(center,
     block(
       stroke: (top: 2pt + colors.purple, bottom: 2pt + colors.purple, rest: 0.5pt + colors.border),

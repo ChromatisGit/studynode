@@ -1,7 +1,8 @@
 import { TopicPath } from "@pipeline/configParser/buildPagePaths";
-import { getFileNames, getFolderNames, writeJSONFile } from "@pipeline/io";
+import { getFileNames, getFolderNames, writeJSONFile, readTypFile } from "@pipeline/io";
 import { ContentIssueCollector, issueCatalog, type ContentIssue } from "@pipeline/errorHandling";
 import { parsePage } from "@pipeline/pageParser/parsePage";
+import { isNewSlideFormat, parseTypedSlideDeck } from "@pipeline/pageParser/parseNewSlides";
 import { WorksheetFormat } from "@schema/course";
 import { NestedRecord, ensurePath } from "./nestedRecord";
 import { fileNameToId } from "@pipeline/pageParser/utils/fileNameToId";
@@ -296,26 +297,33 @@ async function processSlides(
 
     for (const slideFileName of slideFileNames) {
         const sourcePath = `${slidesDir}/${slideFileName}`;
-        let slidePage: Awaited<ReturnType<typeof parsePage>>;
 
         try {
-            slidePage = await parsePage(sourcePath, true, "slides");
+            const fileContent = await readTypFile(sourcePath);
+
+            if (isNewSlideFormat(fileContent)) {
+                const typedDeck = await parseTypedSlideDeck(sourcePath, fileContent);
+                const slideId = fileNameToId(typedDeck.title);
+                const targetPath = `${subjectId}/${topicId}/${chapterId}/slides/${slideId}`;
+                await writeJSONFile(targetPath, typedDeck);
+                slideSummaries.push({ slideId, label: typedDeck.title });
+            } else {
+                const slidePage = await parsePage(sourcePath, true, "slides");
+
+                if (!slidePage.content || slidePage.content.length === 0) {
+                    collector.addIssue(issueCatalog.emptyOverviewContent(), { ...ctx, filePath: sourcePath });
+                    continue;
+                }
+
+                const slideId = fileNameToId(slidePage.title);
+                const targetPath = `${subjectId}/${topicId}/${chapterId}/slides/${slideId}`;
+                const slideDeck = pageToSlideDeck(slidePage);
+                await writeJSONFile(targetPath, slideDeck);
+                slideSummaries.push({ slideId, label: slidePage.title });
+            }
         } catch (err) {
             collector.add(err, { ...ctx, filePath: `content/${sourcePath}` });
-            continue;
         }
-
-        if (!slidePage.content || slidePage.content.length === 0) {
-            collector.addIssue(issueCatalog.emptyOverviewContent(), { ...ctx, filePath: sourcePath });
-            continue;
-        }
-
-        const slideId = fileNameToId(slidePage.title);
-        const targetPath = `${subjectId}/${topicId}/${chapterId}/slides/${slideId}`;
-        const slideDeck = pageToSlideDeck(slidePage);
-
-        await writeJSONFile(targetPath, slideDeck);
-        slideSummaries.push({ slideId, label: slidePage.title });
     }
 
     return slideSummaries;
