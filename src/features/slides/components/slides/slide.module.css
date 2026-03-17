@@ -35,7 +35,7 @@
 
 .headerTitle {
   margin: 0;
-  font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 0.9);
   font-weight: var(--sn-font-bold);
   color: var(--sn-text);
   line-height: 1.2;
@@ -50,38 +50,54 @@
 
 /* ── Focus box ───────────────────────────────────────────────── */
 .focus {
-  border-left: 3.5px solid var(--slide-accent, var(--sn-purple-accent));
+  border-left: 5px solid var(--slide-accent, var(--sn-purple-accent));
+  border-top: 0.75px solid color-mix(in srgb, var(--slide-accent, var(--sn-purple-accent)) 35%, transparent);
+  border-right: 0.75px solid color-mix(in srgb, var(--slide-accent, var(--sn-purple-accent)) 35%, transparent);
+  border-bottom: 0.75px solid color-mix(in srgb, var(--slide-accent, var(--sn-purple-accent)) 35%, transparent);
   background: color-mix(in srgb, var(--slide-accent, var(--sn-purple-accent)) 9%, transparent);
-  border-radius: 0 var(--sn-radius-sm) var(--sn-radius-sm) 0;
-  padding: var(--sn-space-sm) var(--sn-space-md);
-  font-size: clamp(1rem, 2vw, 1.15rem);
+  border-radius: var(--sn-radius-sm);
+  padding: var(--sn-space-md) var(--sn-space-xl);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 1.15);
   line-height: 1.5;
   color: var(--sn-text);
-  width: 100%;
+  width: 60%;
+  min-width: min(480px, 100%);
+  max-width: 90%;
   box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .focusTask {
   background: var(--sn-teal-accent);
-  border-left: none;
   border-radius: var(--sn-radius-sm);
-  padding: var(--sn-space-sm) var(--sn-space-md);
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  padding: var(--sn-space-md) var(--sn-space-lg);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 1.62);
   font-weight: var(--sn-font-semibold);
-  line-height: 1.5;
-  color: var(--sn-text-on-accent);
+  line-height: 1.4;
+  color: #fff;
   width: 100%;
   box-sizing: border-box;
+  text-align: center;
+}
+
+.focusTask * {
+  color: #fff;
 }
 
 /* ── Result box ──────────────────────────────────────────────── */
 .result {
-  border-left: 3.5px solid var(--slide-result-accent, var(--sn-green-accent));
+  border-left: 5px solid var(--slide-result-accent, var(--sn-green-accent));
+  border-top: 0.75px solid color-mix(in srgb, var(--slide-result-accent, var(--sn-green-accent)) 35%, transparent);
+  border-right: 0.75px solid color-mix(in srgb, var(--slide-result-accent, var(--sn-green-accent)) 35%, transparent);
+  border-bottom: 0.75px solid color-mix(in srgb, var(--slide-result-accent, var(--sn-green-accent)) 35%, transparent);
   background: color-mix(in srgb, var(--slide-result-accent, var(--sn-green-accent)) 9%, transparent);
-  border-radius: 0 var(--sn-radius-sm) var(--sn-radius-sm) 0;
+  border-radius: var(--sn-radius-sm);
   padding: var(--sn-space-sm) var(--sn-space-md);
-  width: 100%;
+  font-size: var(--slide-font-base, 1.1rem);
+  min-width: min(480px, 100%);
+  max-width: 80%;
   box-sizing: border-box;
+  margin: 0 auto;
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
@@ -97,6 +113,11 @@
 }
 
 /* ── Bullet list ─────────────────────────────────────────────── */
+.bulletContainer {
+  width: min(80%, 900px);
+  margin: 0 auto;
+}
+
 .bulletList {
   list-style: none;
   margin: 0;
@@ -125,28 +146,60 @@
 
 .bulletMarker {
   display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 1px;
+  width: 0.28em;
+  height: 0.28em;
+  border-radius: 2px;
   background: var(--slide-accent, var(--sn-purple-accent));
   flex-shrink: 0;
-  margin-top: 0.45em;
+  font-size: var(--slide-font-base, 1.1rem);
+  align-self: center;
+  margin-bottom: 0.05em;
 }
 
 .bulletText {
   flex: 1;
   line-height: 1.6;
+  font-size: calc(var(--slide-font-base, 1.1rem) * 1.05);
+}
+
+.bulletSubLine {
+  display: block;
+  padding-left: var(--sn-space-md);
+  color: var(--sn-text-muted);
+  font-size: 0.9em;
+}
+
+/* ── Slide content area (replaces repeated inline styles) ────── */
+.slideContent {
+  padding: var(--sn-space-lg) var(--sn-space-xl);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--sn-space-lg);
+  min-height: 0;
+}
+
+.slideContentCentered {
+  justify-content: center;
 }
 
 /* ── Material: formula ───────────────────────────────────────── */
 .formula {
-  border: 1.5px solid var(--sn-purple-accent-soft-border);
+  border-top: 3px solid var(--sn-purple-accent);
+  border-bottom: 3px solid var(--sn-purple-accent);
+  border-left: 0.75px solid var(--sn-border);
+  border-right: 0.75px solid var(--sn-border);
   background: var(--sn-purple-accent-soft-bg);
   border-radius: var(--sn-radius-sm);
-  padding: var(--sn-space-sm) var(--sn-space-md);
+  padding: var(--sn-space-sm) var(--sn-space-lg);
   text-align: center;
-  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 0.95);
   overflow-x: auto;
+  width: auto;
+  max-width: 640px;
+  box-sizing: border-box;
+  margin: 0 auto;
 }
 
 /* ── Material: image ─────────────────────────────────────────── */
@@ -155,26 +208,22 @@
   flex-direction: column;
   align-items: center;
   gap: var(--sn-space-xs);
-  flex: 1;
-  min-height: 0;
+  min-height: 20vh;
 }
 
 .image {
   max-width: 100%;
   object-fit: contain;
   border-radius: var(--sn-radius-sm);
-  flex: 1;
-  min-height: 0;
-  max-height: 45vh;
+  max-height: 38vh;
 }
 
 .imageProjector {
-  max-height: unset;
-  height: 100%;
+  max-height: 52vh;
 }
 
 .imageLabel {
-  font-size: var(--sn-text-xs);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 0.65);
   color: var(--sn-text-muted);
   text-align: center;
 }
@@ -193,6 +242,9 @@
   font-weight: var(--sn-font-medium);
   text-decoration: none;
   word-break: break-all;
+  min-width: min(480px, 100%);
+  max-width: 80%;
+  margin: 0 auto;
 }
 
 .link:hover {
@@ -204,7 +256,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--sn-space-lg);
-  align-items: start;
+  align-items: stretch;
   flex: 1;
   min-height: 0;
 }
@@ -225,41 +277,74 @@
 /* ── Compare columns grid ────────────────────────────────────── */
 .compareGrid {
   display: grid;
-  gap: var(--sn-space-md);
+  gap: var(--sn-space-lg);
   align-items: stretch;
 }
 
 .compareColumn {
-  border: 1.5px solid var(--sn-border);
-  border-radius: var(--sn-radius-md);
-  padding: var(--sn-space-md);
+  background: color-mix(in srgb, var(--sn-blue-accent) 9%, transparent);
+  border: 0.6px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: var(--sn-space-lg) var(--sn-space-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--sn-space-xs);
 }
 
 .compareColumnTitle {
   font-weight: var(--sn-font-bold);
-  font-size: var(--sn-text-md);
-  color: var(--sn-blue-accent);
+  font-size: calc(var(--slide-font-base, 1.3rem) * 1.25);
+  color: var(--sn-text);
   text-align: center;
+  padding-bottom: var(--sn-space-sm);
+}
+
+.compareColumnDivider {
+  height: 0.6px;
+  background: color-mix(in srgb, var(--sn-blue-accent) 40%, transparent);
+  margin-bottom: var(--sn-space-sm);
+  flex-shrink: 0;
 }
 
 .compareColumnBody {
   color: var(--sn-text);
   line-height: 1.6;
-  font-size: var(--sn-text-sm);
+  font-size: calc(var(--slide-font-base, 1.3rem) * 0.9);
+  text-align: left;
 }
 
 /* ── Recap slide card ────────────────────────────────────────── */
 .recapCard {
   background: var(--sn-orange-accent-soft-bg);
-  border: 1.5px solid var(--sn-orange-accent-soft-border);
+  border-left: 5px solid var(--sn-orange-accent);
+  border-top: 0.75px solid var(--sn-orange-accent-soft-border);
+  border-right: 0.75px solid var(--sn-orange-accent-soft-border);
+  border-bottom: 0.75px solid var(--sn-orange-accent-soft-border);
   border-radius: var(--sn-radius-md);
-  padding: var(--sn-space-lg);
+  padding: var(--sn-space-lg) var(--sn-space-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--sn-space-sm);
+  gap: var(--sn-space-md);
+  min-width: min(480px, 100%);
+  max-width: 80%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.recapCardTitle {
+  font-weight: var(--sn-font-bold);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 1.25);
+  color: var(--sn-orange-accent);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: var(--sn-space-sm);
+}
+
+.recapCardDivider {
+  height: 0.75px;
+  background: color-mix(in srgb, var(--sn-orange-accent) 40%, transparent);
+  margin-bottom: var(--sn-space-xs);
+  flex-shrink: 0;
 }
 
 .recapBulletList {
@@ -281,7 +366,15 @@
 .recapBulletMarker {
   color: var(--sn-orange-accent);
   font-weight: var(--sn-font-bold);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 0.85);
   flex-shrink: 0;
+  margin-top: 0.1em;
+}
+
+.recapBulletText {
+  flex: 1;
+  font-size: calc(var(--slide-font-base, 1.1rem) * 1.05);
+  color: var(--sn-text);
 }
 
 /* ── Section slide overlay ───────────────────────────────────── */
@@ -300,7 +393,7 @@
 }
 
 .sectionSubtitle {
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 0.75);
   font-weight: var(--sn-font-medium);
   color: rgba(255,255,255,0.75);
   letter-spacing: 0.08em;
@@ -308,7 +401,7 @@
 }
 
 .sectionTitle {
-  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-size: calc(var(--slide-font-base, 1.1rem) * 2.0);
   font-weight: var(--sn-font-bold);
   color: #fff;
   line-height: 1.15;

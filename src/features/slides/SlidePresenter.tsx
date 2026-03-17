@@ -119,7 +119,7 @@ export function SlidePresenter({ deck, courseId, projectorPath }: SlidePresenter
 
         <div className={styles.body}>
           <main className={styles.slidePreview}>
-            {currentSlide && <SlideRenderer slide={currentSlide} revealStep={state.revealStep} />}
+            {currentSlide && <SlideRenderer key={state.slideIndex} slide={currentSlide} revealStep={state.revealStep} />}
           </main>
 
           <aside className={styles.sidebar}>

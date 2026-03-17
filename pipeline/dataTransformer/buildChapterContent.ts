@@ -1,5 +1,5 @@
 import { TopicPath } from "@pipeline/configParser/buildPagePaths";
-import { getFileNames, getFolderNames, writeJSONFile, readTypFile } from "@pipeline/io";
+import { getFileNames, getFolderNames, writeJSONFile, readTypFile, resolveAndCopyContentImage } from "@pipeline/io";
 import { ContentIssueCollector, issueCatalog, type ContentIssue } from "@pipeline/errorHandling";
 import { parsePage } from "@pipeline/pageParser/parsePage";
 import { isNewSlideFormat, parseTypedSlideDeck } from "@pipeline/pageParser/parseNewSlides";
@@ -8,7 +8,7 @@ import { NestedRecord, ensurePath } from "./nestedRecord";
 import { fileNameToId } from "@pipeline/pageParser/utils/fileNameToId";
 import { collectCourseIds } from "@pipeline/types";
 import type { Node, Page } from "@schema/page";
-import type { SlideDeck, Slide } from "@schema/slideTypes";
+import type { SlideDeck, Slide, TypedSlideDeck, SlideContentItem } from "@schema/slideTypes";
 import type { PresenterNoteMacro } from "@macros/pn/types";
 
 type WorksheetSummary = { worksheetId: string; label: string; sourceFilename: string };
@@ -303,6 +303,7 @@ async function processSlides(
 
             if (isNewSlideFormat(fileContent)) {
                 const typedDeck = await parseTypedSlideDeck(sourcePath, fileContent);
+                resolveSlideImages(typedDeck, sourcePath);
                 const slideId = fileNameToId(typedDeck.title);
                 const targetPath = `${subjectId}/${topicId}/${chapterId}/slides/${slideId}`;
                 await writeJSONFile(targetPath, typedDeck);
@@ -360,4 +361,23 @@ function mapChapterToFolders(
     }
 
     return { map: result, issues };
+}
+
+
+// ─── Slide Image Resolution ────────────────────────────────────────────────────
+
+function resolveImageItem(item: SlideContentItem | undefined, typFilePath: string): void {
+    if (item?.type === "image") {
+        item.file = resolveAndCopyContentImage(item.file, typFilePath).publicUrl;
+    }
+}
+
+function resolveSlideImages(deck: TypedSlideDeck, typFilePath: string): void {
+    for (const slide of deck.content) {
+        if ("material" in slide) resolveImageItem(slide.material, typFilePath);
+        if ("inlineMaterial" in slide) resolveImageItem(slide.inlineMaterial, typFilePath);
+        if ("result" in slide && slide.result && typeof slide.result === "object" && "type" in slide.result) {
+            resolveImageItem(slide.result as SlideContentItem, typFilePath);
+        }
+    }
 }

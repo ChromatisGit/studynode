@@ -11,6 +11,7 @@ const SIMPLE_REPLACEMENTS: Array<[RegExp, string]> = [
   [/\beq\.not\b/g, "\\neq"],
   [/\bin\.not\b/g, "\\notin"],
   [/\binfinity\b/g, "\\infty"],
+  [/\bin\b/g, "\\in"],
   [/\bNN\b/g, "\\mathbb{N}"],
   [/\bZZ\b/g, "\\mathbb{Z}"],
   [/\bQQ\b/g, "\\mathbb{Q}"],
@@ -36,6 +37,14 @@ export function translateTypstMathToKatex(math: string): string {
 
   // sqrt(x) -> \sqrt{x}
   out = out.replace(/\bsqrt\(([^()]+)\)/g, (_match, inner: string) => `\\sqrt{${inner.trim()}}`);
+
+  // Typst grouping parens in superscript/subscript -> KaTeX curly braces
+  // Must run before fraction conversion so ^(1/2) -> ^{1/2} -> ^{\frac{1}{2}}
+  out = out.replace(/\^(\(([^()]*)\))/g, (_m, _full, inner: string) => `^{${inner}}`);
+  out = out.replace(/_(\(([^()]*)\))/g, (_m, _full, inner: string) => `_{${inner}}`);
+
+  // Typst fraction a/b -> \frac{a}{b} (numeric atoms only)
+  out = out.replace(/(\d+)\/(\d+)/g, (_match, num: string, den: string) => `\\frac{${num}}{${den}}`);
 
   for (const [pattern, replacement] of SIMPLE_REPLACEMENTS) {
     out = out.replace(pattern, replacement);

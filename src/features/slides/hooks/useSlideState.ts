@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { TypedSlide } from "@schema/slideTypes";
 
 type SlideRevealState = {
@@ -22,33 +22,39 @@ export function maxRevealSteps(slide: TypedSlide): number {
   ) {
     return 0;
   }
+  const isManual = slide.reveal === "manual";
+  if (slide.slideType === "compareSlide") {
+    if (!isManual) return 0;
+    return slide.columns.length + (slide.result != null ? 1 : 0);
+  }
   const bullets = "bullets" in slide ? (slide.bullets?.length ?? 0) : 0;
-  const hasResult = "result" in slide && slide.result != null ? 1 : 0;
-  return bullets + hasResult;
-}
-
-function getInitialSlide(totalSlides: number): number {
-  if (typeof window === "undefined") return 0;
-  const params = new URLSearchParams(window.location.search);
-  const s = parseInt(params.get("s") ?? "0", 10);
-  return Math.min(Math.max(0, s), totalSlides - 1);
+  const hasResult = slide.slideType !== "taskSlide" && "result" in slide && slide.result != null ? 1 : 0;
+  return isManual ? bullets + hasResult : hasResult;
 }
 
 export function useSlideState({ slides }: UseSlideStateOptions) {
   const totalSlides = slides.length;
-  const [state, setState] = useState<SlideRevealState>(() => ({
-    slideIndex: getInitialSlide(totalSlides),
+  const [state, setState] = useState<SlideRevealState>({
+    slideIndex: 0,
     blackout: false,
     revealStep: 0,
-  }));
+  });
+
+  // Apply URL ?s= param after mount — must match server initial (0) during hydration
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = parseInt(params.get("s") ?? "0", 10);
+    const initial = Math.min(Math.max(0, s), totalSlides - 1);
+    if (initial !== 0) {
+      setState((prev) => ({ ...prev, slideIndex: initial }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setSlideIndex = useCallback(
     (index: number) => {
       const clamped = Math.max(0, Math.min(index, totalSlides - 1));
       setState((prev) => ({ ...prev, slideIndex: clamped, revealStep: 0 }));
-      const url = new URL(window.location.href);
-      url.searchParams.set("s", String(clamped));
-      window.history.replaceState(null, "", url.pathname + url.search);
     },
     [totalSlides]
   );
@@ -66,9 +72,6 @@ export function useSlideState({ slides }: UseSlideStateOptions) {
       }
       const nextIndex = Math.min(prev.slideIndex + 1, totalSlides - 1);
       if (nextIndex === prev.slideIndex) return prev;
-      const url = new URL(window.location.href);
-      url.searchParams.set("s", String(nextIndex));
-      window.history.replaceState(null, "", url.pathname + url.search);
       return { ...prev, slideIndex: nextIndex, revealStep: 0 };
     });
   }, [slides, totalSlides]);
@@ -77,12 +80,15 @@ export function useSlideState({ slides }: UseSlideStateOptions) {
     setState((prev) => {
       const prevIndex = Math.max(0, prev.slideIndex - 1);
       if (prevIndex === prev.slideIndex && prev.revealStep === 0) return prev;
-      const url = new URL(window.location.href);
-      url.searchParams.set("s", String(prevIndex));
-      window.history.replaceState(null, "", url.pathname + url.search);
       return { ...prev, slideIndex: prevIndex, revealStep: 0 };
     });
   }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("s", String(state.slideIndex));
+    window.history.replaceState(null, "", url.pathname + url.search);
+  }, [state.slideIndex]);
 
   const goTo = setSlideIndex;
   const first = useCallback(() => setSlideIndex(0), [setSlideIndex]);

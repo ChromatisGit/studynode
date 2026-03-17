@@ -14,6 +14,7 @@
 
 /* White card */
 .card {
+  --slide-font-base: 1.3rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -29,6 +30,7 @@
 .cardFull {
   flex: 1;
   min-height: 0;
+  --slide-font-base: clamp(1.3rem, 2vw, 3rem);
 }
 
 /* Section slide uses full purple card — no inner content layout */

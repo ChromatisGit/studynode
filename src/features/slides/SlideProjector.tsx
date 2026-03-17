@@ -79,7 +79,7 @@ export function SlideProjector({ deck, courseId }: SlideProjectorProps) {
             <p>Verbinde...</p>
           </div>
         )}
-        {currentSlide && <SlideRenderer slide={currentSlide} projector revealStep={slideState.revealStep} />}
+        {currentSlide && <SlideRenderer key={slideState.slideIndex} slide={currentSlide} projector revealStep={slideState.revealStep} />}
         <QuizProjectorOverlay quizState={quizState} />
       </div>
     </MacroStateProvider>

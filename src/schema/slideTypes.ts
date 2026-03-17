@@ -18,11 +18,13 @@ export type SlideContentItem =
   | { type: "text"; content: string }
   | { type: "formula"; expr: string }
   | { type: "image"; file: string; label?: string }
-  | { type: "link"; url: string; label?: string };
+  | { type: "link"; url: string; label?: string }
+  | { type: "codeRunner"; code: string; language: string };
 
 type BaseSlide = {
   header: string;
   presenterNotes?: string;
+  reveal?: "auto" | "manual";
 };
 
 export type SectionSlide = BaseSlide & {
@@ -34,6 +36,7 @@ export type HookSlide = BaseSlide & {
   slideType: "hookSlide";
   focus?: string;
   bullets?: string[];
+  inlineMaterial?: SlideContentItem;
   material?: SlideContentItem;
 };
 
@@ -41,6 +44,7 @@ export type ConceptSlide = BaseSlide & {
   slideType: "conceptSlide";
   focus?: string;
   bullets?: string[];
+  inlineMaterial?: SlideContentItem;
   material?: SlideContentItem;
 };
 
@@ -57,6 +61,7 @@ export type ExampleSlide = BaseSlide & {
   slideType: "exampleSlide";
   bullets?: string[];
   result?: SlideContentItem;
+  inlineMaterial?: SlideContentItem;
   material?: SlideContentItem;
 };
 
@@ -65,6 +70,7 @@ export type PromptSlide = BaseSlide & {
   focus?: string;
   bullets?: string[];
   result?: SlideContentItem;
+  inlineMaterial?: SlideContentItem;
   material?: SlideContentItem;
 };
 
@@ -73,6 +79,7 @@ export type TaskSlide = BaseSlide & {
   focus?: string;
   bullets?: string[];
   result?: string;
+  inlineMaterial?: SlideContentItem;
   material?: SlideContentItem;
 };
 

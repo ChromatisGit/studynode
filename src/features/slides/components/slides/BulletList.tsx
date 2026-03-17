@@ -10,9 +10,11 @@ type BulletListProps = {
 
 export function BulletList({ bullets, accent, revealedCount, alwaysVisible }: BulletListProps) {
   return (
+    <div className={styles.bulletContainer}>
     <ul className={styles.bulletList}>
       {bullets.map((bullet, i) => {
         const visible = alwaysVisible || i < revealedCount;
+        const [mainText, ...subLines] = bullet.split("\n");
         return (
           <li
             key={i}
@@ -23,11 +25,17 @@ export function BulletList({ bullets, accent, revealedCount, alwaysVisible }: Bu
               style={{ background: accent }}
             />
             <span className={styles.bulletText}>
-              <MarkdownRenderer markdown={bullet} />
+              <MarkdownRenderer markdown={mainText} />
+              {subLines.map((sub, j) => (
+                <span key={j} className={styles.bulletSubLine}>
+                  <MarkdownRenderer markdown={sub} />
+                </span>
+              ))}
             </span>
           </li>
         );
       })}
     </ul>
+    </div>
   );
 }

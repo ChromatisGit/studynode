@@ -9,13 +9,15 @@ export function RecapSlideView({ slide }: Props) {
   return (
     <>
       <SlideHeader title={slide.header} badge="Zusammenfassung" accent="orange" />
-      <div style={{ padding: "var(--sn-space-md) var(--sn-space-xl)", flex: 1, display: "flex", flexDirection: "column", gap: "var(--sn-space-md)", minHeight: 0, justifyContent: "center" }}>
+      <div className={`${styles.slideContent} ${styles.slideContentCentered}`}>
         <div className={styles.recapCard}>
+          <div className={styles.recapCardTitle}>Das Wichtigste</div>
+          <div className={styles.recapCardDivider} />
           <ul className={styles.recapBulletList}>
             {slide.bullets.map((bullet, i) => (
               <li key={i} className={styles.recapBulletItem}>
                 <span className={styles.recapBulletMarker}>▸</span>
-                <span>
+                <span className={styles.recapBulletText}>
                   <MarkdownRenderer markdown={bullet} />
                 </span>
               </li>

@@ -1,4 +1,5 @@
 import { MarkdownRenderer } from "@features/contentpage/components/MarkdownRenderer/MarkdownRenderer";
+import { SlideCodeRunner } from "./SlideCodeRunner";
 import type { SlideContentItem } from "@schema/slideTypes";
 import styles from "./slide.module.css";
 
@@ -8,6 +9,10 @@ type MaterialRendererProps = {
 };
 
 export function MaterialRenderer({ item, projector }: MaterialRendererProps) {
+  if (item.type === "text") {
+    return <MarkdownRenderer markdown={item.content} />;
+  }
+
   if (item.type === "formula") {
     return (
       <div className={styles.formula}>
@@ -32,6 +37,10 @@ export function MaterialRenderer({ item, projector }: MaterialRendererProps) {
         )}
       </div>
     );
+  }
+
+  if (item.type === "codeRunner") {
+    return <SlideCodeRunner code={item.code} language={item.language} />;
   }
 
   if (item.type === "link") {

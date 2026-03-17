@@ -109,6 +109,12 @@ function parseSlideNode(node: RawMacroBlock, header: string, pb: ProtectedBlock[
 
 // ─── Per-type Parsers ─────────────────────────────────────────────────────────
 
+function getReveal(node: RawMacroBlock, pb: ProtectedBlock[]): "manual" | undefined {
+  const params = node.params ? parseParams(restoreText(node.params, pb)) : {};
+  const val = (params.reveal as string | undefined)?.replace(/^["']|["']$/g, "");
+  return val === "manual" ? "manual" : undefined;
+}
+
 function parseSectionSlide(node: RawMacroBlock, header: string, pb: ProtectedBlock[]): SectionSlide {
   const subtitle = node.content ? restoreText(node.content.trim(), pb) : undefined;
   return { slideType: "sectionSlide", header, subtitle };
@@ -119,14 +125,15 @@ function parseBodyMaterialSlide(
   slideType: "hookSlide" | "conceptSlide"
 ): HookSlide | ConceptSlide {
   const body = parseBodyContent(node.content ?? "", pb);
-  const materialFromSecondBlock = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
-  const material = materialFromSecondBlock ?? body.material;
+  const material = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
 
   return {
     slideType,
     header,
+    reveal: getReveal(node, pb),
     focus: body.focus,
     bullets: body.bullets?.length ? body.bullets : undefined,
+    inlineMaterial: body.material,
     material,
     presenterNotes: body.presenterNotes,
   };
@@ -141,6 +148,7 @@ function parseCompareSlide(node: RawMacroBlock, header: string, pb: ProtectedBlo
   return {
     slideType: "compareSlide",
     header,
+    reveal: getReveal(node, pb),
     focus: body.focus,
     columns: body.columns ?? [],
     result,
@@ -150,14 +158,15 @@ function parseCompareSlide(node: RawMacroBlock, header: string, pb: ProtectedBlo
 
 function parseExampleSlide(node: RawMacroBlock, header: string, pb: ProtectedBlock[]): ExampleSlide {
   const body = parseBodyContent(node.content ?? "", pb);
-  const materialFromSecondBlock = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
-  const material = materialFromSecondBlock ?? body.material;
+  const material = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
 
   return {
     slideType: "exampleSlide",
     header,
+    reveal: getReveal(node, pb),
     bullets: body.bullets?.length ? body.bullets : undefined,
     result: body.resultContent,
+    inlineMaterial: body.material,
     material,
     presenterNotes: body.presenterNotes,
   };
@@ -165,15 +174,16 @@ function parseExampleSlide(node: RawMacroBlock, header: string, pb: ProtectedBlo
 
 function parsePromptSlide(node: RawMacroBlock, header: string, pb: ProtectedBlock[]): PromptSlide {
   const body = parseBodyContent(node.content ?? "", pb);
-  const materialFromSecondBlock = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
-  const material = materialFromSecondBlock ?? body.material;
+  const material = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
 
   return {
     slideType: "promptSlide",
     header,
+    reveal: getReveal(node, pb),
     focus: body.focus,
     bullets: body.bullets?.length ? body.bullets : undefined,
     result: body.resultContent,
+    inlineMaterial: body.material,
     material,
     presenterNotes: body.presenterNotes,
   };
@@ -181,8 +191,7 @@ function parsePromptSlide(node: RawMacroBlock, header: string, pb: ProtectedBloc
 
 function parseTaskSlide(node: RawMacroBlock, header: string, pb: ProtectedBlock[]): TaskSlide {
   const body = parseBodyContent(node.content ?? "", pb);
-  const materialFromSecondBlock = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
-  const material = materialFromSecondBlock ?? body.material;
+  const material = node.content2 ? parseMaterialBlock(node.content2, pb) : undefined;
 
   let result: string | undefined;
   if (body.resultContent?.type === "text") result = body.resultContent.content;
@@ -190,9 +199,11 @@ function parseTaskSlide(node: RawMacroBlock, header: string, pb: ProtectedBlock[
   return {
     slideType: "taskSlide",
     header,
+    reveal: getReveal(node, pb),
     focus: body.focus,
     bullets: body.bullets?.length ? body.bullets : undefined,
     result,
+    inlineMaterial: body.material,
     material,
     presenterNotes: body.presenterNotes,
   };
@@ -238,6 +249,8 @@ function parseBodyContent(bodyText: string, pb: ProtectedBlock[], captureColumns
         const trimmed = line.trim();
         if (trimmed.startsWith("- ")) {
           bullets.push(toMd(trimmed.slice(2).trim()));
+        } else if (trimmed && bullets.length > 0) {
+          bullets[bullets.length - 1] += "\n" + toMd(trimmed);
         }
       }
     } else {
@@ -264,6 +277,7 @@ function parseBodyContent(bodyText: string, pb: ProtectedBlock[], captureColumns
         case "formula":
         case "image":
         case "link":
+        case "codeRunner":
           result.material = parseMaterialNode(node, pb);
           break;
       }
@@ -333,6 +347,12 @@ function parseMaterialNode(node: RawMacroBlock, pb: ProtectedBlock[]): SlideCont
       const rawLabel = params.label as string | undefined;
       const label = rawLabel ? toMd(stripTypstBlock(rawLabel)) : undefined;
       return { type: "link", url, label };
+    }
+    case "codeRunner": {
+      const content = node.content ? restoreCodeBlocks({ rawText: node.content }, pb).rawText : "";
+      const fenceMatch = content.match(/```(\w+)\n([\s\S]*?)```/);
+      if (!fenceMatch) return undefined;
+      return { type: "codeRunner", language: fenceMatch[1], code: fenceMatch[2].trimEnd() };
     }
     default:
       return undefined;

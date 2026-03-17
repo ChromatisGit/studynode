@@ -11,26 +11,32 @@ const RESULT_ACCENT = "var(--sn-purple-accent)";
 type Props = { slide: CompareSlide; revealStep: number };
 
 export function CompareSlideView({ slide, revealStep }: Props) {
+  const isManual = slide.reveal === "manual";
   const colCount = slide.columns.length;
-  const resultVisible = slide.result != null && revealStep >= 1;
+  const resultVisible = slide.result != null && revealStep >= (isManual ? colCount + 1 : 1);
+  const isNarrow = colCount <= 2;
+
+  const gridStyle = isNarrow
+    ? { gridTemplateColumns: `repeat(${colCount}, 1fr)`, width: "80%", margin: "0 auto" }
+    : { gridTemplateColumns: `repeat(${colCount}, 1fr)` };
 
   return (
     <>
       <SlideHeader title={slide.header} badge="Vergleich" accent="blue" />
-      <div style={{ padding: "var(--sn-space-md) var(--sn-space-xl)", flex: 1, display: "flex", flexDirection: "column", gap: "var(--sn-space-md)", minHeight: 0 }}>
+      <div className={styles.slideContent}>
         {slide.focus && <FocusBox text={slide.focus} accent={ACCENT} />}
-        <div
-          className={styles.compareGrid}
-          style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
-        >
+        <div className={styles.compareGrid} style={gridStyle}>
           {slide.columns.map((col, i) => (
             <div key={i} className={styles.compareColumn}>
               <div className={styles.compareColumnTitle}>
                 <MarkdownRenderer markdown={col.title} />
               </div>
-              <div className={styles.compareColumnBody}>
-                <MarkdownRenderer markdown={col.body} />
-              </div>
+              <div className={styles.compareColumnDivider} />
+              {(!isManual || i < revealStep) && (
+                <div className={styles.compareColumnBody}>
+                  <MarkdownRenderer markdown={col.body} />
+                </div>
+              )}
             </div>
           ))}
         </div>

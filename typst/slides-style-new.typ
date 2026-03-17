@@ -1,7 +1,6 @@
 // slides-style-new.typ
 // Didactic slide system for StudyNode PDF output.
 // 9 slide types derived from teaching situations, not subject matter.
-// Web pipeline and CSS translation follow in a later step.
 
 // ─── Design System ────────────────────────────────────────────────────────────
 

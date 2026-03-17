@@ -13,7 +13,7 @@ type Props = { slide: TaskSlide; revealStep: number; projector?: boolean };
 export function TaskSlideView({ slide, revealStep, projector }: Props) {
   const bullets = slide.bullets ?? [];
   const hasResult = slide.result != null;
-  const resultVisible = hasResult && revealStep >= bullets.length + 1;
+  const isManual = slide.reveal === "manual";
   const hasMaterial = !!slide.material;
 
   const body = (
@@ -22,8 +22,11 @@ export function TaskSlideView({ slide, revealStep, projector }: Props) {
         <BulletList
           bullets={bullets}
           accent={ACCENT}
-          revealedCount={revealStep}
+          revealedCount={isManual ? revealStep : Infinity}
         />
+      )}
+      {slide.inlineMaterial && (
+        <MaterialRenderer item={slide.inlineMaterial} projector={projector} />
       )}
     </div>
   );
@@ -31,7 +34,7 @@ export function TaskSlideView({ slide, revealStep, projector }: Props) {
   return (
     <>
       <SlideHeader title={slide.header} badge="Auftrag" accent="teal" />
-      <div style={{ padding: "var(--sn-space-md) var(--sn-space-xl)", flex: 1, display: "flex", flexDirection: "column", gap: "var(--sn-space-md)", minHeight: 0 }}>
+      <div className={styles.slideContent}>
         {slide.focus && <FocusBox text={slide.focus} accent={ACCENT} task />}
         {hasMaterial ? (
           <div className={styles.split}>
@@ -42,7 +45,7 @@ export function TaskSlideView({ slide, revealStep, projector }: Props) {
           </div>
         ) : body}
         {hasResult && (
-          <ResultBox result={slide.result!} visible={resultVisible} accent={ACCENT} />
+          <ResultBox result={slide.result!} visible={true} accent={ACCENT} />
         )}
       </div>
     </>

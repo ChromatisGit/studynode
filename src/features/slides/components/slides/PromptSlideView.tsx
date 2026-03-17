@@ -13,7 +13,8 @@ type Props = { slide: PromptSlide; revealStep: number; projector?: boolean };
 export function PromptSlideView({ slide, revealStep, projector }: Props) {
   const bullets = slide.bullets ?? [];
   const hasResult = slide.result != null;
-  const resultVisible = hasResult && revealStep >= bullets.length + 1;
+  const isManual = slide.reveal === "manual";
+  const resultVisible = hasResult && revealStep >= (isManual ? bullets.length + 1 : 1);
   const hasMaterial = !!slide.material;
 
   const body = (
@@ -23,8 +24,11 @@ export function PromptSlideView({ slide, revealStep, projector }: Props) {
         <BulletList
           bullets={bullets}
           accent={ACCENT}
-          revealedCount={revealStep}
+          revealedCount={isManual ? revealStep : Infinity}
         />
+      )}
+      {slide.inlineMaterial && (
+        <MaterialRenderer item={slide.inlineMaterial} projector={projector} />
       )}
     </div>
   );
@@ -32,7 +36,7 @@ export function PromptSlideView({ slide, revealStep, projector }: Props) {
   return (
     <>
       <SlideHeader title={slide.header} badge="Frage" accent="blue" />
-      <div style={{ padding: "var(--sn-space-md) var(--sn-space-xl)", flex: 1, display: "flex", flexDirection: "column", gap: "var(--sn-space-md)", minHeight: 0 }}>
+      <div className={styles.slideContent}>
         {hasMaterial ? (
           <div className={styles.split}>
             {body}
