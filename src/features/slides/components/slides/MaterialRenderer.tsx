@@ -40,7 +40,7 @@ export function MaterialRenderer({ item, projector }: MaterialRendererProps) {
   }
 
   if (item.type === "codeRunner") {
-    return <SlideCodeRunner code={item.code} language={item.language} />;
+    return <SlideCodeRunner code={item.code} language={item.language} storageKey={item.code} readOnly={projector} />;
   }
 
   if (item.type === "link") {

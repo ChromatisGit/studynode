@@ -270,7 +270,12 @@
 .splitMaterial {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.splitMaterial > * {
+  flex: 1;
   min-height: 0;
 }
 

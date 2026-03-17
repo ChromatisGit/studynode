@@ -129,6 +129,53 @@
 
 #let pn(body) = []
 
+// ─── codeRunner — full IDE on web, styled card in PDF ────────────────────────
+// Colors match --sn-code-bg, --sn-code-bg-border, --sn-code-text from tokens.css
+
+#let _code-bg     = rgb(15,  23,  42)   // --sn-code-bg:        #0f172a
+#let _code-header = rgb(35,  44,  65)   // --sn-code-bg-border: #232c41
+#let _code-text   = rgb(230, 237, 245)  // --sn-code-text:      #e6edf5
+
+#let _code-min-w = 10cm
+
+#let codeRunner(body) = {
+  layout(size => context {
+    let inner = {
+      set text(font: font-mono, size: fs-minor, fill: _code-text)
+      body
+    }
+    let proto = block(
+      inset: (x: padding.md, y: padding.sm),
+      inner,
+    )
+    let w = calc.max(calc.min(measure(proto).width, size.width), _code-min-w)
+    block(
+      width: w,
+      radius: radius,
+      clip: true,
+      stroke: none,
+      stack(
+        dir: ttb,
+        // header bar — "Code-Editor" label only, no button
+        block(
+          width: w,
+          fill: _code-header,
+          inset: (x: padding.md, y: padding.sm),
+          text(size: fs-small, weight: "bold", fill: _code-text, "Code-Editor")
+        ),
+        // code body
+        block(
+          width: w,
+          fill: _code-bg,
+          inset: (x: padding.md, y: padding.sm),
+          inner,
+        ),
+      )
+    )
+  })
+  v(gap.sm)
+}
+
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
 

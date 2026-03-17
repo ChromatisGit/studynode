@@ -241,18 +241,52 @@ function parseBodyContent(bodyText: string, pb: ProtectedBlock[], captureColumns
   const nodes = splitMacroAndText(bodyText);
   const result: ParsedBody = {};
   const bullets: string[] = [];
+  const textParagraphs: string[] = [];
 
   for (const node of nodes) {
     if ("rawText" in node) {
       const restored = restoreText(node.rawText, pb);
-      for (const line of restored.split(/\r?\n/)) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith("- ")) {
-          bullets.push(toMd(trimmed.slice(2).trim()));
-        } else if (trimmed && bullets.length > 0) {
-          bullets[bullets.length - 1] += "\n" + toMd(trimmed);
+
+      // Split into segments: fenced code blocks stay as markdown, other lines become bullets or text
+      // We process line by line but keep track of whether we're inside a code block
+      const lines = restored.split(/\r?\n/);
+      const paraLines: string[] = [];
+      let inFence = false;
+      let fenceLines: string[] = [];
+
+      const flushPara = () => {
+        const t = paraLines.join("\n").trim();
+        if (t) textParagraphs.push(t);
+        paraLines.length = 0;
+      };
+
+      for (const line of lines) {
+        if (!inFence && line.trim().startsWith("```")) {
+          flushPara();
+          inFence = true;
+          fenceLines = [line];
+        } else if (inFence) {
+          fenceLines.push(line);
+          if (line.trim() === "```" || (fenceLines.length > 1 && line.trim().startsWith("```"))) {
+            inFence = false;
+            textParagraphs.push(fenceLines.join("\n"));
+            fenceLines = [];
+          }
+        } else {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("- ")) {
+            flushPara();
+            bullets.push(toMd(trimmed.slice(2).trim()));
+          } else if (trimmed && bullets.length > 0 && paraLines.length === 0) {
+            bullets[bullets.length - 1] += "\n" + toMd(trimmed);
+          } else if (trimmed) {
+            paraLines.push(toMd(trimmed));
+          }
         }
       }
+
+      if (inFence && fenceLines.length > 0) textParagraphs.push(fenceLines.join("\n"));
+      flushPara();
     } else {
       switch (node.type) {
         case "focus":
@@ -285,6 +319,12 @@ function parseBodyContent(bodyText: string, pb: ProtectedBlock[], captureColumns
   }
 
   if (bullets.length > 0) result.bullets = bullets;
+
+  // Fall back to plain text paragraphs as material if no other material was found
+  if (!result.material && textParagraphs.length > 0) {
+    result.material = { type: "text", content: textParagraphs.join("\n\n") };
+  }
+
   return result;
 }
 
