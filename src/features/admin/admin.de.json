@@ -47,6 +47,8 @@
       "description": "Arbeitsblätter freischalten oder verstecken und Schülerfortschritt live einsehen.",
       "visible": "Sichtbar",
       "hidden": "Versteckt",
+      "solutionVisible": "Lösung sichtbar",
+      "solutionHidden": "Lösung versteckt",
       "monitorButton": "Monitoring",
       "closeMonitor": "Schließen",
       "presenceTitle": "Wo sind die Schüler gerade?",
