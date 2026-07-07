@@ -1,155 +1,39 @@
 # Deployment
 
-## Target Environments
-
-StudyLuma supports two deployment targets.
+## Targets
 
 | Target | Notes |
 |--------|-------|
-| Docker container | Containerized SSR deployment using the shared framework Dockerfile |
+| Docker container | Uses the shared framework Dockerfile |
 | Cloudflare Workers + Neon | Edge deployment, lower latency, free tier available |
 
----
+Both read from `CONFIG.yaml` (copy from `CONFIG.template.yaml`): `local`/`production` profiles, each with `database` (Postgres connection string) and `session_secret`.
 
-## Configuration
+## Docker
 
-Both deployment targets read from `CONFIG.yaml`. Copy the template and fill in your production values:
+1. `bun install && bun run build`
+2. `docker build -f node_modules/@chromatis/base/infra/docker/Dockerfile -t studyluma .`
+3. `bun run db:deploy` — shows pending migrations, confirms, applies. Run on a fresh DB and again after each migration-bearing release.
+4. In `studyluma-content`: set the production DB URL in `CONFIG.yaml`, then `bun run publish`
+5. `docker run --rm -p 3000:3000 -e DATABASE_URL=<url> -e SESSION_SECRET=<secret> -e NODE_ENV=production studyluma` — listens on port 3000
 
-```sh
-cp CONFIG.template.yaml CONFIG.yaml
-```
+## Cloudflare Workers + Neon
 
-```yaml
-local:
-  database: postgres://studyluma:studyluma@localhost:5432/studyluma_dev
-  session_secret: dev
+Needs: Wrangler CLI (dev dependency), a Neon database, Cloudflare account.
 
-production:
-  database: ""   # Neon or self-hosted Postgres connection string
-  session_secret: ""  # openssl rand -base64 32
-```
+1. Create a Neon project, put its connection string in `CONFIG.yaml` → `production.database`
+2. `bun run db:deploy` — same confirm-then-apply flow, against Neon
+3. In `studyluma-content`: set the Neon URL in `CONFIG.yaml` production profile, then `bun run publish`
+4. `bun run cf:deploy` — syncs `CONFIG.yaml` production values to Worker secrets, builds, deploys, all in one step
+5. Local Workers testing: `bun run cf:dev` (writes `.dev.vars` from the local profile, starts Wrangler)
 
----
+## Planned: GitHub Release Artifacts (not yet implemented)
 
-## Option 1: Docker Deployment
-
-### Prerequisites
-
-- Docker
-- PostgreSQL accessible from the container
-
-### 1. Build the image
-
-```sh
-bun install
-bun run build
-docker build -f node_modules/@chromatis/base/infra/docker/Dockerfile -t studyluma .
-```
-
-The Dockerfile comes from the installed `@chromatis/base` package.
-
-### 2. Initialise the schema
-
-```sh
-bun run db:deploy
-```
-
-Shows pending migrations and asks for confirmation before applying. Run this once on a fresh database, and again after each release that includes migrations.
-
-### 3. Deploy content
-
-In `studyluma-content`, set the production database URL in `CONFIG.yaml`, then:
-
-```sh
-bun run publish
-```
-
-### 4. Run
-
-```sh
-docker run --rm -p 3000:3000 \
-  -e DATABASE_URL=postgres://user:pass@host:5432/studyluma \
-  -e SESSION_SECRET=<long-random-string> \
-  -e NODE_ENV=production \
-  studyluma
-```
-
-The app listens on port `3000` inside the container.
-
----
-
-## Option 2: Cloudflare Workers + Neon Postgres
-
-### Prerequisites
-
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) — installed as a dev dependency
-- A [Neon](https://neon.tech) database
-- Cloudflare account
-
-### 1. Create a Neon database
-
-In the Neon console, create a new project and copy the connection string into `CONFIG.yaml` under `production.database`.
-
-### 2. Initialise the schema
-
-```sh
-bun run db:deploy
-```
-
-Shows pending migrations and asks for confirmation before applying to Neon.
-
-### 3. Deploy content
-
-In `studyluma-content`, set the Neon URL in `CONFIG.yaml` production profile, then:
-
-```sh
-bun run publish
-```
-
-### 4. Build and deploy
-
-```sh
-bun run cf:deploy
-```
-
-This syncs all production values from `CONFIG.yaml` as Cloudflare secrets, builds the Workers bundle, and deploys — all in one step.
-
-### Local Cloudflare dev
-
-To test the Workers build locally:
-
-```sh
-bun run cf:dev
-```
-
-This writes a `.dev.vars` file from your `CONFIG.yaml` local profile and starts Wrangler.
-
----
-
-## Planned: GitHub Release Artifacts
-
-> TODO (post-alpha): Automate release publishing so teachers never need to clone this repo.
-
-Two artifacts should be published for each tagged release (`v0.x.x`):
-
-**Docker image** — pushed to `ghcr.io/yourorg/studyluma:<version>` and `ghcr.io/yourorg/studyluma:latest`.
-Teachers pull this via the `docker-compose.yml` in `studyluma-content` — no build step needed.
-
-**Cloudflare Workers bundle** — the output of `bun run build` zipped and attached as a GitHub release asset.
-Teachers download, unzip, and run `wrangler deploy --config wrangler.json` directly — no clone or build needed.
-
-The CI workflow should:
-1. On push to a `v*` tag: build both targets
-2. Push the Docker image to GHCR with the version tag and `latest`
-3. Zip `build/server/` and attach it to the GitHub release
-
-Until this is in place, teachers deploying to Cloudflare need to clone the repo and run `bun run cf:deploy`.
-
----
+Goal: teachers deploy without cloning. Docker image → `ghcr.io/yourorg/studyluma:<version>`/`:latest`; Workers bundle → zipped `build/server/` attached to the GitHub release. CI on a `v*` tag: build both targets, push the image, attach the zip. Until this exists, Cloudflare deploys require cloning and running `bun run cf:deploy` directly.
 
 ## Environment Variables Reference
 
-These are set automatically by `bun run cf:deploy` (synced from `CONFIG.yaml`) or passed manually for Docker.
+Set automatically by `bun run cf:deploy` (from `CONFIG.yaml`), or passed manually for Docker.
 
 | Variable | Required | Description |
 |----------|----------|-------------|

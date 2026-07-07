@@ -2,98 +2,66 @@
 
 ## Two-Repo Structure
 
-StudyLuma is split across two independent repositories:
+StudyLuma is split across two independent repos — no shared filesystem, no relative paths between them. Only coupling: shared Postgres (content pipeline writes, website reads) and binary assets (Postgres `content_assets` by default, or S3-compatible storage) — see [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md#images--binary-assets).
 
 | Repo | Purpose |
 |------|---------|
-| `studyluma-website` | React Router v7 SSR web application |
+| `studyluma-website` | React Router v7 SSR web app |
 | `studyluma-content` | Markdown content source + build pipeline |
-
-The repos are completely independent — no shared filesystem, no relative paths between them. The **only coupling** is shared infrastructure: the content pipeline writes to the Postgres database and the website reads from it, and binary assets (currently: images) referenced from Markdown flow through the same database by default, or through S3-compatible object storage (Cloudflare R2, MinIO, ...) if configured. See [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md#images--binary-assets).
 
 ```
 studyluma-content          studyluma-website
-     │                           │
-     │ bun run preview / publish │  bun run dev / deploy
-     │                           │
-     └──────► Postgres ◄─────────┘
+     │ preview / publish        │ dev / deploy
+     └──────► Postgres ◄────────┘
 ```
-
----
 
 ## studyluma-website
 
 ### Framework
 
-Built on **React Router v7** with SSR enabled. Vite handles both client and server bundling.
-
-A custom framework is declared as a `file:` dependency (`@chromatis/base`) and installed via `bun install`. It provides Vite config helpers, ESLint config, and the base TypeScript config.
+React Router v7, SSR, Vite. `@chromatis/base` (bun-linked locally) provides Vite config, ESLint config, and base tsconfig.
 
 ### Source Layout
 
 ```
-src/
-├── core/           Route handlers (thin loaders/actions calling services)
-├── features/       UI feature modules (one folder per feature)
-├── macros/         Content macro definitions and renderers
-├── schema/         Shared TypeScript types (no runtime code)
-├── server/         Server-only business logic (services, DB layer)
-└── ui/             Shared UI components and layout
+src/core/     Route handlers (thin loaders/actions calling services)
+src/features/ UI feature modules, one per feature
+src/macros/   Content macro definitions + renderers
+src/schema/   Shared TS types, no runtime code
+src/server/   Server-only business logic (services, DB layer)
+src/ui/       Shared UI components + layout
 ```
 
 ### Layer Rules
 
-The architecture is enforced by `node_modules/@chromatis/base/infra/scripts/checkArchitectureBoundaries.ts` and ESLint's `eslint-plugin-boundaries`:
+Enforced by `checkArchitectureBoundaries.ts` + `eslint-plugin-boundaries`:
 
-- `features/` modules are **isolated** — no cross-feature imports
-- `features/` may import from `ui/`, `macros/`, `schema/`
-- `server/` code is **never** imported by `features/` or `ui/`
-- `core/` owns route-level infrastructure such as sessions, auth guards, content access, and DB access
-- `macros/` may import `features/` for rendering but not `server/` or `core/`
+- `features/` — no cross-feature imports; may import `ui/`, `macros/`, `schema/`
+- `server/` — never imported by `features/` or `ui/`
+- `core/` — owns route-level infra: sessions, auth guards, content access, DB access
+- `macros/` — may import `features/` for rendering, not `server/`/`core/`
 
 ### Core Layer (`src/core/`)
 
-Thin wrappers around framework primitives:
-
-- **`db.server.ts`** — Postgres singleton; exports `anonSQL` (no RLS context) and `userSQL(user)` (sets RLS session vars before each query)
-- **`auth/`** — Session cookie management, PIN-based login, route guards (`assertLoggedIn`, `assertAdminAccess`)
-- **`content.server.ts`** — Typed accessors for `content_pages` rows (`getContentPage`, `getWorksheetContent`, `getSlideDeckContent`, …)
+- `db.server.ts` — Postgres singleton; `anonSQL` (no RLS context), `userSQL(user)` (sets RLS session vars per query)
+- `auth/` — session cookies, PIN login, route guards (`assertLoggedIn`, `assertAdminAccess`)
+- `content.server.ts` — typed accessors for `content_pages` (`getContentPage`, `getWorksheetContent`, `getSlideDeckContent`, …)
 
 ### Authentication
 
-Users authenticate with a username + PIN. The PIN is hashed with **PBKDF2** via the Web Crypto API (`hashPin`/`verifyPin` from `@chromatis/base/auth`) — no native modules, works on both Node.js and Cloudflare Workers.
-
-On successful login, a signed session cookie is issued. The cookie stores only a `user_id`; the core auth layer resolves the full `UserDTO` on every request.
+Username + PIN, PBKDF2 via Web Crypto (`hashPin`/`verifyPin` from `@chromatis/base/auth`) — no native modules, works on Node and Workers. Session cookie stores only `user_id`; core auth resolves the full `UserDTO` per request.
 
 ### Database
 
-PostgreSQL everywhere:
-
-- **Local dev**: Docker Compose, typically started via `bun run db`
-- **Docker deployment**: standard Postgres connection via `DATABASE_URL`
-- **Cloudflare deployment**: Neon serverless Postgres (compatible with Cloudflare Workers via HTTP)
-
-All writes go through `userSQL(user)` which sets three session-level parameters before executing:
-
-```sql
-SET app.user_id   = '<id>';
-SET app.user_role = '<role>';
-SET app.group_key = '<key>';
-```
-
-Row-Level Security policies on each table use these parameters to enforce access control — no application-level filtering needed.
+Postgres everywhere: Docker Compose locally (`bun run db`), `DATABASE_URL` for Docker deploys, Neon for Cloudflare. `userSQL(user)` sets `app.user_id`/`app.user_role`/`app.group_key` before each query; RLS policies key off these — no app-level filtering needed.
 
 ### Content
 
-Content pages are stored as parsed JSONB in the `content_pages` table. The website only reads the pre-parsed JSON produced by the pipeline. At request time, `core/content.server.ts` fetches the relevant row and the React Router loader passes it to the renderer.
-
-Images referenced from Markdown are content-addressed (`<sha256-of-bytes>.<ext>`) and served via `GET /content-assets/:key`, which resolves the key through `core/assets.server.ts` (Postgres `content_assets` table by default, or S3-compatible storage — see [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md#images--binary-assets)). There is no per-asset access control beyond the key being unguessable, matching `content_pages`.
+Pages stored as parsed JSONB in `content_pages`; the website only reads pre-parsed JSON (`core/content.server.ts` fetches the row, the loader passes it to the renderer). Images are content-addressed (`<sha256>.<ext>`), served via `GET /content-assets/:key` → `core/assets.server.ts` (Postgres `content_assets` or S3 — see CONTENT_PIPELINE.md). No per-asset access control beyond the key being unguessable, same as `content_pages`.
 
 ### Realtime
 
-Not implemented yet ToDo
-
----
+Not implemented yet.
 
 ## studyluma-content
 
@@ -101,18 +69,12 @@ Not implemented yet ToDo
 
 ```
 content/
-├── definitions.yml          Groups, subjects, and variant definitions
-├── base/                    Subject-organised content (math/, info/, …)
-│   └── <subject>/<topic>/<chapter>/
-│       ├── chapters.md      Chapter overview (title, learning goals)
-│       └── <worksheets>/    Worksheet and slide Markdown files
-└── courses/                 Course definitions (which base content to include)
-    └── <course-id>/
-        └── course.yml
-
-pipeline/                    Build pipeline (TypeScript)
+├── definitions.yml   Groups, subjects, variant definitions
+├── base/             <subject>/<topic>/chapters.md + <chapter>/*.md (worksheet/slide source, independent of any course)
+└── courses/          <course-id>/course.yml — which base content to include
+pipeline/             Build pipeline (TypeScript)
 ```
 
 ### Pipeline
 
-`bun run preview / publish` reads the YAML course definitions and all Markdown source files, parses them into typed JSON, and writes course structure + content pages to the database. See [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md).
+`bun run preview`/`publish` reads YAML + Markdown, parses to typed JSON, writes course structure + content pages to Postgres. See [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md).

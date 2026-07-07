@@ -1,218 +1,90 @@
 # Content Pipeline
 
-The `studyluma-content` repository is a standalone build tool. It reads Markdown source files and YAML configuration, then writes parsed course structure and content pages to the Postgres database.
-
----
+`studyluma-content` is a standalone build tool: reads Markdown + YAML, writes parsed course structure and content pages to Postgres.
 
 ## Repo Structure
 
 ```
-studyluma-content/
-├── content/
-│   ├── definitions.yml          Groups, subjects, and variant definitions
-│   ├── base/                    Subject content (independent of any course)
-│   │   └── <subject>/
-│   │       └── <topic>/
-│   │           ├── chapters.md  Chapter overview + learning goals
-│   │           └── <chapter>/
-│   │               └── *.md    Worksheet and slide deck files
-│   └── courses/                 Course definitions
-│       └── <course-id>/
-│           └── course.yml       Which topics/chapters to include
-└── pipeline/                    TypeScript pipeline code
-    ├── preview.ts               Entry point for local deployment
-    ├── publish.ts               Entry point for production deployment
-    ├── main.ts                  Orchestrator
-    ├── config.ts                Reads CONFIG.yaml for database URLs
-    ├── configParser/            Loads and validates YAML configs
-    ├── markdownParser/          Parses Markdown to typed JSON
-    ├── pageParser/              Converts parsed content to DB format
-    ├── dataTransformer/         Resolves course structure
-    └── db/                      Database write operations
+content/
+├── definitions.yml   Groups, subjects, variant definitions
+├── base/<subject>/<topic>/chapters.md + <chapter>/*.md   Worksheet/slide source, independent of any course
+└── courses/<course-id>/course.yml   Which topics/chapters to include
+pipeline/
+├── preview.ts / publish.ts   Entry points (local / production)
+├── main.ts             Orchestrator
+├── config.ts           Reads CONFIG.yaml for DB URLs
+├── configParser/       Loads/validates YAML
+├── markdownParser/     Markdown → typed JSON
+├── pageParser/         Parsed content → DB format
+├── dataTransformer/    Resolves course structure
+└── db/                 Database write operations
 ```
 
----
-
-## Running the Pipeline
+## Running
 
 ```sh
-# Local — starts Docker, reads CONFIG.yaml local profile:
-bun run preview
-
-# Production — reads CONFIG.yaml production profile, asks for confirmation:
-bun run publish
+bun run preview   # local — starts Docker, uses CONFIG.yaml local profile
+bun run publish   # production — uses CONFIG.yaml production profile, asks for confirmation
 ```
 
----
+## What It Does
 
-## What the Pipeline Does
-
-1. **Load configuration** — reads `content/definitions.yml` (groups, subjects, variants) and all `content/courses/*/course.yml` files
-2. **Resolve content paths** — maps each course's topic/chapter references to actual Markdown file paths under `content/base/`
-3. **Parse Markdown** — converts each `.md` file to a typed `Page` object (title + array of sections + structured macro content)
-4. **Resolve course structure** — builds the full hierarchy: course → topics → chapters → worksheets
-5. **Write to database**:
-   - `deployCourseStructure`: upserts rows in `groups`, `subjects`, `courses`, `topics`, `chapters`, `worksheets`, and junction tables
-   - `deployContentPages`: upserts rows in `content_pages` (only re-writes rows whose `content_hash` has changed)
-6. **Render math** (`flushPendingMathAssets`): every unique Typst math span found anywhere in the built content tree is compiled to SVG via the Typst CLI and uploaded to the AssetStore, content-addressed by hash of the (trimmed) math source. The website resolves the same hash independently at render time - no asset key needs to be stored in `content_json`.
-7. **Generate PDFs** (`deployContentPdfs`): for each `@pdf` section in any content page, generates Typst markup (`renderSectionToTypst`) and compiles it directly to PDF via the Typst CLI, uploads to AssetStore (content-addressed — unchanged PDFs are skipped), stores the asset key in the DB
-
----
+1. Load `definitions.yml` + all `courses/*/course.yml`
+2. Resolve each course's topic/chapter refs to Markdown paths under `base/`
+3. Parse each `.md` to a typed `Page` (title + sections + macro content)
+4. Build hierarchy: course → topics → chapters → worksheets
+5. Write to DB: `deployCourseStructure` upserts `groups`/`subjects`/`courses`/`topics`/`chapters`/`worksheets` + junction tables; `deployContentPages` upserts `content_pages` (only rows whose `content_hash` changed)
+6. `flushPendingMathAssets`: every unique Typst math span is compiled to SVG, uploaded content-addressed by hash of the trimmed source — the website resolves the same hash independently at render time, no key stored in `content_json`
+7. `deployContentPdfs`: each `@pdf` section → Typst markup → compiled to PDF, uploaded content-addressed (unchanged PDFs skipped), asset key stored in the DB
 
 ## PDF Generation
 
-PDFs are generated for every `@pdf` section found in any content page. The pipeline step `deployContentPdfs` runs after `deployContentPages`.
-
-**Tooling:** the Typst CLI compiles the whole worksheet directly to PDF — text, layout, and math are all native vector PDF content. No `@react-pdf/renderer`, no rasterized math, no Chrome or other browser dependency.
-
-**Storage:** PDFs are stored in the AssetStore (same mechanism as images — Postgres `content_assets` table by default, or S3-compatible storage). The asset key is the SHA-256 hash of the PDF bytes. If the content hash of a page has not changed, its PDF is not re-generated.
-
-**Served via:** The existing `GET /content-assets/:key` route on the website. No new website infrastructure needed.
-
-**Return URL in footer:** Every page of the PDF includes a footer linking to `https://studyluma.de/w/<contentKey>`. This URL is course-independent (see below).
-
----
+Typst CLI compiles worksheets directly to PDF — native vector text/layout/math, no `@react-pdf/renderer`, no rasterized math, no browser dependency. Stored in the AssetStore like images, keyed by SHA-256 of the PDF bytes; unchanged content hash skips regeneration. Served via the existing `GET /content-assets/:key` route. Every page footer links to `https://studyluma.de/w/<contentKey>` (course-independent, see below).
 
 ## `/w/:contentKey` Redirect Route
 
-A lightweight route on `studyluma-website` that resolves a content key to the correct course-specific worksheet URL for the logged-in student.
+Resolves a content key to the logged-in student's course-specific worksheet URL:
 
-**Flow:**
-1. Student taps the return link in the PDF → `GET /w/:contentKey`
-2. Not logged in → redirect to login with return URL
-3. Logged in → query DB for courses the student is enrolled in that contain this content key (RLS enforces access automatically)
-4. Exactly one match → redirect to the course worksheet URL
-5. Multiple matches → show a simple course picker (edge case: teacher enrolled in two courses)
-6. No match → 404 / "you don't have access to this content"
+1. `GET /w/:contentKey` → not logged in: redirect to login with return URL
+2. Logged in: query enrolled courses containing this key (RLS-enforced)
+3. One match → redirect to the course worksheet URL
+4. Multiple matches → course picker (edge case: teacher enrolled in two courses)
+5. No match → 404
 
-This keeps the PDF URL permanently stable and course-independent. The same PDF is reused across all courses that include the same worksheet.
-
----
+Keeps the PDF URL permanently stable and course-independent; the same PDF is reused across courses sharing a worksheet.
 
 ## Content Key Convention
 
-Each content page is identified by a key constructed from its hierarchy position:
-
-```
-<kind>:<subject>:<topicId>:<chapterId>[:<worksheetId>]
-```
-
-Examples:
-- `chapter:math:differenzialrechnung:sekanten`
-- `worksheet:math:differenzialrechnung:sekanten:grundaufgaben`
-- `slides:info:grundlagen-programmieren-ts:variablen:variablen-slides`
-
-The website looks up pages by key via `platform/content.server.ts`.
-
----
+`<kind>:<subject>:<topicId>:<chapterId>[:<worksheetId>]`, e.g. `worksheet:math:differenzialrechnung:sekanten:grundaufgaben`. Looked up via `platform/content.server.ts`.
 
 ## `definitions.yml`
 
-Defines the global lookup tables. Example structure:
-
-```yaml
-groups:
-  - id: tg
-    label: Technisches Gymnasium
-    color: "#4f86c6"
-  - id: public
-    label: Public
-    color: "#888888"
-
-subjects:
-  - id: math
-    label: Mathematik
-    icon: calculator
-  - id: info
-    label: Informatik
-    icon: code
-
-variants:
-  - id: gk
-    label: Grundkurs
-    short: GK
-```
-
----
+Global lookup tables: `groups`, `subjects`, `variants`, each entry with `id`/`label` plus a type-specific field (`color` for groups, `icon` for subjects, `short` for variants). See the file itself for the current values.
 
 ## `course.yml`
 
-Defines a single course instance:
-
-```yaml
-id: public-math
-group: public
-subject: math
-label: Mathematik (öffentlich)
-slug: public-math
-color: "#4f86c6"
-icon: calculator
-worksheetFormat: web
-
-topics:
-  - id: differenzialrechnung
-    status: current
-    chapters:
-      - id: sekanten
-        status: finished
-        worksheets:
-          - id: grundaufgaben
-          - id: zusatzaufgaben
-            hidden: true
-```
-
----
+A single course instance: `id`, `group`, `subject`, `label`, `slug`, `color`, `icon`, `worksheetFormat`, plus a `topics` tree (`status` + `chapters`, each with `status` + `worksheets`, each optionally `hidden`). See any existing `content/courses/*/course.yml` for a concrete example.
 
 ## Adding a New Course
 
-1. Create `content/courses/<course-id>/course.yml` following the format above
-2. Ensure the referenced `topicId` / `chapterId` directories exist under `content/base/<subject>/`
+1. Create `content/courses/<course-id>/course.yml`
+2. Ensure the referenced `topicId`/`chapterId` dirs exist under `content/base/<subject>/`
 3. Run `bun run preview`
 
-The pipeline is idempotent — running it multiple times is safe. Unchanged content pages (same hash) are not re-written.
-
----
+Idempotent — safe to re-run; unchanged pages (same hash) aren't rewritten.
 
 ## Images / Binary Assets
 
-Images are written with standard Markdown syntax (`![](./diagram.svg)`, relative to the
-`.md` file). Since the two repos share no filesystem, the pipeline never copies the file
-into `studyluma-website`. Instead, each image is content-addressed - `<sha256-of-bytes>.<ext>`
-- and uploaded through an `AssetStore` (`pipeline/assets/`) once parsing finishes. The
-website resolves a key back to bytes on request via `GET /content-assets/:key`
-(`src/core/assets.server.ts`).
+Standard Markdown syntax (`![](./diagram.svg)`, relative to the `.md` file). The two repos share no filesystem, so images are never copied — each is content-addressed (`<sha256>.<ext>`) and uploaded via `AssetStore` (`pipeline/assets/`); the website resolves a key back to bytes via `GET /content-assets/:key`.
 
-Backend is chosen with `asset_driver` in `CONFIG.yaml` (same profile as `database`) -
-**must be set the same way in both repos' `CONFIG.yaml`**:
+Backend chosen by `asset_driver` in `CONFIG.yaml` (must match in both repos):
 
-```yaml
-local:
-  database: postgres://...
-  asset_driver: postgres   # default - no extra setup, stored in the content_assets table.
-                            # Fine for small/medium content and local dev.
+- `postgres` (default) — stored in `content_assets`, fine for small/medium content
+- `s3` — any S3-compatible endpoint (Cloudflare R2, MinIO, AWS S3) via Bun's built-in client; needs `asset_s3_endpoint`/`bucket`/`region`/`access_key_id`/`secret_access_key`
 
-  # asset_driver: s3       # for deployments with many/large assets. Requires:
-  # asset_s3_endpoint: ""
-  # asset_s3_bucket: ""
-  # asset_s3_region: ""
-  # asset_s3_access_key_id: ""
-  # asset_s3_secret_access_key: ""
-```
+No per-asset access control — an unguessable key is the trust model, same as a public CDN link. Course-level access (public vs. gated) is enforced earlier, before a content page (and the asset URLs it contains) is ever sent to the client.
 
-`asset_driver: s3` works against any S3-compatible endpoint (Cloudflare R2, MinIO, AWS S3, ...)
-via Bun's built-in S3 client - no extra dependency.
-
-There is no per-asset access control - anyone with the key (an unguessable hash) can fetch
-it, same trust model as a public CDN link. Course-level access control (public vs. gated
-courses) is unaffected, since it's enforced before a content page - and the asset URLs it
-contains - is ever sent to the client.
-
-PDFs (`compilePdfToPublic` in `pipeline/io.ts`) do **not** go through this mechanism yet and
-still write directly to `studyluma-website/public/.generated/pdf` - which only works when
-both repos happen to be sibling directories on the same machine. This is a known gap, not
-addressed by the asset store above.
-
----
+**Known gap**: PDFs (`compilePdfToPublic` in `pipeline/io.ts`) don't go through AssetStore yet — they still write directly to `studyluma-website/public/.generated/pdf`, which only works when both repos are sibling directories on the same machine.
 
 ## Content Format
 

@@ -2,17 +2,7 @@
 
 ## Technology
 
-PostgreSQL 16. Connection is managed via the `postgres` npm package (v3).
-
-- **Local dev**: Docker Compose, typically started via `bun run db`
-- **Production**: Postgres accessible from the chosen deployment target
-
-For the currently supported deployment targets:
-
-- **Docker**: standard Postgres connection via `DATABASE_URL`
-- **Cloudflare Workers**: Neon serverless Postgres is the intended target
-
----
+Postgres 16 via the `postgres` npm package (v3). Local: Docker Compose (`bun run db`). Docker deploy: `DATABASE_URL`. Cloudflare: Neon serverless Postgres.
 
 ## Schema Overview
 
@@ -36,10 +26,7 @@ For the currently supported deployment targets:
 | `course_chapters` | Chapter membership + status per course × topic |
 | `course_worksheets` | Worksheet membership + visibility flags per course × chapter |
 
-The hierarchy is: `course → topics → chapters → worksheets`.
-
-Worksheet `status` values: `current`, `finished`, `planned`, `locked`.
-Chapter `status` values: `current`, `finished`, `locked`.
+Hierarchy: `course → topics → chapters → worksheets`. Worksheet `status`: `current`/`finished`/`planned`/`locked`. Chapter `status`: `current`/`finished`/`locked`.
 
 ### Users and authentication
 
@@ -54,17 +41,15 @@ Chapter `status` values: `current`, `finished`, `locked`.
 | Table | Purpose |
 |-------|---------|
 | `content_pages` | Parsed Markdown pages stored as JSONB |
-| `content_assets` | Binary assets (images) referenced from content, content-addressed by hash. Only populated when the content pipeline uses `asset_driver: postgres` (the default) - see [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md#images--binary-assets) |
+| `content_assets` | Binary assets (images), content-addressed by hash. Only populated when `asset_driver: postgres` (default) — see [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md#images--binary-assets) |
 
-### Quiz (TODO temp will be removed from DB)
+### Quiz (TODO, temp, will be removed from DB)
 
 | Table | Purpose |
 |-------|---------|
 | `quiz_sessions` | Live quiz session (questions, current phase, current index) |
 | `quiz_participants` | Students who have joined a session |
 | `quiz_responses` | Individual student answer submissions |
-
----
 
 ## `content_pages` Table
 
@@ -87,74 +72,16 @@ CREATE TABLE content_pages (
 );
 ```
 
-### `content_key` Convention
+`content_key` pattern: `<kind>:<subject>:<topicId>:<chapterId>[:<worksheetId>]`, kinds are `chapter`/`worksheet`/`slides`/`practice`. Example: `worksheet:math:differenzialrechnung:sekanten:sekanten-aufgaben`.
 
-Keys identify content by type and hierarchy:
-
-| Kind | Key pattern |
-|------|------------|
-| Chapter overview | `chapter:<subject>:<topicId>:<chapterId>` |
-| Worksheet | `worksheet:<subject>:<topicId>:<chapterId>:<worksheetId>` |
-| Slides | `slides:<subject>:<topicId>:<chapterId>:<worksheetId>` |
-| Practice | `practice:<subject>:<topicId>:<chapterId>` |
-
-Example: `worksheet:math:differenzialrechnung:sekanten:sekanten-aufgaben`
-
-### `content_json` Structure
-
-The JSONB column holds the full parsed page as a `Page` object (see `src/schema/page.ts`):
-
-```json
-{
-  "title": "Sekanten",
-  "content": [
-    {
-      "header": "Aufgaben",
-      "content": [
-        { "type": "markdown", "markdown": "Berechne..." },
-        {
-          "type": "group",
-          "macros": [
-            { "type": "textTask", "prompt": { "markdown": "..." }, "hint": "...", "solution": "..." }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
----
+`content_json` holds the full parsed page as a `Page` object (`src/schema/page.ts`): title + array of sections, each with markdown blocks and/or macro groups.
 
 ## Row-Level Security (RLS)
 
-RLS is enabled on all user-facing tables. Access decisions are driven by three session-level parameters set before each query:
-
-| Parameter | Set by |
-|-----------|--------|
-| `app.user_id` | `userSQL(user)` in `platform/db.server.ts` |
-| `app.user_role` | `userSQL(user)` |
-| `app.group_key` | `userSQL(user)` |
-
-`anonSQL` does not set these variables and is only used for operations that don't require user context (e.g., login lookups).
-
----
+Enabled on all user-facing tables, driven by three session params set by `userSQL(user)` (`platform/db.server.ts`): `app.user_id`, `app.user_role`, `app.group_key`. `anonSQL` skips these — only for context-free ops like login lookups.
 
 ## Migrations
 
-Migration files live in `sql/migrations/`. They are applied in lexicographic filename order.
+`sql/migrations/`, applied in lexicographic filename order (`app_schema_migrations` tracks applied versions; each runs in a transaction, all-or-nothing).
 
-```
-sql/migrations/
-├── 1.0.0__initial.sql           Full initial schema
-└── 1.0.1__content_assets.sql    content_assets table
-```
-
-### How to add a migration
-
-1. Create a new file: `sql/migrations/1.0.1__description.sql`
-2. Write idempotent SQL (use `IF NOT EXISTS`, `IF EXISTS`, `CREATE OR REPLACE`, etc.)
-3. Run `bun run db` locally — applies pending migrations to the local database
-4. Run `bun run db:deploy` before the next production deployment — shows pending migrations, asks for confirmation, then applies
-
-Applied versions are tracked in the `app_schema_migrations` table. Each migration runs inside a Postgres transaction — if any statement fails, the entire migration rolls back with no partial state.
+To add one: create `sql/migrations/<version>__description.sql` with idempotent SQL (`IF NOT EXISTS` etc.), run `bun run db` locally, then `bun run db:deploy` before the next production deployment.
