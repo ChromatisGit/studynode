@@ -39,7 +39,7 @@ bun run publish   # production — uses CONFIG.yaml production profile, asks for
 
 ## PDF Generation
 
-Typst CLI compiles worksheets directly to PDF — native vector text/layout/math, no `@react-pdf/renderer`, no rasterized math, no browser dependency. Stored in the AssetStore like images, keyed by SHA-256 of the PDF bytes; unchanged content hash skips regeneration. Served via the existing `GET /content-assets/:key` route. Every page footer links to `https://studyluma.de/w/<contentKey>` (course-independent, see below).
+Typst CLI compiles worksheets directly to PDF — native vector text/layout/math, no `@react-pdf/renderer`, no rasterized math, no browser dependency. Stored in the AssetStore like images, keyed by SHA-256 of the PDF bytes; unchanged content hash skips regeneration. Served via the existing `GET /content-assets/:key` route. Every page footer links to `<site_url>/w/<contentKey>` (course-independent, see below), where `site_url` is the deploying instance's own domain (e.g. `https://holst.studyluma.org` or `https://studyluma.org` for the demo) — configured per profile in `studyluma-content`'s `CONFIG.yaml`, not hardcoded.
 
 ## `/w/:contentKey` Redirect Route
 
@@ -83,8 +83,6 @@ Backend chosen by `asset_driver` in `CONFIG.yaml` (must match in both repos):
 - `s3` — any S3-compatible endpoint (Cloudflare R2, MinIO, AWS S3) via Bun's built-in client; needs `asset_s3_endpoint`/`bucket`/`region`/`access_key_id`/`secret_access_key`
 
 No per-asset access control — an unguessable key is the trust model, same as a public CDN link. Course-level access (public vs. gated) is enforced earlier, before a content page (and the asset URLs it contains) is ever sent to the client.
-
-**Known gap**: PDFs (`compilePdfToPublic` in `pipeline/io.ts`) don't go through AssetStore yet — they still write directly to `studyluma-website/public/.generated/pdf`, which only works when both repos are sibling directories on the same machine.
 
 ## Content Format
 
