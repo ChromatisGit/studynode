@@ -142,7 +142,3 @@ Reconsider an SDK only if the scope grows to arbitrary object select/move/transf
 - Free-response task type: naming + shape (working name `freeResponse`); how its solution renders on the projector.
 - Workspace overlay vs. transition: keep the impulse pinned beside a free surface, or demote it to a small reference object. Likely per-frame configurable — settle when specced.
 - Exact derivation of student mode from interaction mode + teacher override (the mapping table above is the starting point).
-
-## Reference
-
-The full narrative walkthrough this model was derived from — a complete Jahrgang-9 lesson on solving linear systems by substitution — lives in the design discussion, not this repo. This doc is its distilled, buildable form.
