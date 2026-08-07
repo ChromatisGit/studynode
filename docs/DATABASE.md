@@ -34,7 +34,6 @@ Hierarchy: `course → topics → chapters → worksheets`. Worksheet `status`: 
 |-------|---------|
 | `users` | User accounts (username + PBKDF2 PIN hash) |
 | `user_courses` | Which courses a user is enrolled in |
-| `user_progress` | Per-chapter progress status per user |
 
 ### Content
 
